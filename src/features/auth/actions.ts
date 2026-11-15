@@ -14,6 +14,7 @@ export interface LoginResult {
     name: string;
     email: string;
     roleName: string;
+    roleCode: string;
   };
 }
 
@@ -85,6 +86,7 @@ export async function loginAction(formData: FormData): Promise<LoginResult> {
         name: user.name,
         email: user.email,
         roleName: user.role.name,
+        roleCode: user.role.code,
       },
     };
   } catch (err) {

@@ -25,7 +25,16 @@ export default function LoginForm() {
             formData.append("password", password);
             const res = await loginAction(formData);
             if (res.success) {
-                router.push("/dashboard");
+                const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+                const redirectParam = searchParams?.get("redirect");
+
+                if (redirectParam && redirectParam.startsWith("/")) {
+                    router.push(redirectParam);
+                } else if (res.user?.roleCode === "SUPERADMIN" || res.user?.roleName?.toLowerCase().includes("super")) {
+                    router.push("/internals");
+                } else {
+                    router.push("/dashboard");
+                }
                 router.refresh();
             } else {
                 setError(res.error || "Email atau kata sandi tidak cocok.");

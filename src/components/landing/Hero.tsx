@@ -102,12 +102,12 @@ export default function Hero() {
         {/* CTAs */}
         <div className="animate-fade-up delay-300 opacity-0-init flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <a href="#pricing"
-            className="px-8 py-3.5 rounded-xl bg-rimba hover:bg-jati text-lontar font-semibold text-sm transition-all duration-200 glow-rimba hover:scale-[1.02] active:scale-[0.99] font-ui">
-            Mulai Gratis Sekarang
+            className="px-8 py-3.5 rounded-xl bg-rimba hover:bg-jati text-lontar font-semibold text-sm transition-all duration-200 glow-rimba hover:scale-[1.02] active:scale-[0.99] font-ui shadow-lg flex items-center justify-center gap-2">
+            Mulai Uji Coba Gratis
           </a>
-          <a href="#fitur"
-            className="px-8 py-3.5 rounded-xl border border-rimba/20 hover:border-rimba/40 text-arang/70 hover:text-arang font-ui text-sm transition-all duration-200 hover:bg-rimba/5">
-            Lihat Cara Kerja →
+          <a href="/login"
+            className="px-8 py-3.5 rounded-xl bg-white border border-rimba/20 hover:border-rimba/50 text-arang hover:text-rimba font-ui text-sm font-semibold transition-all duration-200 shadow-sm flex items-center justify-center gap-2">
+            Masuk ke Portal Demo →
           </a>
         </div>
 

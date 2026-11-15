@@ -113,13 +113,23 @@ const tableFeatures = [
 
 export default function Pricing() {
     const [showTable, setShowTable] = useState(false);
+    const [isAnnual, setIsAnnual] = useState(false);
     const router = useRouter();
+
+    const displayPriceLabel = (plan: typeof plans[0]) => {
+        if (!plan.price) return plan.priceLabel;
+        if (isAnnual) {
+            if (plan.id === "starter") return "639K";
+            if (plan.id === "pro") return "1.2Jt";
+        }
+        return plan.priceLabel;
+    };
 
     return (
         <section id="pricing" className="py-32 relative bg-pasir/30 border-t border-rimba/10">
             <div className="max-w-6xl mx-auto px-6 relative z-10">
                 {/* Header */}
-                <div className="text-center mb-16">
+                <div className="text-center mb-10">
                     <div className="font-ui text-xs text-rimba tracking-widest uppercase mb-4">
                         — Pricing —
                     </div>
@@ -131,6 +141,33 @@ export default function Pricing() {
                     <p className="font-ui text-abu text-sm max-w-sm mx-auto">
                         Tidak perlu kartu kredit untuk memulai. Upgrade kapan saja.
                     </p>
+                </div>
+
+                {/* Billing toggle */}
+                <div className="flex items-center justify-center gap-3 mb-12">
+                    <span className={`text-xs font-ui font-semibold ${!isAnnual ? "text-rimba" : "text-abu"}`}>
+                        Bulanan
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => setIsAnnual(!isAnnual)}
+                        className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
+                            isAnnual ? "bg-rimba" : "bg-pasir border border-rimba/20"
+                        }`}
+                        aria-label="Toggle annual billing"
+                    >
+                        <div
+                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${
+                                isAnnual ? "translate-x-6" : "translate-x-0"
+                            }`}
+                        />
+                    </button>
+                    <span className={`text-xs font-ui font-semibold flex items-center gap-1.5 ${isAnnual ? "text-rimba" : "text-abu"}`}>
+                        Tahunan
+                        <span className="text-[10px] bg-[#B8962E]/15 text-[#B8962E] font-bold px-2 py-0.5 rounded-full border border-[#B8962E]/30">
+                            Hemat 20%
+                        </span>
+                    </span>
                 </div>
 
                 {/* Cards */}
@@ -159,7 +196,7 @@ export default function Pricing() {
                                 {plan.price ? (
                                     <>
                                         <span className="font-ui text-xs text-abu mr-0.5">Rp</span>
-                                        <span className="font-display text-3xl text-arang">{plan.priceLabel}</span>
+                                        <span className="font-display text-3xl text-arang">{displayPriceLabel(plan)}</span>
                                         <span className="font-ui text-xs text-abu">{plan.period}</span>
                                     </>
                                 ) : (

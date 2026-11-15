@@ -85,7 +85,7 @@ export default function Navbar() {
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
           <a
-            href="/auth"
+            href="/login"
             className="text-sm text-abu hover:text-rimba font-semibold px-3 py-2 transition-colors duration-200 font-ui"
           >
             Masuk Portal
@@ -122,6 +122,10 @@ export default function Navbar() {
               {l}
             </a>
           ))}
+          <a href="/login" onClick={() => setMenuOpen(false)}
+            className="text-sm border border-rimba/30 text-rimba font-semibold px-4 py-2 rounded-lg text-center font-ui">
+            Masuk Portal
+          </a>
           <a href="#pricing" onClick={() => setMenuOpen(false)}
             className="text-sm bg-rimba text-lontar font-semibold px-4 py-2 rounded-lg text-center font-ui">
             Mulai Gratis
