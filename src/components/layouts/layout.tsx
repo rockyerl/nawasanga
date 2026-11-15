@@ -16,7 +16,17 @@ import { ChevronDown, LogOut, ChevronRight, Home } from "lucide-react";
 
 const SEGMENT_LABELS: Record<string, string> = {
     dashboard:        "Dashboard",
-    internals:        "Internals",
+    internals:        "Super Admin",
+    assets:           "Aset Kendaraan",
+    drivers:          "Driver",
+    locations:        "Lokasi & Pool",
+    logs:             "Pencatatan BBM",
+    reports:          "Laporan",
+    summary:          "Ringkasan Emisi",
+    "per-asset":      "Laporan per Aset",
+    trends:           "Tren Emisi",
+    audit:            "Audit Emisi ESG",
+    support:          "Bantuan",
     users:            "User",
     role:             "Role",
     driver:           "Driver",

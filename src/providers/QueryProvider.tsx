@@ -60,6 +60,8 @@ export function QueryProvider({ children }: Props) {
                     queries: {
                         staleTime: 60 * 1000,
                         gcTime: 5 * 60 * 1000,
+                        refetchOnWindowFocus: false,
+                        refetchOnReconnect: false,
                         retry: (failureCount, error: any) => {
                             const status = getErrorStatus(error);
                             if (
@@ -85,7 +87,7 @@ export function QueryProvider({ children }: Props) {
     return (
         <QueryClientProvider client={queryClient}>
             {children}
-            <ReactQueryDevtools initialIsOpen={false} />
+            {process.env.NODE_ENV !== 'production' && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
     );
 }

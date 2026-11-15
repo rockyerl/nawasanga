@@ -7,7 +7,10 @@ build/
 .env
 .env.local
 .env.*.local
-local.db
-local.db-journal
+local.db*
+*.db*
+*.db-journal
+*.db-wal
+*.db-shm
 .DS_Store
 *.tsbuildinfo

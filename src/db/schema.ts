@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, index } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 // ---------------------------------------------------------------------------
@@ -64,20 +64,27 @@ export const organizations = sqliteTable("organizations", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
-export const users = sqliteTable("users", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id").references(() => organizations.id),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  roleId: text("role_id")
-    .notNull()
-    .references(() => roles.id),
-  avatarUrl: text("avatar_url"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const users = sqliteTable(
+  "users",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id").references(() => organizations.id),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    passwordHash: text("password_hash").notNull(),
+    roleId: text("role_id")
+      .notNull()
+      .references(() => roles.id),
+    avatarUrl: text("avatar_url"),
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_users_org").on(table.organizationId),
+    index("idx_users_role").on(table.roleId),
+  ]
+);
 
 // ---------------------------------------------------------------------------
 // 3. Vehicles, Drivers, Locations & Fuel Operations
@@ -92,106 +99,145 @@ export const fuelTypes = sqliteTable("fuel_types", {
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
 
-export const drivers = sqliteTable("drivers", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  licenseNumber: text("license_number").notNull(),
-  phoneNumber: text("phone_number").notNull(),
-  status: text("status").notNull().default("active"), // active, inactive
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const drivers = sqliteTable(
+  "drivers",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    licenseNumber: text("license_number").notNull(),
+    phoneNumber: text("phone_number").notNull(),
+    status: text("status").notNull().default("active"), // active, inactive
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_drivers_org_status").on(table.organizationId, table.status),
+  ]
+);
 
-export const locations = sqliteTable("locations", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  type: text("type").notNull().default("pool"), // pool, depot, site, branch
-  address: text("address"),
-  latitude: real("latitude"),
-  longitude: real("longitude"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-});
+export const locations = sqliteTable(
+  "locations",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    type: text("type").notNull().default("pool"), // pool, depot, site, branch
+    address: text("address"),
+    latitude: real("latitude"),
+    longitude: real("longitude"),
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  },
+  (table) => [
+    index("idx_locations_org").on(table.organizationId),
+  ]
+);
 
-export const vehicles = sqliteTable("vehicles", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  plateNumber: text("plate_number").notNull().unique(),
-  brandModel: text("brand_model").notNull(),
-  vehicleType: text("vehicle_type").notNull(), // Truck, Pick-up, Sedan, SUV, Heavy Equipment
-  fuelTypeId: text("fuel_type_id")
-    .notNull()
-    .references(() => fuelTypes.id),
-  assignedDriverId: text("assigned_driver_id").references(() => drivers.id),
-  locationId: text("location_id").references(() => locations.id),
-  year: integer("year"),
-  status: text("status").notNull().default("operational"), // operational, maintenance, idle
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const vehicles = sqliteTable(
+  "vehicles",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    plateNumber: text("plate_number").notNull().unique(),
+    brandModel: text("brand_model").notNull(),
+    vehicleType: text("vehicle_type").notNull(), // Truck, Pick-up, Sedan, SUV, Heavy Equipment
+    fuelTypeId: text("fuel_type_id")
+      .notNull()
+      .references(() => fuelTypes.id),
+    assignedDriverId: text("assigned_driver_id").references(() => drivers.id),
+    locationId: text("location_id").references(() => locations.id),
+    year: integer("year"),
+    status: text("status").notNull().default("operational"), // operational, maintenance, idle
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_vehicles_org_status").on(table.organizationId, table.status),
+    index("idx_vehicles_driver").on(table.assignedDriverId),
+  ]
+);
 
 // ---------------------------------------------------------------------------
 // 4. Fuel & Carbon Emission Transaction Logs
 // ---------------------------------------------------------------------------
 
-export const fuelLogs = sqliteTable("fuel_logs", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  vehicleId: text("vehicle_id")
-    .notNull()
-    .references(() => vehicles.id, { onDelete: "cascade" }),
-  driverId: text("driver_id").references(() => drivers.id),
-  fuelTypeId: text("fuel_type_id")
-    .notNull()
-    .references(() => fuelTypes.id),
-  liters: real("liters").notNull(),
-  costIdr: integer("cost_idr").notNull(),
-  odometerKm: integer("odometer_km"),
-  emissionCo2Kg: real("emission_co2_kg").notNull(), // calculated = liters * emission factor
-  fuelStation: text("fuel_station"),
-  receiptImageUrl: text("receipt_image_url"),
-  loggedAt: integer("logged_at", { mode: "timestamp_ms" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const fuelLogs = sqliteTable(
+  "fuel_logs",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    vehicleId: text("vehicle_id")
+      .notNull()
+      .references(() => vehicles.id, { onDelete: "cascade" }),
+    driverId: text("driver_id").references(() => drivers.id),
+    fuelTypeId: text("fuel_type_id")
+      .notNull()
+      .references(() => fuelTypes.id),
+    liters: real("liters").notNull(),
+    costIdr: integer("cost_idr").notNull(),
+    odometerKm: integer("odometer_km"),
+    emissionCo2Kg: real("emission_co2_kg").notNull(), // calculated = liters * emission factor
+    fuelStation: text("fuel_station"),
+    receiptImageUrl: text("receipt_image_url"),
+    loggedAt: integer("logged_at", { mode: "timestamp_ms" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_fuel_logs_org_date").on(table.organizationId, table.loggedAt),
+    index("idx_fuel_logs_veh_date").on(table.vehicleId, table.loggedAt),
+    index("idx_fuel_logs_driver").on(table.driverId),
+  ]
+);
 
 // ---------------------------------------------------------------------------
 // 5. Billing, Subscriptions, Promos & KYC
 // ---------------------------------------------------------------------------
 
-export const subscriptions = sqliteTable("subscriptions", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  plan: text("plan").notNull(), // trial, starter, pro, enterprise
-  billingCycle: text("billing_cycle").notNull().default("monthly"), // monthly, annual
-  priceIdr: integer("price_idr").notNull(),
-  startsAt: integer("starts_at", { mode: "timestamp_ms" }).notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
-  status: text("status").notNull().default("active"), // active, expired, cancelled
-});
+export const subscriptions = sqliteTable(
+  "subscriptions",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    plan: text("plan").notNull(), // trial, starter, pro, enterprise
+    billingCycle: text("billing_cycle").notNull().default("monthly"), // monthly, annual
+    priceIdr: integer("price_idr").notNull(),
+    startsAt: integer("starts_at", { mode: "timestamp_ms" }).notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    status: text("status").notNull().default("active"), // active, expired, cancelled
+  },
+  (table) => [
+    index("idx_subscriptions_org").on(table.organizationId, table.status),
+  ]
+);
 
-export const billingInvoices = sqliteTable("billing_invoices", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  invoiceNumber: text("invoice_number").notNull().unique(),
-  amountIdr: integer("amount_idr").notNull(),
-  status: text("status").notNull().default("pending"), // pending, paid, failed, expired
-  paymentMethod: text("payment_method"),
-  paidAt: integer("paid_at", { mode: "timestamp_ms" }),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const billingInvoices = sqliteTable(
+  "billing_invoices",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    invoiceNumber: text("invoice_number").notNull().unique(),
+    amountIdr: integer("amount_idr").notNull(),
+    status: text("status").notNull().default("pending"), // pending, paid, failed, expired
+    paymentMethod: text("payment_method"),
+    paidAt: integer("paid_at", { mode: "timestamp_ms" }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_invoices_org_date").on(table.organizationId, table.createdAt),
+  ]
+);
 
 export const promos = sqliteTable("promos", {
   id: text("id").primaryKey(),
@@ -202,21 +248,27 @@ export const promos = sqliteTable("promos", {
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
 
-export const tickets = sqliteTable("tickets", {
-  id: text("id").primaryKey(),
-  organizationId: text("organization_id")
-    .notNull()
-    .references(() => organizations.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  subject: text("subject").notNull(),
-  description: text("description").notNull(),
-  priority: text("priority").notNull().default("medium"), // low, medium, high
-  status: text("status").notNull().default("open"), // open, in_progress, resolved, closed
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const tickets = sqliteTable(
+  "tickets",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    subject: text("subject").notNull(),
+    description: text("description").notNull(),
+    priority: text("priority").notNull().default("medium"), // low, medium, high
+    status: text("status").notNull().default("open"), // open, in_progress, resolved, closed
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_tickets_org_status").on(table.organizationId, table.status),
+  ]
+);
 
 export const vehicleTypes = sqliteTable("vehicle_types", {
   id: text("id").primaryKey(),
@@ -229,33 +281,45 @@ export const vehicleTypes = sqliteTable("vehicle_types", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
-export const articles = sqliteTable("articles", {
-  id: text("id").primaryKey(),
-  title: text("title").notNull(),
-  author: text("author").notNull(),
-  category: text("category").notNull(),
-  content: text("content").notNull(),
-  publishedAt: text("published_at").notNull(),
-  status: text("status").notNull().default("published"), // published, draft, archived
-  views: integer("views").notNull().default(0),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const articles = sqliteTable(
+  "articles",
+  {
+    id: text("id").primaryKey(),
+    title: text("title").notNull(),
+    author: text("author").notNull(),
+    category: text("category").notNull(),
+    content: text("content").notNull(),
+    publishedAt: text("published_at").notNull(),
+    status: text("status").notNull().default("published"), // published, draft, archived
+    views: integer("views").notNull().default(0),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_articles_status_date").on(table.status, table.publishedAt),
+  ]
+);
 
 // ---------------------------------------------------------------------------
 // 6. Audit Logs
 // ---------------------------------------------------------------------------
 
-export const auditLogs = sqliteTable("audit_logs", {
-  id: text("id").primaryKey(),
-  actorId: text("actor_id"),
-  actorEmail: text("actor_email"),
-  organizationId: text("organization_id"),
-  action: text("action").notNull(),
-  resource: text("resource").notNull(),
-  details: text("details"),
-  ipAddress: text("ip_address"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
-});
+export const auditLogs = sqliteTable(
+  "audit_logs",
+  {
+    id: text("id").primaryKey(),
+    actorId: text("actor_id"),
+    actorEmail: text("actor_email"),
+    organizationId: text("organization_id"),
+    action: text("action").notNull(),
+    resource: text("resource").notNull(),
+    details: text("details"),
+    ipAddress: text("ip_address"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_audit_logs_org_date").on(table.organizationId, table.createdAt),
+  ]
+);
 
 // ---------------------------------------------------------------------------
 // Drizzle Relations
