@@ -1,16 +1,36 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
 import { fuelTypes } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search") || "";
+
     const allFuels = await db.select().from(fuelTypes);
+    const filtered = search
+      ? allFuels.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()))
+      : allFuels;
+
     return NextResponse.json({
       code: 200,
       status: "OK",
       message: "Data master bahan bakar berhasil diambil",
-      data: allFuels,
+      data: {
+        items: filtered.map((f) => ({
+          id: f.id,
+          name: f.name,
+          category: f.category,
+          emissionFactor: f.emissionFactorKgCo2PerLiter,
+          unitPriceIdr: f.unitPriceIdr,
+          isActive: f.isActive,
+        })),
+        count: filtered.length,
+        page: 1,
+        itemPerPage: 10,
+        totalPages: 1,
+      },
     });
   } catch (err) {
     return NextResponse.json({ code: 500, status: "Error", message: String(err) }, { status: 500 });

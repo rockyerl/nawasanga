@@ -5,12 +5,42 @@ import { desc } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search") || "";
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const itemPerPage = parseInt(searchParams.get("itemPerPage") || "10", 10);
+
     const allOrgs = await db.select().from(organizations).orderBy(desc(organizations.createdAt));
+    const filtered = search
+      ? allOrgs.filter((o) => o.name.toLowerCase().includes(search.toLowerCase()))
+      : allOrgs;
+
+    const start = (page - 1) * itemPerPage;
+    const items = filtered.slice(start, start + itemPerPage);
+
     return NextResponse.json({
       code: 200,
       status: "OK",
       message: "Data organisasi berhasil diambil",
-      data: allOrgs,
+      data: {
+        items: items.map((o) => ({
+          id: o.id,
+          name: o.name,
+          slug: o.slug,
+          industry: o.industry || "Logistics",
+          personInCharge: o.contactEmail,
+          contactPhone: o.contactPhone || "-",
+          address: o.address || "-",
+          plan: o.plan,
+          maxAssets: o.maxAssets,
+          status: o.status,
+          createdAt: o.createdAt ? new Date(o.createdAt).toISOString() : new Date().toISOString(),
+        })),
+        count: filtered.length,
+        page,
+        itemPerPage,
+        totalPages: Math.max(1, Math.ceil(filtered.length / itemPerPage)),
+      },
     });
   } catch (err) {
     return NextResponse.json({ code: 500, status: "Error", message: String(err) }, { status: 500 });
@@ -26,12 +56,12 @@ export async function POST(request: NextRequest) {
       name: body.name,
       slug: body.name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
       industry: body.industry || "Logistics",
-      contactEmail: body.contactEmail || "admin@example.com",
+      contactEmail: body.contactEmail || body.personInCharge || "admin@example.com",
       contactPhone: body.contactPhone || "-",
       address: body.address || "-",
       plan: body.plan || "starter",
       maxAssets: parseInt(body.maxAssets, 10) || 10,
-      status: "active",
+      status: body.status || "active",
       createdAt: now,
       updatedAt: now,
     };

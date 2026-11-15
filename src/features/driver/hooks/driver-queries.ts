@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import DriverService from "@/features/driver/services/driver.service.mock";
+import DriverService from "@/features/driver/services/driver.service";
 import { onQueryError } from "@/lib/utils";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";
 import type { Query } from "@/types/lib/query.type";

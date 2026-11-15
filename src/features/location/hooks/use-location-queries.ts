@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import LocationService from "@/features/location/services/location.service.mock";
+import LocationService from "@/features/location/services/location.service";
 import { onQueryError } from "@/lib/utils";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";
 import type { Query } from "@/types/lib/query.type";

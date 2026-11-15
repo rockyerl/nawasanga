@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import fuelTypeService from "@/features/fuel-type/services/fuel-type.service.mock";
+import fuelTypeService from "@/features/fuel-type/services/fuel-type.service";
 import { onQueryError } from "@/lib/utils";
 import { FuelTypeTypes } from "@/types/features/fuel-type.type";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";

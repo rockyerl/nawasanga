@@ -182,7 +182,7 @@ export class HttpClient {
 
 export const Client = HttpClient.create({
     baseURL:
-        process.env.NEXT_PUBLIC_SERVICE_URL || 'http://localhost:4200/api/v1/',
+        process.env.NEXT_PUBLIC_SERVICE_URL || '/api/',
     withCredentials: true
 });
 
