@@ -1,0 +1,117 @@
+import type { ColumnDef } from "@tanstack/table-core";
+import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
+import { FuelTypeTableRowActions } from "@/features/fuel-type/components/fuel-type-table-row-actions";
+import { FuelTypeTypes } from "@/types/features/fuel-type.type";
+import { UNIT_LABEL, UNIT_COLOR } from "@/lib/mock-data/fuel-type.mock";
+
+export const fuelTypeColumns: ColumnDef<FuelTypeTypes.Service.FuelTypeData>[] = [
+    {
+        accessorKey: "code",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Kode" />,
+        cell: ({ row }) => (
+            <span
+                className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-medium"
+                style={{ background: "#EDEAE0", color: "#4A3728" }}
+            >
+                {row.getValue("code")}
+            </span>
+        ),
+    },
+    {
+        accessorKey: "name",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Nama Bahan Bakar" />,
+        cell: ({ row }) => (
+            <span className="text-sm font-medium" style={{ color: "#1A1A18" }}>
+                {row.getValue("name")}
+            </span>
+        ),
+    },
+    {
+        accessorKey: "unit",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Satuan" />,
+        cell: ({ row }) => {
+            const unit = row.getValue("unit") as FuelTypeTypes.Service.Unit;
+            const color = UNIT_COLOR[unit];
+            return (
+                <span
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
+                    style={{ backgroundColor: color.bg, color: color.text }}
+                >
+                    {UNIT_LABEL[unit]}
+                </span>
+            );
+        },
+    },
+    {
+        accessorKey: "emissionFactor",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Faktor Emisi (kg CO₂)" />,
+        cell: ({ row }) => {
+            const unit = row.original.unit;
+            return (
+                <span className="text-sm font-mono" style={{ color: "#1D6B5A" }}>
+                    {(row.getValue("emissionFactor") as number).toFixed(4)}
+                    <span className="ml-1 text-[10px]" style={{ color: "#7A7A72" }}>
+                        /{UNIT_LABEL[unit]}
+                    </span>
+                </span>
+            );
+        },
+    },
+    {
+        accessorKey: "pricePerUnit",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Harga (Rp)" />,
+        cell: ({ row }) => {
+            const price = row.getValue("pricePerUnit") as number;
+            return (
+                <span className="text-sm font-mono" style={{ color: "#1A1A18" }}>
+                    {price.toLocaleString("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 })}
+                </span>
+            );
+        },
+    },
+    {
+        accessorKey: "isActive",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+        cell: ({ row }) => {
+            const active = row.getValue("isActive") as boolean;
+            return (
+                <span
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
+                    style={
+                        active
+                            ? { background: "#DCFCE7", color: "#15803D" }
+                            : { background: "#FEE2E2", color: "#B91C1C" }
+                    }
+                >
+                    {active ? "Aktif" : "Nonaktif"}
+                </span>
+            );
+        },
+    },
+    {
+        accessorKey: "source",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Referensi" />,
+        cell: ({ row }) => (
+            <span className="text-sm" style={{ color: "#7A7A72" }}>
+                {row.getValue("source") || "—"}
+            </span>
+        ),
+    },
+    {
+        accessorKey: "updatedAt",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Diperbarui" />,
+        cell: ({ row }) => {
+            const date = new Date(row.getValue("updatedAt") as string);
+            return (
+                <span className="text-sm" style={{ color: "#7A7A72" }}>
+                    {date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+                </span>
+            );
+        },
+    },
+    {
+        id: "actions",
+        header: () => <span className="sr-only">Aksi</span>,
+        cell: ({ row }) => <FuelTypeTableRowActions row={row} />,
+    },
+];

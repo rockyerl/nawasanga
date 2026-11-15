@@ -1,0 +1,9 @@
+node_modules
+.next
+.env
+.idea
+dist
+build
+.cache
+
+.vercel

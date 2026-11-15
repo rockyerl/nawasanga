@@ -1,0 +1,261 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --color-black: oklch(0.1556 0.0017 17.34);
+
+    /* ── NAWASANGA BRAND PALETTE ── */
+
+    /* Rimba (Primary Teal) */
+    --color-rimba-50:  #eef5f3;
+    --color-rimba-100: #d0e7e2;
+    --color-rimba-200: #a2cfc5;
+    --color-rimba-300: #6eb0a4;
+    --color-rimba-400: #2A9478;
+    --color-rimba-500: #1D6B5A;
+    --color-rimba-600: #175749;
+    --color-rimba-700: #104238;
+    --color-rimba-800: #0a2d27;
+    --color-rimba-900: #051916;
+
+    /* Emas Majapahit (Accent Gold) */
+    --color-emas-300: #D4AF5A;
+    --color-emas-400: #C9A040;
+    --color-emas-500: #B8962E;
+    --color-emas-600: #9a7d26;
+
+    /* Tanah Liat (Alert/Warning) */
+    --color-tanah-400: #d4603e;
+    --color-tanah-500: #C14B2A;
+    --color-tanah-600: #a03d22;
+
+    /* Neutral / Earth */
+    --color-arang:        #1A1A18;
+    --color-abu-bambu:    #7A7A72;
+    --color-kertas:       #F7F5EF;
+    --color-pasir:        #EDEAE0;
+    --color-jati:         #4A3728;
+
+    /* Neutral scale */
+    --color-neutral-50:  oklch(0.9851 0 0);
+    --color-neutral-100: oklch(0.9702 0 0);
+    --color-neutral-200: oklch(0.9491 0 0);
+    --color-neutral-300: oklch(0.9097 0 0);
+    --color-neutral-400: oklch(0.839 0 0);
+    --color-neutral-500: oklch(0.6467 0 0);
+    --color-neutral-600: oklch(0.4128 0 0);
+    --color-neutral-700: oklch(0.2393 0 0);
+    --color-neutral-800: oklch(0.18 0 0);
+    --color-neutral-900: oklch(0.12 0 0);
+
+    /* Semantic */
+    --color-danger-50:   #fdf2f0;
+    --color-danger-500:  #C14B2A;
+    --color-danger-600:  #a03d22;
+
+    --color-success-500: oklch(0.7522 0.1089 160.17);
+    --color-success-600: oklch(0.7036 0.1314 158.87);
+
+    --color-warning-500: #B8962E;
+    --color-warning-600: #9a7d26;
+}
+
+@theme inline {
+    --font-roboto: "Roboto", sans-serif;
+    --font-family-base: var(--font-roboto);
+
+    --color-background:               var(--background);
+    --color-foreground:               var(--foreground);
+    --color-sidebar-ring:             var(--sidebar-ring);
+    --color-sidebar-border:           var(--sidebar-border);
+    --color-sidebar-accent-foreground:var(--sidebar-accent-foreground);
+    --color-sidebar-accent:           var(--sidebar-accent);
+    --color-sidebar-primary-foreground:var(--sidebar-primary-foreground);
+    --color-sidebar-primary:          var(--sidebar-primary);
+    --color-sidebar-foreground:       var(--sidebar-foreground);
+    --color-sidebar:                  var(--sidebar);
+    --color-chart-5:                  var(--chart-5);
+    --color-chart-4:                  var(--chart-4);
+    --color-chart-3:                  var(--chart-3);
+    --color-chart-2:                  var(--chart-2);
+    --color-chart-1:                  var(--chart-1);
+    --color-ring:                     var(--ring);
+    --color-input:                    var(--input);
+    --color-border:                   var(--border);
+    --color-destructive:              var(--destructive);
+    --color-accent-foreground:        var(--accent-foreground);
+    --color-accent:                   var(--accent);
+    --color-muted-foreground:         var(--muted-foreground);
+    --color-muted:                    var(--muted);
+    --color-secondary-foreground:     var(--secondary-foreground);
+    --color-secondary:                var(--secondary);
+    --color-primary-foreground:       var(--primary-foreground);
+    --color-primary:                  var(--primary);
+    --color-popover-foreground:       var(--popover-foreground);
+    --color-popover:                  var(--popover);
+    --color-card-foreground:          var(--card-foreground);
+    --color-card:                     var(--card);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+    --radius: 0.5rem;
+
+    /* Nawasanga Light Theme */
+    --background:         #F7F5EF; /* Kertas Lontar */
+    --foreground:         #1A1A18; /* Arang */
+
+    --card:               #FFFFFF;
+    --card-foreground:    #1A1A18;
+
+    --popover:            #FFFFFF;
+    --popover-foreground: #1A1A18;
+
+    --primary:            #1D6B5A; /* Rimba */
+    --primary-foreground: #F7F5EF;
+
+    --secondary:          #EDEAE0; /* Pasir Putih */
+    --secondary-foreground: #1D6B5A;
+
+    --muted:              #EDEAE0;
+    --muted-foreground:   #7A7A72; /* Abu Bambu */
+
+    --accent:             #eef5f3; /* Rimba-50 */
+    --accent-foreground:  #1D6B5A;
+
+    --destructive:        #C14B2A; /* Tanah Liat */
+    --border:             #DEDAD0;
+    --input:              #DEDAD0;
+    --ring:               #2A9478; /* Tembaga Hijau */
+
+    --chart-1: #1D6B5A;
+    --chart-2: #2A9478;
+    --chart-3: #B8962E;
+    --chart-4: #D4AF5A;
+    --chart-5: #C14B2A;
+
+    /* Sidebar — warm off-white, not pure white */
+    --sidebar:                    #F0EDE5;
+    --sidebar-foreground:         #7A7A72;
+    --sidebar-primary:            #1D6B5A;
+    --sidebar-primary-foreground: #F7F5EF;
+    --sidebar-accent:             #E6E2D8;
+    --sidebar-accent-foreground:  #4A3728;
+    --sidebar-border:             #DEDAD0;
+    --sidebar-ring:               #2A9478;
+}
+
+.dark {
+    --background:         #1A1A18; /* Arang */
+    --foreground:         #F7F5EF;
+    --card:               #242420;
+    --card-foreground:    #F7F5EF;
+    --popover:            #242420;
+    --popover-foreground: #F7F5EF;
+    --primary:            #2A9478; /* Tembaga Hijau lebih terang di dark */
+    --primary-foreground: #1A1A18;
+    --secondary:          #4A3728; /* Jati Tua */
+    --secondary-foreground: #D4AF5A;
+    --muted:              #2d2d2a;
+    --muted-foreground:   #7A7A72;
+    --accent:             #1D6B5A;
+    --accent-foreground:  #F7F5EF;
+    --destructive:        #C14B2A;
+    --border:             #3a3a36;
+    --input:              #3a3a36;
+    --ring:               #2A9478;
+
+    --sidebar:                    #1f1f1c;
+    --sidebar-foreground:         #7A7A72;
+    --sidebar-primary:            #2A9478;
+    --sidebar-primary-foreground: #F7F5EF;
+    --sidebar-accent:             #2d2d2a;
+    --sidebar-accent-foreground:  #D4AF5A;
+    --sidebar-border:             #3a3a36;
+    --sidebar-ring:               #2A9478;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    html {
+        font-family: "Roboto", Arial, sans-serif;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        background-color: #F7F5EF;
+    }
+}
+
+/* ── SIDEBAR — Nawasanga warm off-white ── */
+[data-sidebar="sidebar"],
+[data-slot="sidebar-inner"] {
+    background-color: #F0EDE5 !important;
+    background: #F0EDE5 !important;
+    border-right: 1px solid #DEDAD0 !important;
+}
+
+/* Sidebar menu button default */
+[data-sidebar="menu-button"] {
+    color: #7A7A72 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+/* Sidebar active — Rimba teal */
+[data-sidebar="menu-button"][data-active="true"] {
+    background-color: #1D6B5A !important;
+    color: #F7F5EF !important;
+    border-radius: 6px !important;
+}
+
+/* Sidebar hover */
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) {
+    background-color: #E6E2D8 !important;
+    color: #4A3728 !important;
+}
+
+/* Sidebar sub-menu */
+[data-sidebar="menu-sub-button"] {
+    color: #7A7A72 !important;
+    font-size: 13px !important;
+}
+[data-sidebar="menu-sub-button"]:hover {
+    color: #1D6B5A !important;
+    background-color: #eef5f3 !important;
+}
+[data-sidebar="menu-sub-button"][data-active="true"] {
+    color: #1D6B5A !important;
+    font-weight: 600 !important;
+}
+
+/* Header brand */
+[data-sidebar="header"] {
+    border-bottom: 1px solid #DEDAD0 !important;
+    background: #F0EDE5 !important;
+}
+
+/* Sidebar footer */
+[data-sidebar="footer"] {
+    border-top: 1px solid #DEDAD0 !important;
+    background: #F0EDE5 !important;
+}
+
+/* Sidebar inset */
+[data-sidebar="inset"] {
+    background: #F7F5EF;
+}
+
+/* Font base */
+*, *::before, *::after {
+    font-family: "Roboto", Arial, sans-serif !important;
+}
