@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Leaf, ArrowRight } from "lucide-react";
+import { loginAction } from "@/features/auth/actions";
 
 export default function LoginForm() {
     const router = useRouter();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("superadmin@fuelcarbon.id");
+    const [password, setPassword] = useState("Admin@12345");
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [focused, setFocused] = useState<string | null>(null);
@@ -17,9 +18,23 @@ export default function LoginForm() {
         e.preventDefault();
         setIsLoading(true);
         setError("");
-        setTimeout(() => {
-            router.push("/dashboard");
-        }, 800);
+        
+        try {
+            const formData = new FormData();
+            formData.append("email", email);
+            formData.append("password", password);
+            const res = await loginAction(formData);
+            if (res.success) {
+                router.push("/dashboard");
+                router.refresh();
+            } else {
+                setError(res.error || "Email atau kata sandi tidak cocok.");
+                setIsLoading(false);
+            }
+        } catch {
+            setError("Terjadi kendala saat menghubungi server autentikasi.");
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -151,10 +166,37 @@ export default function LoginForm() {
                         </button>
                     </form>
 
+                    {/* Demo Accounts Quick Select */}
+                    <div className="mt-4 pt-3 border-t border-[#EDEAE0] flex flex-col gap-1.5 text-xs">
+                        <span className="text-[#7A7A72] text-[11px] font-medium">Akun Demo (Klik untuk isi cepat):</span>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEmail("superadmin@fuelcarbon.id");
+                                    setPassword("Admin@12345");
+                                }}
+                                className="px-2.5 py-1 rounded bg-[#EDEAE0] text-[#1A1A18] hover:bg-[#1D6B5A] hover:text-white transition-all text-[11px] font-medium"
+                            >
+                                Superadmin
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEmail("budi@nusantaralogistik.co.id");
+                                    setPassword("Admin@12345");
+                                }}
+                                className="px-2.5 py-1 rounded bg-[#EDEAE0] text-[#1A1A18] hover:bg-[#1D6B5A] hover:text-white transition-all text-[11px] font-medium"
+                            >
+                                Client Admin
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Register */}
                     <p className="lregister">
                         Belum punya akun?{" "}
-                        <a href="#" className="lregister-link">Daftar sekarang</a>
+                        <a href="/kyc" className="lregister-link">Daftar sekarang</a>
                     </p>
                 </div>
             </div>

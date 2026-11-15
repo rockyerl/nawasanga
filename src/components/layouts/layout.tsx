@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { logoutAction } from "@/features/auth/actions";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,6 +54,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
     const pathname = usePathname();
+    const router = useRouter();
     const breadcrumbs = buildBreadcrumbs(pathname);
 
     return (
@@ -122,9 +124,10 @@ export function Layout({ children }: LayoutProps) {
                         >
                             <DropdownMenuItem
                                 className="cursor-pointer font-medium text-[#C14B2A] focus:text-[#C14B2A] focus:bg-[#fdf2f0]"
-                                onClick={() => {
-                                    // tambahkan logout logic di sini
-                                    // contoh: router.push("/auth")
+                                onClick={async () => {
+                                    await logoutAction();
+                                    router.push("/auth");
+                                    router.refresh();
                                 }}
                             >
                                 <LogOut className="mr-2 h-4 w-4" />
