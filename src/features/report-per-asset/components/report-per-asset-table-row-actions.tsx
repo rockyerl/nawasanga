@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { Row } from "@tanstack/table-core";
 import { MoreVertical, Eye, Download, FileText, Lock } from "lucide-react";
-import type { PlanType } from "@/lib/mock-data/report-per-asset.mock";
+import type { PlanType } from "@/types/features/report-per-asset.type";
 
 interface PerAssetTableRowActionsProps<TData> {
     row: Row<TData>;

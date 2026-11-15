@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateVehicleType, useUpdateVehicleType } from "@/features/vehicle-type/hooks/vehicle-type-queries";
+import { useFuelTypes } from "@/features/fuel-type/hooks/fuel-type-queries";
 import { VehicleTypeTypes } from "@/types/features/vehicle-type.type";
-import { CATEGORY_LABEL, mockFuelTypes } from "@/lib/mock-data/vehicle-type.mock";
+import { CATEGORY_LABEL } from "@/features/vehicle-type/constants/vehicle-type.constants";
 
 const CATEGORIES: VehicleTypeTypes.Service.Category[] = [
     "motorcycle",
@@ -38,6 +39,8 @@ export function VehicleTypeFormDialog({ open, setOpen, initialData }: Props) {
     const isEdit = !!initialData;
     const createMutation = useCreateVehicleType();
     const updateMutation = useUpdateVehicleType();
+    const { data: fuelData } = useFuelTypes({ page: 1, itemPerPage: 100 });
+    const fuelTypes = (((fuelData?.data as any)?.items || []) as Array<{ id: string; name: string }>);
     const isLoading = createMutation.isPending || updateMutation.isPending;
 
     const [form, setForm] = useState(emptyForm);
@@ -154,7 +157,7 @@ export function VehicleTypeFormDialog({ open, setOpen, initialData }: Props) {
                                 <SelectValue placeholder="Pilih bahan bakar" />
                             </SelectTrigger>
                             <SelectContent>
-                                {mockFuelTypes.map((f) => (
+                                {fuelTypes.map((f) => (
                                     <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
                                 ))}
                             </SelectContent>

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import type { Row } from "@tanstack/table-core";
 import { MoreVertical, Eye, Download, FileText, Pencil, Trash2, Lock } from "lucide-react";
-import type { PlanType } from "@/lib/mock-data/report-summary.mock";
+import type { PlanType } from "@/types/features/report-summary.type";
 
 interface ReportTableRowActionsProps<TData> {
     row: Row<TData>;

@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { VehicleTypeTableRowActions } from "@/features/vehicle-type/components/vehicle-type-table-row-actions";
 import { VehicleTypeTypes } from "@/types/features/vehicle-type.type";
-import { CATEGORY_LABEL, CATEGORY_COLOR } from "@/lib/mock-data/vehicle-type.mock";
+import { CATEGORY_LABEL, CATEGORY_COLOR } from "@/features/vehicle-type/constants/vehicle-type.constants";
 
 export const vehicleTypeColumns: ColumnDef<VehicleTypeTypes.Service.VehicleTypeData>[] = [
     {

@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketingTypes } from "@/types/features/ticketing.type";
-import { STATUS_LABEL } from "@/lib/mock-data/ticketing.mock";
+import { STATUS_LABEL } from "@/features/ticketing/constants/ticketing.constants";
 
 interface Props {
     open: boolean;

@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { SubscriptionTableRowActions } from "@/features/subscription/components/subscription-table-row-actions";
 import { SubscriptionTypes } from "@/types/features/subscription.type";
-import { PLAN_COLOR } from "@/lib/mock-data/subscription.mock";
+import { PLAN_COLOR } from "@/features/subscription/constants/subscription.constants";
 import { Check, X } from "lucide-react";
 
 const formatPrice = (price: number) =>

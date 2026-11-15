@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { TicketingTableRowActions } from "./ticketing-table-row-actions";
 import { TicketingTypes } from "@/types/features/ticketing.type";
-import { STATUS_LABEL, STATUS_COLOR } from "@/lib/mock-data/ticketing.mock";
+import { STATUS_LABEL, STATUS_COLOR } from "@/features/ticketing/constants/ticketing.constants";
 import { Paperclip } from "lucide-react";
 
 export const ticketingColumns: ColumnDef<TicketingTypes.Service.TicketData>[] = [

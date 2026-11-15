@@ -1,10 +1,10 @@
 import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { LogTableRowActions } from "@/features/log/components/log-table-row-actions";
-import type { LogData } from "@/lib/mock-data/log.mock";
+import type { LogTypes } from "@/types/features/log.type";
 import { ImageIcon } from "lucide-react";
 
-export const logColumns: ColumnDef<LogData>[] = [
+export const logColumns: ColumnDef<LogTypes.Service.LogData>[] = [
     {
         accessorKey: "id",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Log ID" />,

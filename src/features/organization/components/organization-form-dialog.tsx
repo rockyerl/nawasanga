@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateOrganization, useUpdateOrganization } from "@/features/organization/hooks/organization-queries";
 import { OrganizationTypes } from "@/types/features/organization.type";
-import { INDUSTRY_LABEL, PLAN_LABEL, PLAN_MAX_ASSETS } from "@/lib/mock-data/organization.mock";
+import { INDUSTRY_LABEL, PLAN_LABEL, PLAN_MAX_ASSETS } from "@/features/organization/constants/organization.constants";
 
 const INDUSTRIES: OrganizationTypes.Service.Industry[] = [
     "logistics",

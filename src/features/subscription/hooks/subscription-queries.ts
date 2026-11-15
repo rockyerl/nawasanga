@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import subscriptionService from "@/features/subscription/services/subscription.service.mock";
+import subscriptionService from "@/features/subscription/services/subscription.service";
 import { onQueryError } from "@/lib/utils";
 import { SubscriptionTypes } from "@/types/features/subscription.type";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";
@@ -15,6 +15,8 @@ export function usePlans() {
         queryFn:  () => subscriptionService.getPlans(),
     });
 }
+
+export const useSubscriptions = usePlans;
 
 export function useUpdatePlan() {
     const queryClient = useQueryClient();

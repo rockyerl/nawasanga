@@ -1,6 +1,9 @@
 import { HttpClientTypes } from '@/types/lib/http-client.type';
 import { Query } from '@/types/lib/query.type';
 
+export type PlanType = 'trial' | 'starter' | 'pro' | 'enterprise';
+export type ReportData = ReportTypes.Service.ReportData;
+
 export declare namespace ReportTypes {
   namespace Service {
     type ReportStatus = 'Published' | 'Draft';

@@ -18,7 +18,8 @@ import {
     enterpriseStatCards, enterpriseEmissionsData, enterpriseLocationBars,
     enterprisePerformanceCategories, enterpriseInsights, enterpriseAssets,
     type PlanType, type StatCard, type TopEmitter, type AssetRow, type InsightBox,
-} from "@/lib/mock-data/dashboard.mock";
+} from "@/features/dashboard/constants/dashboard.constants";
+import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard-queries";
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
@@ -536,6 +537,7 @@ const PLAN_LABELS: { id: PlanType; label: string }[] = [
 
 export default function ClientDashboard() {
     const [plan, setPlan] = useState<PlanType>("trial");
+    const { data: statsRes } = useDashboardStats("client");
 
     return (
         <Layout>

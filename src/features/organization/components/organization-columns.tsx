@@ -7,7 +7,7 @@ import {
     INDUSTRY_COLOR,
     PLAN_LABEL,
     PLAN_COLOR,
-} from "@/lib/mock-data/organization.mock";
+} from "@/features/organization/constants/organization.constants";
 
 export const organizationColumns: ColumnDef<OrganizationTypes.Service.OrganizationData>[] = [
     {

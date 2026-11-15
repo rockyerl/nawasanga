@@ -2,67 +2,73 @@
 
 import { useReactTable } from "@tanstack/react-table";
 import {
-    getCoreRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    type PaginationState,
-    type SortingState,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  type PaginationState,
+  type SortingState,
 } from "@tanstack/table-core";
 import { useMemo, useState } from "react";
 import { DataGrid } from "@/components/data-grid";
 import { driverColumns } from "@/features/driver/components/driver-columns";
 import { DriverTableToolbar } from "@/features/driver/components/driver-table-toolbar";
 import { DriverFormDialog } from "@/features/driver/components/driver-form-dialog";
-import { mockDrivers } from "@/lib/mock-data/driver.mock";
+import { useDrivers } from "@/features/driver/hooks/driver-queries";
+import { QueryDirection } from "@/types/lib/query.type";
+import type { DriverTypes } from "@/types/features/driver.type";
 
 export function DriverTable() {
-    const [open, setOpen] = useState(false);
-    const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-    const [sorting, setSorting] = useState<SortingState>([]);
-    const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [search, setSearch] = useState("");
 
-    const filtered = useMemo(
-        () =>
-            mockDrivers.filter(
-                (d) =>
-                    d.name.toLowerCase().includes(search.toLowerCase()) ||
-                    d.licenseNumber.toLowerCase().includes(search.toLowerCase()) ||
-                    d.locationName.toLowerCase().includes(search.toLowerCase())
-            ),
-        [search]
-    );
+  const { data, isLoading, isError } = useDrivers({
+    page: pagination.pageIndex + 1,
+    itemPerPage: pagination.pageSize,
+    sortBy: sorting[0]?.id || "name",
+    direction: sorting[0]?.desc ? QueryDirection.DESC : QueryDirection.ASC,
+    search,
+  });
 
-    const table = useReactTable({
-        data: filtered,
-        columns: driverColumns,
-        state: { pagination, sorting },
-        onPaginationChange: setPagination,
-        onSortingChange: setSorting,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-    });
+  const responseData = data?.data as { items?: DriverTypes.Service.DriverData[]; count?: number } | undefined;
+  const items = useMemo(() => responseData?.items || [], [responseData?.items]);
+  const pageCount = Math.max(1, Math.ceil((responseData?.count || 0) / pagination.pageSize));
 
-    return (
-        <>
-            <div className="space-y-4">
-                <DriverTableToolbar
-                    table={table}
-                    search={search}
-                    setSearch={setSearch}
-                    onAdd={() => setOpen(true)}
-                />
-                <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
-                    <DataGrid
-                        table={table}
-                        columnsLength={driverColumns.length}
-                        isLoading={false}
-                        isError={false}
-                    />
-                </div>
-            </div>
+  const table = useReactTable({
+    data: items,
+    columns: driverColumns,
+    pageCount,
+    state: { pagination, sorting },
+    onPaginationChange: setPagination,
+    onSortingChange: setSorting,
+    manualPagination: true,
+    manualSorting: true,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
-            <DriverFormDialog open={open} setOpen={setOpen} />
-        </>
-    );
+  return (
+    <>
+      <div className="space-y-4">
+        <DriverTableToolbar
+          table={table}
+          search={search}
+          setSearch={setSearch}
+          onAdd={() => setOpen(true)}
+        />
+        <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
+          <DataGrid
+            table={table}
+            columnsLength={driverColumns.length}
+            isLoading={isLoading}
+            isError={isError}
+          />
+        </div>
+      </div>
+
+      <DriverFormDialog open={open} setOpen={setOpen} />
+    </>
+  );
 }

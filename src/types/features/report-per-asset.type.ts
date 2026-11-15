@@ -1,6 +1,9 @@
 import { HttpClientTypes } from "@/types/lib/http-client.type";
 import { Query } from "@/types/lib/query.type";
 
+export type PlanType = "trial" | "starter" | "pro" | "enterprise";
+export type AssetData = AssetTypes.Service.AssetData;
+
 export declare namespace AssetTypes {
     namespace Service {
         type AssetStatus = "Baik" | "Perlu Perhatian" | "Kritis";

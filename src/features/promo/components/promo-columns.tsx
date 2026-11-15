@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { PromoTableRowActions } from "./promo-table-row-actions";
 import { PromoTypes } from "@/types/features/promo.type";
-import { STATUS_COLOR } from "@/lib/mock-data/promo.mock";
+import { STATUS_COLOR } from "@/features/promo/constants/promo.constants";
 import { Bell, BellOff } from "lucide-react";
 
 export const promoColumns: ColumnDef<PromoTypes.Service.PromoData>[] = [

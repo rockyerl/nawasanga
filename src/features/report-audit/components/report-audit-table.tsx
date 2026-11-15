@@ -13,7 +13,7 @@ import { Lock, AlertTriangle, Zap, Lightbulb, Download } from "lucide-react";
 import { DataGrid } from "@/components/data-grid";
 import { auditColumns } from "@/features/report-audit/components/report-audit-columns";
 import { ReportAuditTableToolbar } from "@/features/report-audit/components/report-audit-table-toolbar";
-import { mockAudit } from "@/lib/mock-data/report-audit.mock";
+import { useAuditInsights } from "@/features/report-audit/hooks/use-report-audit-queries";
 import type { PlanType, AuditTypes } from "@/types/features/report-audit.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
@@ -311,14 +311,17 @@ export function ReportAuditTable() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
 
+    const { data: auditRes, isLoading } = useAuditInsights(plan);
+    const data = auditRes?.data || { insights: [] };
+
     const filtered = useMemo(() => {
-        const insights = mockAudit[plan].insights ?? [];
+        const insights = data.insights ?? [];
         if (!search) return insights;
         return insights.filter((s) =>
             s.title.toLowerCase().includes(search.toLowerCase()) ||
             s.description.toLowerCase().includes(search.toLowerCase())
         );
-    }, [plan, search]);
+    }, [data, search]);
 
     const table = useReactTable({
         data: filtered,
@@ -332,7 +335,6 @@ export function ReportAuditTable() {
     });
 
     const isLocked = plan === "trial" || plan === "starter";
-    const data = mockAudit[plan];
 
     return (
         <>

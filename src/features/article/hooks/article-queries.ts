@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import articleService from "@/features/article/services/article.service.mock";
+import articleService from "@/features/article/services/article.service";
 import { Query } from "@/types/lib/query.type";
 
 export const articleKeys = {

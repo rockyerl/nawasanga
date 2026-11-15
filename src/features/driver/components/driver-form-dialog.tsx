@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { mockLocations } from "@/lib/mock-data/driver.mock";
+import { useLocations } from "@/features/location/hooks/use-location-queries";
 import type { DriverFormValues, LicenseType } from "@/types/features/driver.type";
 
 const LICENSE_TYPES: LicenseType[] = ["SIM A", "SIM B1", "SIM B2", "SIM C", "SIM D"];
@@ -44,7 +44,10 @@ export function DriverFormDialog({ open, setOpen }: DriverFormDialogProps) {
     const [locationOpen, setLocationOpen] = useState(false);
     const employeeId = useMemo(() => generateEmployeeId(), [open]);
 
-    const selectedLocation = mockLocations.find((l) => l.id === form.locationId);
+    const { data: locData } = useLocations({ page: 1, itemPerPage: 100 });
+    const availableLocations = useMemo(() => ((locData?.data as any)?.items || []) as Array<{ id: string; name: string }>, [locData]);
+
+    const selectedLocation = availableLocations.find((l) => l.id === form.locationId);
 
     const handleClose = () => {
         setForm(EMPTY_FORM);
@@ -166,7 +169,7 @@ export function DriverFormDialog({ open, setOpen }: DriverFormDialogProps) {
                                     <CommandList>
                                         <CommandEmpty>Lokasi tidak ditemukan.</CommandEmpty>
                                         <CommandGroup>
-                                            {mockLocations.map((loc) => (
+                                            {availableLocations.map((loc) => (
                                                 <CommandItem
                                                     key={loc.id}
                                                     value={loc.name}

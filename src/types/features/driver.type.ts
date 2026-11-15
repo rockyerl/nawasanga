@@ -26,3 +26,9 @@ export interface DriverFormValues {
     status: DriverStatus | "";
     notes: string;
 }
+
+export namespace DriverTypes {
+    export namespace Service {
+        export type DriverData = import('@/types/features/driver.type').DriverData;
+    }
+}

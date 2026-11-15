@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { AccountTableRowActions } from "@/features/account/components/account-table-row-actions";
 import { AccountTypes } from "@/types/features/account.type";
-import { PLAN_LABEL, PLAN_COLOR, STATUS_LABEL, STATUS_COLOR } from "@/lib/mock-data/account.mock";
+import { PLAN_LABEL, PLAN_COLOR, STATUS_LABEL, STATUS_COLOR } from "@/features/account/constants/account.constants";
 
 export const accountColumns: ColumnDef<AccountTypes.Service.AccountData>[] = [
     {

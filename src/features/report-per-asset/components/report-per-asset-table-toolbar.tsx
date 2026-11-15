@@ -3,7 +3,7 @@ import { X, Download, FileText, Filter, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import type { PlanType } from "@/lib/mock-data/report-per-asset.mock";
+import type { PlanType } from "@/types/features/report-per-asset.type";
 
 interface PerAssetTableToolbarProps<TData> {
     table: Table<TData>;

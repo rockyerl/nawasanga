@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import monitoringService from "@/features/monitoring/services/monitoring.service.mock";
+import monitoringService from "@/features/monitoring/services/monitoring.service";
 import { Query } from "@/types/lib/query.type";
 
 export const monitoringKeys = {

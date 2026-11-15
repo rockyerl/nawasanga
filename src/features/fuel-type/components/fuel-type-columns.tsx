@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { FuelTypeTableRowActions } from "@/features/fuel-type/components/fuel-type-table-row-actions";
 import { FuelTypeTypes } from "@/types/features/fuel-type.type";
-import { UNIT_LABEL, UNIT_COLOR } from "@/lib/mock-data/fuel-type.mock";
+import { UNIT_LABEL, UNIT_COLOR } from "@/features/fuel-type/constants/fuel-type.constants";
 
 export const fuelTypeColumns: ColumnDef<FuelTypeTypes.Service.FuelTypeData>[] = [
     {

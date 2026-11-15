@@ -13,7 +13,8 @@ import { Lock, Download, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import { DataGrid } from "@/components/data-grid";
 import { reportColumns } from "@/features/report-summary/components/report-summary-columns";
 import { ReportTableToolbar } from "@/features/report-summary/components/report-summary-table-toolbar";
-import { mockReports, type PlanType } from "@/lib/mock-data/report-summary.mock";
+import { useReports } from "@/features/report-summary/hooks/use-report-summary-queries";
+import type { PlanType, ReportData } from "@/types/features/report-summary.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
 
@@ -665,16 +666,17 @@ export function ReportSummaryTable() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
 
-    const filtered = useMemo(() =>
-            mockReports[plan].filter((row) =>
-                row.id.toLowerCase().includes(search.toLowerCase()) ||
-                row.period.toLowerCase().includes(search.toLowerCase())
-            ),
-        [plan, search]
-    );
+    const { data, isLoading, isError } = useReports(plan, {
+        page: pagination.pageIndex + 1,
+        itemPerPage: pagination.pageSize,
+        search,
+    });
+
+    const responseData = data?.data as { items?: ReportData[]; count?: number } | undefined;
+    const items = useMemo(() => (responseData?.items || []) as any[], [responseData?.items]);
 
     const table = useReactTable({
-        data: filtered,
+        data: items,
         columns: reportColumns[plan],
         state: { pagination, sorting },
         onPaginationChange: setPagination,
@@ -723,8 +725,8 @@ export function ReportSummaryTable() {
                     <DataGrid
                         table={table}
                         columnsLength={reportColumns[plan].length}
-                        isLoading={false}
-                        isError={false}
+                        isLoading={isLoading}
+                        isError={isError}
                     />
                 </div>
             </div>

@@ -15,7 +15,7 @@ import { assetColumns } from "@/features/report-per-asset/components/report-per-
 import { PerAssetTableToolbar } from "@/features/report-per-asset/components/report-per-asset-table-toolbar";
 import { useAssets } from "@/features/report-per-asset/hooks/report-per-asset-user-queries";
 import { QueryDirection } from "@/types/lib/query.type";
-import type { AssetData, PlanType } from "@/lib/mock-data/report-per-asset.mock";
+import type { AssetData, PlanType } from "@/types/features/report-per-asset.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
 

@@ -218,6 +218,29 @@ export const tickets = sqliteTable("tickets", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+export const vehicleTypes = sqliteTable("vehicle_types", {
+  id: text("id").primaryKey(),
+  category: text("category").notNull(), // motorcycle, car, light_truck, heavy_truck, bus, heavy_equipment
+  name: text("name").notNull(),
+  defaultFuelTypeId: text("default_fuel_type_id"),
+  consumptionKm: real("consumption_km").notNull().default(0),
+  gvwMinTon: real("gvw_min_ton"),
+  description: text("description"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+export const articles = sqliteTable("articles", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  author: text("author").notNull(),
+  category: text("category").notNull(),
+  content: text("content").notNull(),
+  publishedAt: text("published_at").notNull(),
+  status: text("status").notNull().default("published"), // published, draft, archived
+  views: integer("views").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 // ---------------------------------------------------------------------------
 // 6. Audit Logs
 // ---------------------------------------------------------------------------
@@ -315,5 +338,16 @@ export const fuelLogsRelations = relations(fuelLogs, ({ one }) => ({
   fuelType: one(fuelTypes, {
     fields: [fuelLogs.fuelTypeId],
     references: [fuelTypes.id],
+  }),
+}));
+
+export const ticketsRelations = relations(tickets, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [tickets.organizationId],
+    references: [organizations.id],
+  }),
+  user: one(users, {
+    fields: [tickets.userId],
+    references: [users.id],
   }),
 }));

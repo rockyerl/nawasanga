@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import accountService from "@/features/account/services/account.service.mock";
+import accountService from "@/features/account/services/account.service";
 import { onQueryError } from "@/lib/utils";
 import { AccountTypes } from "@/types/features/account.type";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";

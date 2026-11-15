@@ -25,7 +25,7 @@ import {
 import { DataGrid } from "@/components/data-grid";
 import { trendColumns } from "@/features/report-tren/components/report-tren-columns";
 import { ReportTrenTableToolbar } from "@/features/report-tren/components/report-tren-table-toolbar";
-import { mockTrends } from "@/lib/mock-data/report-tren.mock";
+import { useTrends } from "@/features/report-tren/hooks/report-tren-user-queries";
 import type { PlanType } from "@/types/features/report-tren.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
@@ -463,13 +463,16 @@ export function ReportTrenTable() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
 
+    const { data: trendRes, isLoading } = useTrends(plan);
+    const trendData = trendRes?.data;
+
     const filtered = useMemo(() => {
-        const series = mockTrends[plan].emissionSeries ?? [];
+        const series = (trendData?.emissionSeries ?? []) as any[];
         if (!search) return series;
         return series.filter((s) =>
             s.label.toLowerCase().includes(search.toLowerCase())
         );
-    }, [plan, search]);
+    }, [trendData, search]);
 
     const table = useReactTable({
         data: filtered,

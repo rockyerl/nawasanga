@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { PerAssetTableRowActions } from "@/features/report-per-asset/components/report-per-asset-table-row-actions";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { AssetData, PlanType } from "@/lib/mock-data/report-per-asset.mock";
+import type { AssetData, PlanType } from "@/types/features/report-per-asset.type";
 
 const STATUS_COLOR: Record<string, string> = {
     "Baik":             "#22c55e",

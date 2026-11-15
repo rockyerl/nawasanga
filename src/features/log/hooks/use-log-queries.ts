@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import LogService from "@/features/log/services/log.service.mock";
+import LogService from "@/features/log/services/log.service";
 import type { Query } from "@/types/lib/query.type";
 
 export const logKeys = {

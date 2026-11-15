@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUpdatePlan } from "@/features/subscription/hooks/subscription-queries";
 import { SubscriptionTypes } from "@/types/features/subscription.type";
-import { PLAN_COLOR } from "@/lib/mock-data/subscription.mock";
+import { PLAN_COLOR } from "@/features/subscription/constants/subscription.constants";
 
 interface Props {
     open:        boolean;

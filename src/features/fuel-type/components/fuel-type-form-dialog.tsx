@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateFuelType, useUpdateFuelType } from "@/features/fuel-type/hooks/fuel-type-queries";
 import { FuelTypeTypes } from "@/types/features/fuel-type.type";
-import { UNIT_LABEL } from "@/lib/mock-data/fuel-type.mock";
+import { UNIT_LABEL } from "@/features/fuel-type/constants/fuel-type.constants";
 
 const UNITS: FuelTypeTypes.Service.Unit[] = ["liter", "m3", "kwh"];
 

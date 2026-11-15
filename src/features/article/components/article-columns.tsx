@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { ArticleTableRowActions } from "@/features/article/components/article-table-row-actions";
 import { ArticleTypes } from "@/types/features/article.type";
-import { STATUS_LABEL, STATUS_COLOR } from "@/lib/mock-data/article.mock";
+import { STATUS_LABEL, STATUS_COLOR } from "@/features/article/constants/article.constants";
 
 export const articleColumns: ColumnDef<ArticleTypes.Service.ArticleData>[] = [
     {

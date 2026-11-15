@@ -16,6 +16,8 @@ export function useDriverPage(params: Query.Params) {
     });
 }
 
+export const useDrivers = useDriverPage;
+
 export function useCreateDriver() {
     const queryClient = useQueryClient();
 

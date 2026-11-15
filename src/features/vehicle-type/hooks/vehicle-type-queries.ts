@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import vehicleTypeService from "@/features/vehicle-type/services/vehicle-type.service.mock";
+import vehicleTypeService from "@/features/vehicle-type/services/vehicle-type.service";
 import { onQueryError } from "@/lib/utils";
 import { VehicleTypeTypes } from "@/types/features/vehicle-type.type";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";

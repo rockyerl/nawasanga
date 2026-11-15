@@ -3,7 +3,7 @@ import { X, Download, FileText, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
-import type { PlanType } from "@/lib/mock-data/report-summary.mock";
+import type { PlanType } from "@/types/features/report-summary.type";
 
 interface ReportTableToolbarProps<TData> {
     table: Table<TData>;

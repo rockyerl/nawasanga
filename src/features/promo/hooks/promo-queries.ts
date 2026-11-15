@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Query } from "@/types/lib/query.type";
 import { toast } from "sonner";
-import promoService from "@/features/promo/services/promo.service.mock";
+import promoService from "@/features/promo/services/promo.service";
 
 
 export const promoKeys = {

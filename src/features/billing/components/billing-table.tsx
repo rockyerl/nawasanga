@@ -16,7 +16,8 @@ import {
     Star,
     AlertTriangle,
 } from "lucide-react";
-import { PLAN_OPTIONS, mockBilling } from "@/lib/mock-data/billing.mock";
+import { PLAN_OPTIONS } from "@/features/billing/constants/billing.constants";
+import { useBillingList } from "@/features/billing/hooks/use-billing-queries";
 import type { BillingTypes } from "@/types/features/billing.type";
 import type { PlanType } from "@/types/features/report-tren.type";
 
@@ -463,8 +464,22 @@ function DemoSwitcher({ company, setCompany }: { company: string; setCompany: (c
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function BillingView() {
-    const [company, setCompany] = useState("PT Solusi Energi");
-    const billing = useMemo(() => mockBilling[company] ?? mockBilling["CV Langit Biru"], [company]);
+    const [company, setCompany] = useState("PT Nusantara Logistik Makmur");
+    const { data: billingRes } = useBillingList();
+    const liveBilling = billingRes?.data as any;
+
+    const billing = useMemo(() => {
+        if (liveBilling) return liveBilling;
+        return {
+            currentPlan: "pro",
+            companyName: "PT Nusantara Logistik Makmur",
+            startedAt: "2026-01-01",
+            expiresAt: "2026-12-31",
+            assetUsed: 6,
+            assetLimit: 30,
+            invoices: [],
+        };
+    }, [liveBilling]);
 
     return (
         <>

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import ticketingService from "@/features/ticketing/services/ticketing.service.mock";
+import ticketingService from "@/features/ticketing/services/ticketing.service";
 import { Query } from "@/types/lib/query.type";
 
 export const ticketingKeys = {
@@ -12,6 +12,8 @@ export function useTickets(params: Query.Params) {
         queryFn: () => ticketingService.getTickets(params),
     });
 }
+
+export const useTicketingList = useTickets;
 
 export function useDeleteTicket() {
     const queryClient = useQueryClient();

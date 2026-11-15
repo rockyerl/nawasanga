@@ -10,6 +10,13 @@ import {
   locations,
   drivers,
   vehicles,
+  fuelLogs,
+  subscriptions,
+  billingInvoices,
+  promos,
+  tickets,
+  vehicleTypes,
+  articles,
 } from "./schema";
 import bcrypt from "bcryptjs";
 
@@ -399,45 +406,320 @@ export async function seed() {
   await db.insert(users).values(clientAdmin).onConflictDoNothing();
 
   // 7. Seed Pool Locations & Drivers
-  const poolJakarta = {
-    id: "loc_pool_cikarang",
+  const locList = [
+    {
+      id: "loc_pool_cikarang",
+      organizationId: demoOrg.id,
+      name: "Pool Utama Cikarang",
+      type: "pool",
+      address: "Blok C-12 Kawasan Industri MM2100",
+      latitude: -6.3054,
+      longitude: 107.0987,
+      isActive: true,
+    },
+    {
+      id: "loc_hub_priok",
+      organizationId: demoOrg.id,
+      name: "Hub Logistik Tanjung Priok",
+      type: "depot",
+      address: "Jl. Pelabuhan Nusantara No. 8, Jakarta Utara",
+      latitude: -6.1038,
+      longitude: 106.8821,
+      isActive: true,
+    },
+    {
+      id: "loc_hub_surabaya",
+      organizationId: demoOrg.id,
+      name: "Depot Distribusi Surabaya",
+      type: "branch",
+      address: "Jl. Margomulyo Industri No. 45, Surabaya",
+      latitude: -7.2458,
+      longitude: 112.6712,
+      isActive: true,
+    },
+  ];
+  for (const loc of locList) {
+    await db.insert(locations).values(loc).onConflictDoNothing();
+  }
+
+  const driverList = [
+    {
+      id: "drv_demo_1",
+      organizationId: demoOrg.id,
+      name: "Ahmad Riyadi",
+      licenseNumber: "B1234567890",
+      phoneNumber: "081299887766",
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "drv_demo_2",
+      organizationId: demoOrg.id,
+      name: "Budi Santoso",
+      licenseNumber: "B2345678901",
+      phoneNumber: "081388776655",
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "drv_demo_3",
+      organizationId: demoOrg.id,
+      name: "Agus Pratama",
+      licenseNumber: "D3456789012",
+      phoneNumber: "081577665544",
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "drv_demo_4",
+      organizationId: demoOrg.id,
+      name: "Hendra Wijaya",
+      licenseNumber: "L4567890123",
+      phoneNumber: "081866554433",
+      status: "active",
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+  for (const drv of driverList) {
+    await db.insert(drivers).values(drv).onConflictDoNothing();
+  }
+
+  const vehicleList = [
+    {
+      id: "veh_demo_1",
+      organizationId: demoOrg.id,
+      plateNumber: "B 9876 PQR",
+      brandModel: "Hino Ranger 500 FL (Tronton)",
+      vehicleType: "Heavy Truck",
+      fuelTypeId: "fuel_solar",
+      assignedDriverId: "drv_demo_1",
+      locationId: "loc_pool_cikarang",
+      year: 2022,
+      status: "operational",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "veh_demo_2",
+      organizationId: demoOrg.id,
+      plateNumber: "B 9123 KLM",
+      brandModel: "Mitsubishi Canter FE 74 HD",
+      vehicleType: "Medium Truck",
+      fuelTypeId: "fuel_dexlite",
+      assignedDriverId: "drv_demo_2",
+      locationId: "loc_pool_cikarang",
+      year: 2023,
+      status: "operational",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "veh_demo_3",
+      organizationId: demoOrg.id,
+      plateNumber: "D 4512 STU",
+      brandModel: "Isuzu Giga FVR 34 P",
+      vehicleType: "Heavy Truck",
+      fuelTypeId: "fuel_solar",
+      assignedDriverId: "drv_demo_3",
+      locationId: "loc_hub_priok",
+      year: 2021,
+      status: "operational",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "veh_demo_4",
+      organizationId: demoOrg.id,
+      plateNumber: "L 7890 XYZ",
+      brandModel: "Mercedes-Benz Axor 2528 C",
+      vehicleType: "Heavy Truck",
+      fuelTypeId: "fuel_pertdex",
+      assignedDriverId: "drv_demo_4",
+      locationId: "loc_hub_surabaya",
+      year: 2024,
+      status: "operational",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "veh_demo_5",
+      organizationId: demoOrg.id,
+      plateNumber: "B 3456 DEF",
+      brandModel: "Toyota Hilux 2.4 D-Cab",
+      vehicleType: "Light Vehicle",
+      fuelTypeId: "fuel_dexlite",
+      assignedDriverId: "drv_demo_1",
+      locationId: "loc_pool_cikarang",
+      year: 2023,
+      status: "operational",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "veh_demo_6",
+      organizationId: demoOrg.id,
+      plateNumber: "AST-GEN-01",
+      brandModel: "Genset Perkins 150 kVA",
+      vehicleType: "Stationary Equipment",
+      fuelTypeId: "fuel_solar",
+      assignedDriverId: null,
+      locationId: "loc_pool_cikarang",
+      year: 2020,
+      status: "operational",
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+  for (const veh of vehicleList) {
+    await db.insert(vehicles).values(veh).onConflictDoNothing();
+  }
+
+  // 8. Vehicle Types
+  const vTypes = [
+    {
+      id: "vt_heavy_truck",
+      category: "heavy_truck",
+      name: "Truk Tronton / Wingbox",
+      defaultFuelTypeId: "fuel_solar",
+      consumptionKm: 0.85,
+      gvwMinTon: 24,
+      description: "Armada logistik kargo berat antar provinsi",
+      createdAt: now,
+    },
+    {
+      id: "vt_light_truck",
+      category: "light_truck",
+      name: "Colt Diesel Double (CDD)",
+      defaultFuelTypeId: "fuel_solar",
+      consumptionKm: 0.42,
+      gvwMinTon: 8,
+      description: "Armada distribusi barang perkotaan dan regional",
+      createdAt: now,
+    },
+    {
+      id: "vt_pickup",
+      category: "car",
+      name: "Pick-up Muatan Ringan",
+      defaultFuelTypeId: "fuel_pertalite",
+      consumptionKm: 0.22,
+      gvwMinTon: 2.5,
+      description: "Armada last-mile delivery",
+      createdAt: now,
+    },
+  ];
+  for (const vt of vTypes) {
+    await db.insert(vehicleTypes).values(vt).onConflictDoNothing();
+  }
+
+  // 9. Articles
+  const articleList = [
+    {
+      id: "art_1",
+      title: "Panduan Implementasi Standar IPCC Scope 1 untuk Armada Logistik",
+      author: "Sundawa Sustainability Team",
+      category: "Regulasi & ESG",
+      content: "Penerapan penghitungan emisi gas rumah kaca (GRK) Scope 1 berbasis konsumsi bahan bakar...",
+      publishedAt: "2026-05-01",
+      status: "published",
+      views: 342,
+      createdAt: now,
+    },
+    {
+      id: "art_2",
+      title: "Optimalisasi Efisiensi BBM Bio Solar B35 pada Armada Angkutan Berat",
+      author: "Pusat Riset Transportasi Hijau",
+      category: "Teknis Armada",
+      content: "Analisis teknis efisiensi pembakaran Bio Solar B35 dan perawatannya terhadap konsumsi km/liter...",
+      publishedAt: "2026-05-10",
+      status: "published",
+      views: 215,
+      createdAt: now,
+    },
+  ];
+  for (const art of articleList) {
+    await db.insert(articles).values(art).onConflictDoNothing();
+  }
+
+  // 10. Subscriptions & Billing Invoices
+  const subDemo = {
+    id: "sub_demo_1",
     organizationId: demoOrg.id,
-    name: "Pool Utama Cikarang",
-    type: "pool",
-    address: "Blok C-12 Kawasan Industri MM2100",
-    latitude: -6.3054,
-    longitude: 107.0987,
+    plan: "pro",
+    priceIdr: 4500000,
+    startsAt: now,
+    expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    status: "active",
+  };
+  await db.insert(subscriptions).values(subDemo).onConflictDoNothing();
+
+  const invDemo = {
+    id: "inv_demo_1",
+    organizationId: demoOrg.id,
+    invoiceNumber: "INV-2026-001",
+    amountIdr: 4500000,
+    status: "paid",
+    paymentMethod: "Bank Transfer BCA",
+    paidAt: now,
+    createdAt: now,
+  };
+  await db.insert(billingInvoices).values(invDemo).onConflictDoNothing();
+
+  // 11. Promos
+  const promoDemo = {
+    id: "prm_hijau2026",
+    code: "HIJAU2026",
+    discountPercent: 15,
+    maxDiscountIdr: 1000000,
+    validUntil: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
     isActive: true,
   };
-  await db.insert(locations).values(poolJakarta).onConflictDoNothing();
+  await db.insert(promos).values(promoDemo).onConflictDoNothing();
 
-  const driverDemo = {
-    id: "drv_demo_1",
+  // 12. Tickets
+  const ticketDemo = {
+    id: "tkt_demo_1",
     organizationId: demoOrg.id,
-    name: "Ahmad Riyadi",
-    licenseNumber: "B1234567890",
-    phoneNumber: "081299887766",
-    status: "active",
+    userId: clientAdmin.id,
+    subject: "Integrasi Sensor Telematika GPS Fleet",
+    description: "Mohon panduan integrasi API OBD-II ke dashboard emisi real-time.",
+    priority: "medium",
+    status: "in_progress",
     createdAt: now,
     updatedAt: now,
   };
-  await db.insert(drivers).values(driverDemo).onConflictDoNothing();
+  await db.insert(tickets).values(ticketDemo).onConflictDoNothing();
 
-  const vehicleDemo = {
-    id: "veh_demo_1",
-    organizationId: demoOrg.id,
-    plateNumber: "B 9876 PQR",
-    brandModel: "Hino Ranger 500 FL",
-    vehicleType: "Heavy Truck",
-    fuelTypeId: "fuel_solar",
-    assignedDriverId: driverDemo.id,
-    locationId: poolJakarta.id,
-    year: 2022,
-    status: "operational",
-    createdAt: now,
-    updatedAt: now,
-  };
-  await db.insert(vehicles).values(vehicleDemo).onConflictDoNothing();
+  // 13. Fuel Logs (Transactions across Jan - May 2026)
+  const fuelLogData = [
+    { id: "flog_01", vehicleId: "veh_demo_1", driverId: "drv_demo_1", fuelTypeId: "fuel_solar", liters: 150, costIdr: 150 * 6800, odometerKm: 42100, emissionCo2Kg: 150 * 2.68, fuelStation: "SPBU Pertamina 31.175.02 Cikarang", loggedAt: new Date("2026-01-15T08:30:00Z") },
+    { id: "flog_02", vehicleId: "veh_demo_2", driverId: "drv_demo_2", fuelTypeId: "fuel_dexlite", liters: 90, costIdr: 90 * 14550, odometerKm: 18200, emissionCo2Kg: 90 * 2.68, fuelStation: "SPBU Pertamina 34.123.01 Cikarang", loggedAt: new Date("2026-01-22T09:15:00Z") },
+    { id: "flog_03", vehicleId: "veh_demo_3", driverId: "drv_demo_3", fuelTypeId: "fuel_solar", liters: 180, costIdr: 180 * 6800, odometerKm: 65400, emissionCo2Kg: 180 * 2.68, fuelStation: "SPBU Shell Tanjung Priok", loggedAt: new Date("2026-02-05T07:45:00Z") },
+    { id: "flog_04", vehicleId: "veh_demo_4", driverId: "drv_demo_4", fuelTypeId: "fuel_pertdex", liters: 140, costIdr: 140 * 15100, odometerKm: 12400, emissionCo2Kg: 140 * 2.68, fuelStation: "SPBU Margomulyo Surabaya", loggedAt: new Date("2026-02-18T11:00:00Z") },
+    { id: "flog_05", vehicleId: "veh_demo_1", driverId: "drv_demo_1", fuelTypeId: "fuel_solar", liters: 160, costIdr: 160 * 6800, odometerKm: 43250, emissionCo2Kg: 160 * 2.68, fuelStation: "SPBU Pertamina 31.175.02 Cikarang", loggedAt: new Date("2026-02-27T10:20:00Z") },
+    { id: "flog_06", vehicleId: "veh_demo_5", driverId: "drv_demo_1", fuelTypeId: "fuel_dexlite", liters: 65, costIdr: 65 * 14550, odometerKm: 28900, emissionCo2Kg: 65 * 2.68, fuelStation: "SPBU Pertamina Karawang Barat", loggedAt: new Date("2026-03-08T08:00:00Z") },
+    { id: "flog_07", vehicleId: "veh_demo_6", driverId: null, fuelTypeId: "fuel_solar", liters: 200, costIdr: 200 * 6800, odometerKm: null, emissionCo2Kg: 200 * 2.68, fuelStation: "Tangki Genset Internal Cikarang", loggedAt: new Date("2026-03-14T14:00:00Z") },
+    { id: "flog_08", vehicleId: "veh_demo_2", driverId: "drv_demo_2", fuelTypeId: "fuel_dexlite", liters: 85, costIdr: 85 * 14550, odometerKm: 19100, emissionCo2Kg: 85 * 2.68, fuelStation: "SPBU Cikarang Central", loggedAt: new Date("2026-03-25T16:30:00Z") },
+    { id: "flog_09", vehicleId: "veh_demo_3", driverId: "drv_demo_3", fuelTypeId: "fuel_solar", liters: 190, costIdr: 190 * 6800, odometerKm: 66800, emissionCo2Kg: 190 * 2.68, fuelStation: "SPBU Tanjung Priok Gate 3", loggedAt: new Date("2026-04-04T07:10:00Z") },
+    { id: "flog_10", vehicleId: "veh_demo_1", driverId: "drv_demo_1", fuelTypeId: "fuel_solar", liters: 170, costIdr: 170 * 6800, odometerKm: 44500, emissionCo2Kg: 170 * 2.68, fuelStation: "SPBU Tol Jakarta-Cikampek KM 19", loggedAt: new Date("2026-04-12T13:40:00Z") },
+    { id: "flog_11", vehicleId: "veh_demo_4", driverId: "drv_demo_4", fuelTypeId: "fuel_pertdex", liters: 155, costIdr: 155 * 15100, odometerKm: 13900, emissionCo2Kg: 155 * 2.68, fuelStation: "SPBU Tol Trans Jawa KM 575", loggedAt: new Date("2026-04-22T19:20:00Z") },
+    { id: "flog_12", vehicleId: "veh_demo_5", driverId: "drv_demo_1", fuelTypeId: "fuel_dexlite", liters: 70, costIdr: 70 * 14550, odometerKm: 29800, emissionCo2Kg: 70 * 2.68, fuelStation: "SPBU Pertamina Cikarang", loggedAt: new Date("2026-05-02T09:00:00Z") },
+    { id: "flog_13", vehicleId: "veh_demo_6", driverId: null, fuelTypeId: "fuel_solar", liters: 220, costIdr: 220 * 6800, odometerKm: null, emissionCo2Kg: 220 * 2.68, fuelStation: "Tangki Genset Internal Cikarang", loggedAt: new Date("2026-05-09T15:15:00Z") },
+    { id: "flog_14", vehicleId: "veh_demo_2", driverId: "drv_demo_2", fuelTypeId: "fuel_dexlite", liters: 95, costIdr: 95 * 14550, odometerKm: 20250, emissionCo2Kg: 95 * 2.68, fuelStation: "SPBU Tol Cikampek KM 39", loggedAt: new Date("2026-05-14T08:45:00Z") },
+    { id: "flog_15", vehicleId: "veh_demo_1", driverId: "drv_demo_1", fuelTypeId: "fuel_solar", liters: 180, costIdr: 180 * 6800, odometerKm: 45800, emissionCo2Kg: 180 * 2.68, fuelStation: "SPBU Pertamina 31.175.02 Cikarang", loggedAt: new Date("2026-05-15T11:30:00Z") },
+  ];
+
+  for (const flog of fuelLogData) {
+    await db.insert(fuelLogs).values({
+      ...flog,
+      organizationId: demoOrg.id,
+      receiptImageUrl: null,
+      createdAt: flog.loggedAt,
+    }).onConflictDoNothing();
+  }
 
   console.log("✅ Fuel-Carbon Seeding Completed Successfully.");
 }

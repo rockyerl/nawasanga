@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import UsersService from "@/features/users/services/users.service.mock";
+import UsersService from "@/features/users/services/users.service";
 import { onQueryError } from "@/lib/utils";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";
 import type { Query } from "@/types/lib/query.type";
@@ -15,6 +15,8 @@ export function useUsersPage(params: Query.Params) {
         queryFn: () => UsersService.getUsers(params),
     });
 }
+
+export const useUsers = useUsersPage;
 
 export function useCreateUserPage() {
     const queryClient = useQueryClient();

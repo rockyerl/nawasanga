@@ -30,3 +30,9 @@ export interface LocationListResponse {
     itemPerPage: number;
     totalPages: number;
 }
+
+export namespace LocationTypes {
+    export namespace Service {
+        export type LocationData = Location;
+    }
+}

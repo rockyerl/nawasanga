@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { ReportTableRowActions } from "@/features/report-summary/components/report-summary-table-row-actions";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { ReportData, PlanType } from "@/lib/mock-data/report-summary.mock";
+import type { ReportData, PlanType } from "@/types/features/report-summary.type";
 
 function buildColumns(plan: PlanType): ColumnDef<ReportData>[] {
     const cols: ColumnDef<ReportData>[] = [
