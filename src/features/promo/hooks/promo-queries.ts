@@ -25,14 +25,10 @@ export function usePushPromo() {
     return useMutation({
         mutationFn: (id: string) => promoService.pushNotification(id),
         onSuccess: (res: any) => {
-            // Tampilkan toast sukses menggunakan data dari server mock
             toast.success(res.message || "Notifikasi berhasil dikirim ke semua user!");
-
-            // Refresh data tabel jika ada perubahan status 'isPushNotified'
             queryClient.invalidateQueries({ queryKey: ["promo"] });
         },
         onError: (err: any) => {
-            // Menangani error dari API atau Service
             toast.error(err.message || "Gagal mengirim push notification");
         },
     });
@@ -45,14 +41,13 @@ export function useDeletePromo() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => {
-            // Simulasi delete, jika service belum ada bisa tambahkan di mock-service
-            console.log("Deleting promo:", id);
-            return Promise.resolve({ message: "Promo berhasil dihapus" });
-        },
+        mutationFn: (id: string) => promoService.deletePromo(id),
         onSuccess: (res: any) => {
-            toast.success(res.message);
+            toast.success(res.message || "Promo berhasil dihapus");
             queryClient.invalidateQueries({ queryKey: ["promo"] });
+        },
+        onError: (err: any) => {
+            toast.error(err.message || "Gagal menghapus promo");
         },
     });
 }

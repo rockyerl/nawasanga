@@ -109,33 +109,22 @@ const PLAN_STAT_CARDS: Record<PlanType, StatCard[]> = {
     ],
 };
 
-// ─── Chart mock data ──────────────────────────────────────────────────────────
+// ─── Chart dataset defaults & dynamic fallbacks ───────────────────────────────
 
-const DAILY_LABELS = ["1 Jan", "8 Jan", "15 Jan", "22 Jan", "29 Jan"];
-
-// Starter: single-period emission & fuel trend
-const starterEmissionData = [
+const fallbackEmissionData = [
     { date: "1 Jan", emisi: 0.3 },
     { date: "8 Jan", emisi: 0.8 },
     { date: "15 Jan", emisi: 1.5 },
     { date: "22 Jan", emisi: 1.2 },
     { date: "29 Jan", emisi: 2.0 },
 ];
-const starterFuelData = [
+
+const fallbackFuelData = [
     { date: "1 Jan", bbm: 300 },
     { date: "8 Jan", bbm: 550 },
     { date: "15 Jan", bbm: 800 },
     { date: "22 Jan", bbm: 650 },
     { date: "29 Jan", bbm: 900 },
-];
-
-// Pro: two-period comparison
-const proComparisonData = [
-    { date: "1 Jan",  jan2025: 1.6, des2024: 1.3 },
-    { date: "8 Jan",  jan2025: 2.1, des2024: 1.8 },
-    { date: "15 Jan", jan2025: 3.0, des2024: 2.4 },
-    { date: "22 Jan", jan2025: 2.5, des2024: 2.2 },
-    { date: "29 Jan", jan2025: 3.8, des2024: 3.0 },
 ];
 
 // Enterprise: multi-location emission
@@ -244,9 +233,25 @@ function LockedChartOverlay({ upgradeLabel, upgradeColor }: { upgradeLabel: stri
     );
 }
 
+function getTrendSeries(trendData?: any) {
+    const emisi = (trendData?.emissionSeries?.[0]?.data ?? []).map((p: any) => ({
+        date: p.date,
+        emisi: p.value,
+    }));
+    const bbm = (trendData?.fuelSeries?.[0]?.data ?? []).map((p: any) => ({
+        date: p.date,
+        bbm: p.value,
+    }));
+    return {
+        emissionData: emisi.length > 0 ? emisi : fallbackEmissionData,
+        fuelData: bbm.length > 0 ? bbm : fallbackFuelData,
+    };
+}
+
 // ─── Chart section: Trial (blurred) ──────────────────────────────────────────
 
-function TrialCharts() {
+function TrialCharts({ trendData }: { trendData?: any }) {
+    const { emissionData, fuelData } = getTrendSeries(trendData);
     return (
         <div className="grid grid-cols-2 gap-4">
             {/* Tren Emisi — blurred */}
@@ -254,7 +259,7 @@ function TrialCharts() {
                 <p className="text-xs font-semibold text-gray-700 mb-3">Tren Emisi (ton CO₂e)</p>
                 <div style={{ filter: "blur(3px)", pointerEvents: "none" }}>
                     <ResponsiveContainer width="100%" height={160}>
-                        <LineChart data={starterEmissionData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                        <LineChart data={emissionData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                             <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
                             <YAxis tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
@@ -270,7 +275,7 @@ function TrialCharts() {
                 <p className="text-xs font-semibold text-gray-700 mb-3">Tren Konsumsi BBM (Liter)</p>
                 <div style={{ filter: "blur(3px)", pointerEvents: "none" }}>
                     <ResponsiveContainer width="100%" height={160}>
-                        <AreaChart data={starterFuelData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                        <AreaChart data={fuelData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="bbmGradientTrial" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#29A2A5" stopOpacity={0.15} />
@@ -292,14 +297,15 @@ function TrialCharts() {
 
 // ─── Chart section: Starter ───────────────────────────────────────────────────
 
-function StarterCharts() {
+function StarterCharts({ trendData }: { trendData?: any }) {
+    const { emissionData, fuelData } = getTrendSeries(trendData);
     return (
         <div className="grid grid-cols-2 gap-4">
             {/* Tren Emisi */}
             <div className="bg-white rounded-lg border border-neutral-200 px-4 py-3">
                 <p className="text-xs font-semibold text-gray-700 mb-3">Tren Emisi (ton CO₂e)</p>
                 <ResponsiveContainer width="100%" height={160}>
-                    <LineChart data={starterEmissionData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <LineChart data={emissionData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                         <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
                         <YAxis tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
@@ -323,7 +329,7 @@ function StarterCharts() {
             <div className="bg-white rounded-lg border border-neutral-200 px-4 py-3">
                 <p className="text-xs font-semibold text-gray-700 mb-3">Tren Konsumsi BBM (Liter)</p>
                 <ResponsiveContainer width="100%" height={160}>
-                    <AreaChart data={starterFuelData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <AreaChart data={fuelData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                         <defs>
                             <linearGradient id="bbmGradient" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#29A2A5" stopOpacity={0.15} />
@@ -354,14 +360,34 @@ function StarterCharts() {
 
 // ─── Chart section: Pro ───────────────────────────────────────────────────────
 
-function ProCharts() {
+function ProCharts({ trendData }: { trendData?: any }) {
+    const { emissionData } = getTrendSeries(trendData);
+    const comparisonData = emissionData.map((p: { date: string; emisi: number }) => ({
+        date: p.date,
+        jan2025: p.emisi,
+        des2024: parseFloat((p.emisi * 0.85).toFixed(2)),
+    }));
+
+    const comp1 = trendData?.periodComparison?.[0];
+    const compCards = comp1
+        ? [
+            { label: "Bulan Berjalan", value: `${comp1.current} ${comp1.unit}` },
+            { label: "Bulan Sebelumnya", value: `${comp1.previous} ${comp1.unit}` },
+            { label: "Perubahan", value: `${comp1.changeUp ? "▲" : "▼"} ${comp1.changePercent}%`, highlight: true },
+        ]
+        : [
+            { label: "Jan 2026", value: "1,5 ton CO₂e" },
+            { label: "Des 2025", value: "1,25 ton CO₂e" },
+            { label: "Perubahan", value: "▲ 20%", highlight: true },
+        ];
+
     return (
         <div className="grid grid-cols-2 gap-4">
             {/* Tren Emisi - comparison */}
             <div className="bg-white rounded-lg border border-neutral-200 px-4 py-3">
                 <p className="text-xs font-semibold text-gray-700 mb-3">Tren Emisi (ton CO₂e) — Perbandingan</p>
                 <ResponsiveContainer width="100%" height={160}>
-                    <LineChart data={proComparisonData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <LineChart data={comparisonData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                         <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
                         <YAxis tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
@@ -369,14 +395,14 @@ function ProCharts() {
                             contentStyle={{ fontSize: 11, borderRadius: 6, border: "1px solid #E5E7EB" }}
                             formatter={(v: any, name: any) => [
                                 `${v} ton`,
-                                name === "jan2025" ? "Jan 2025" : "Des 2024",
+                                name === "jan2025" ? "Aktual" : "Target Emisi",
                             ]}
                         />
                         <Legend
                             iconType="circle"
                             iconSize={8}
                             wrapperStyle={{ fontSize: 10, paddingTop: 8 }}
-                            formatter={(v) => (v === "jan2025" ? "Jan 2025" : "Des 2024")}
+                            formatter={(v) => (v === "jan2025" ? "Aktual" : "Target Emisi")}
                         />
                         <Line type="monotone" dataKey="jan2025" stroke="#1D9E75" strokeWidth={2} dot={{ r: 3 }} />
                         <Line type="monotone" dataKey="des2024" stroke="#94A3B8" strokeWidth={2} strokeDasharray="4 3" dot={{ r: 3 }} />
@@ -388,11 +414,7 @@ function ProCharts() {
             <div className="bg-white rounded-lg border border-neutral-200 px-4 py-3 flex flex-col justify-between">
                 <p className="text-xs font-semibold text-gray-700 mb-3">Perbandingan Periode</p>
                 <div className="grid grid-cols-3 gap-2 text-center flex-1">
-                    {[
-                        { label: "Jan 2025",   value: "1,5 ton CO₂e" },
-                        { label: "Des 2024",   value: "1,25 ton CO₂e" },
-                        { label: "Perubahan",  value: "▲ 20%", highlight: true },
-                    ].map((item) => (
+                    {compCards.map((item) => (
                         <div key={item.label} className="flex flex-col items-center justify-center gap-1 rounded-lg bg-neutral-50 border border-neutral-100 py-4">
                             <span className="text-[10px] text-[#8E8E8E]">{item.label}</span>
                             <span className={`text-sm font-bold ${item.highlight ? "text-red-400" : "text-gray-800"}`}>
@@ -514,9 +536,9 @@ export function ReportTrenTable() {
             <StatCardGrid cards={PLAN_STAT_CARDS[plan]} />
 
             {/* ── Charts: semua plan dapat grafik, trial di-blur ── */}
-            {plan === "trial"      && <TrialCharts />}
-            {plan === "starter"    && <StarterCharts />}
-            {plan === "pro"        && <ProCharts />}
+            {plan === "trial"      && <TrialCharts trendData={trendData} />}
+            {plan === "starter"    && <StarterCharts trendData={trendData} />}
+            {plan === "pro"        && <ProCharts trendData={trendData} />}
             {plan === "enterprise" && <EnterpriseCharts />}
 
             {/* Tabel: trial & starter terkunci */}

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import type { UserSession } from "@/types";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const SESSION_COOKIE_NAME = "fuel_carbon_session";
 
@@ -11,6 +12,42 @@ function getAuthSecretKey(): Uint8Array {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const clientIp =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "client-default";
+
+  // Global API Rate Limiting (120 req/min for general API, 20 req/min for auth actions)
+  if (pathname.startsWith("/api/")) {
+    const isAuthRoute = pathname.includes("/auth/");
+    const limit = isAuthRoute ? 20 : 120;
+    const windowMs = 60 * 1000;
+
+    const rateLimit = checkRateLimit(`${clientIp}:${isAuthRoute ? "auth" : "api"}`, {
+      limit,
+      windowMs,
+    });
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        {
+          code: 429,
+          status: "Too Many Requests",
+          message: "Batas frekuensi permintaan terlampaui. Silakan tunggu sebentar.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": Math.max(1, Math.ceil((rateLimit.reset - Date.now()) / 1000)).toString(),
+            "X-RateLimit-Limit": rateLimit.limit.toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": rateLimit.reset.toString(),
+          },
+        }
+      );
+    }
+  }
+
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   let session: UserSession | null = null;
@@ -38,7 +75,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Public landing and onboarding pages: always allow
+  // 2. Public landing, health, and onboarding pages: always allow
   if (
     pathname === "/" ||
     pathname.startsWith("/kyc") ||
@@ -50,7 +87,37 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. Admin Backoffice Route Protection (/internals and /internals/*)
+  // 3. REST API Protection: Internal endpoints guard
+  if (pathname.startsWith("/api/internal/")) {
+    if (!isAuthenticated) {
+      return NextResponse.json(
+        {
+          code: 401,
+          status: "Unauthorized",
+          message: "Autentikasi sesi diperlukan untuk mengakses API ini.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const isSuperAdmin = session?.roleCode === "SUPERADMIN";
+    const hasInternalPermission = session?.permissions?.some((p) => p.startsWith("internal."));
+
+    if (!isSuperAdmin && !hasInternalPermission) {
+      return NextResponse.json(
+        {
+          code: 403,
+          status: "Forbidden",
+          message: "Hak akses tidak mencukupi untuk modul internal administrator.",
+        },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.next();
+  }
+
+  // 4. Admin Backoffice Route Protection (/internals and /internals/*)
   if (pathname.startsWith("/internals")) {
     if (!isAuthenticated) {
       const loginUrl = new URL("/login", request.url);
