@@ -1,54 +1,18 @@
 "use client";
 
 import { Layout } from "@/components/layouts/layout";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import {
   ChevronDown, TrendingUp, TrendingDown, Calendar,
-  Download, Search
+  Download,
 } from "lucide-react";
 import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard-queries";
 
-const PLAN_LABEL: Record<string, string> = {
-  freemium: "Freemium",
-  starter: "Starter",
-  pro: "Pro",
-  enterprise: "Enterprise",
-};
-
-const PLAN_COLOR: Record<string, { bg: string; text: string }> = {
-  freemium: { bg: "#EDEAE0", text: "#7A7A72" },
-  starter: { bg: "#DBEAFE", text: "#1D4ED8" },
-  pro: { bg: "#1D6B5A", text: "#F7F5EF" },
-  enterprise: { bg: "#FEF9EC", text: "#B8962E" },
-};
-
-const STATUS_COLOR: Record<string, { bg: string; text: string }> = {
-  active: { bg: "#eef5f3", text: "#1D6B5A" },
-  trial: { bg: "#FEF3C7", text: "#B45309" },
-  expired: { bg: "#FEE2E2", text: "#B91C1C" },
-  cancelled: { bg: "#EDEAE0", text: "#7A7A72" },
-  pending: { bg: "#FEF3C7", text: "#B45309" },
-  approved: { bg: "#eef5f3", text: "#1D6B5A" },
-  rejected: { bg: "#FEE2E2", text: "#B91C1C" },
-};
-
-function Badge({ bg, text, label }: { bg: string; text: string; label: string }) {
-  return (
-    <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap uppercase tracking-wider"
-      style={{ backgroundColor: bg, color: text }}
-    >
-      {label}
-    </span>
-  );
-}
-
 export default function InternalDashboard() {
-  const [companySearch, setCompanySearch] = useState("");
   const { data: statsRes, isLoading } = useDashboardStats("internal");
   const stats = statsRes?.data;
 
@@ -89,27 +53,6 @@ export default function InternalDashboard() {
       ]
     );
   }, [stats]);
-
-  const kycEntries = useMemo(() => {
-    const raw = stats?.recentKyc || [];
-    return raw.map((k: any) => ({
-      id: k.id,
-      companyName: k.companyName,
-      picName: k.reviewer || "PIC Admin",
-      email: "admin@fuelcarbon.id",
-      plan: (k.tier || "pro").toLowerCase(),
-      sector: "Logistics",
-      assetCount: "6 unit",
-      submittedAt: k.submittedAt,
-      status: k.status || "approved",
-    }));
-  }, [stats]);
-
-  const filteredKyc = useMemo(() => {
-    return kycEntries.filter((c: any) =>
-      c.companyName.toLowerCase().includes(companySearch.toLowerCase())
-    );
-  }, [kycEntries, companySearch]);
 
   return (
     <Layout>
@@ -211,68 +154,122 @@ export default function InternalDashboard() {
           </div>
         </div>
 
-        {/* KYC Review Table */}
-        <div className="rounded-xl flex flex-col overflow-hidden bg-white border border-[#DEDAD0]">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F0EDE5]">
+        {/* Platform Quick Telemetry & Feature Navigation */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Tenant Verification Executive Summary */}
+          <div className="rounded-xl p-5 flex flex-col justify-between bg-white border border-[#DEDAD0]">
             <div>
-              <p className="text-sm font-semibold text-[#1A1A18]">KYC & Tenant Verification</p>
-              <p className="text-[11px] mt-0.5 text-[#7A7A72]">Pendaftaran tenant yang diverifikasi dalam database</p>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1D6B5A]">
+                  Tenant Governance
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#eef5f3] text-[#1D6B5A]">
+                  {stats?.recentKyc?.length || 0} Terdaftar
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-[#1A1A18]">
+                Verifikasi & Status Organisasi Tenant
+              </h3>
+              <p className="text-xs text-[#7A7A72] mt-1">
+                Kelola pendaftaran organisasi perusahaan, status KYC, penanggung jawab (PIC), dan penetapan batas armada kendaraan.
+              </p>
+
+              <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="rounded-lg bg-[#F7F5EF] p-3 text-center border border-[#EDEAE0]">
+                  <span className="text-[11px] text-[#7A7A72]">Aktif & Terverifikasi</span>
+                  <p className="text-lg font-bold text-[#1D6B5A] mt-0.5">
+                    {stats?.recentKyc?.filter((k: any) => k.status === "approved").length || 1} Organisasi
+                  </p>
+                </div>
+                <div className="rounded-lg bg-[#FEF9EC] p-3 text-center border border-[#E8DEC0]">
+                  <span className="text-[11px] text-[#B8962E]">Menunggu Review</span>
+                  <p className="text-lg font-bold text-[#B8962E] mt-0.5">
+                    {stats?.recentKyc?.filter((k: any) => k.status === "pending").length || 0} Permohonan
+                  </p>
+                </div>
+                <div className="rounded-lg bg-[#F7F5EF] p-3 text-center border border-[#EDEAE0]">
+                  <span className="text-[11px] text-[#7A7A72]">Total Akun PIC</span>
+                  <p className="text-lg font-bold text-[#1A1A18] mt-0.5">
+                    {stats?.statCards?.[3]?.value || "2 User"}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#7A7A72]" />
-              <input
-                type="text"
-                placeholder="Cari perusahaan..."
-                className="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-[#F7F5EF] border border-[#DEDAD0] outline-none w-48"
-                onChange={(e) => setCompanySearch(e.target.value)}
-              />
+
+            <div className="mt-5 pt-4 border-t border-[#F0EDE5] flex items-center justify-between">
+              <span className="text-xs text-[#7A7A72]">
+                Akses terpusat verifikasi KYC dan legalitas perusahaan
+              </span>
+              <a
+                href="/admin/organization"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-lg bg-[#1D6B5A] text-[#F7F5EF] hover:bg-[#155245] transition-colors"
+              >
+                Kelola Organisasi & Verifikasi &rarr;
+              </a>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-[#FDFCFA] border-b border-[#F0EDE5]">
-                  {["ID", "Company Name", "PIC", "Plan", "Sector", "Assets", "Status", "Action"].map((h) => (
-                    <th key={h} className="px-5 py-3 text-[10px] font-bold text-[#7A7A72] uppercase tracking-wider">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F7F5EF]">
-                {filteredKyc.map((kyc: any) => (
-                  <tr key={kyc.id} className="hover:bg-[#FDFCFA] transition-colors">
-                    <td className="px-5 py-3 text-xs font-medium text-[#7A7A72]">{kyc.id}</td>
-                    <td className="px-5 py-3 text-xs font-bold text-[#1A1A18]">{kyc.companyName}</td>
-                    <td className="px-5 py-3">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-medium text-[#1A1A18]">{kyc.picName}</span>
-                        <span className="text-[10px] text-[#7A7A72]">{kyc.email}</span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3">
-                      <Badge
-                        label={PLAN_LABEL[kyc.plan] || kyc.plan}
-                        bg={PLAN_COLOR[kyc.plan]?.bg || "#DBEAFE"}
-                        text={PLAN_COLOR[kyc.plan]?.text || "#1D4ED8"}
-                      />
-                    </td>
-                    <td className="px-5 py-3 text-xs text-[#7A7A72]">{kyc.sector}</td>
-                    <td className="px-5 py-3 text-xs text-[#7A7A72]">{kyc.assetCount}</td>
-                    <td className="px-5 py-3">
-                      <Badge
-                        label={kyc.status}
-                        bg={STATUS_COLOR[kyc.status]?.bg || "#eef5f3"}
-                        text={STATUS_COLOR[kyc.status]?.text || "#1D6B5A"}
-                      />
-                    </td>
-                    <td className="px-5 py-3">
-                      <button className="text-[11px] font-bold text-[#1D6B5A] hover:underline">Review</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Operational & Platform Governance Navigation */}
+          <div className="rounded-xl p-5 flex flex-col justify-between bg-white border border-[#DEDAD0]">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#B8962E]">
+                  Platform Control
+                </span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF9EC] text-[#B8962E]">
+                  SLA 99.9%
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-[#1A1A18]">
+                Pusat Kendali Operasional & ESG
+              </h3>
+              <p className="text-xs text-[#7A7A72] mt-1">
+                Akses cepat modul konfigurasi faktor emisi IPCC, helpdesk tiket customer, paket langganan, dan faktur billing platform.
+              </p>
+
+              <div className="grid grid-cols-2 gap-2.5 mt-4">
+                <a
+                  href="/admin/billing"
+                  className="p-3 rounded-lg border border-[#EDEAE0] bg-[#FDFCFA] hover:bg-[#F7F5EF] transition-colors flex flex-col"
+                >
+                  <span className="text-xs font-bold text-[#1A1A18]">Faktur & Billing Global</span>
+                  <span className="text-[11px] text-[#7A7A72] mt-0.5">Tagihan & pendapatan platform</span>
+                </a>
+                <a
+                  href="/admin/fuel-type"
+                  className="p-3 rounded-lg border border-[#EDEAE0] bg-[#FDFCFA] hover:bg-[#F7F5EF] transition-colors flex flex-col"
+                >
+                  <span className="text-xs font-bold text-[#1A1A18]">Faktor Emisi BBM (IPCC)</span>
+                  <span className="text-[11px] text-[#7A7A72] mt-0.5">Koefisien standar emisi karbon</span>
+                </a>
+                <a
+                  href="/admin/ticketing"
+                  className="p-3 rounded-lg border border-[#EDEAE0] bg-[#FDFCFA] hover:bg-[#F7F5EF] transition-colors flex flex-col"
+                >
+                  <span className="text-xs font-bold text-[#1A1A18]">Helpdesk & Tiket Global</span>
+                  <span className="text-[11px] text-[#7A7A72] mt-0.5">Layanan bantuan tenant klien</span>
+                </a>
+                <a
+                  href="/admin/subscription"
+                  className="p-3 rounded-lg border border-[#EDEAE0] bg-[#FDFCFA] hover:bg-[#F7F5EF] transition-colors flex flex-col"
+                >
+                  <span className="text-xs font-bold text-[#1A1A18]">Master Paket Langganan</span>
+                  <span className="text-[11px] text-[#7A7A72] mt-0.5">Batas aset & skema harga paket</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-[#F0EDE5] flex items-center justify-between">
+              <span className="text-xs text-[#7A7A72]">
+                Sistem RBAC dan audit log aktif
+              </span>
+              <a
+                href="/admin/users"
+                className="text-xs font-semibold text-[#1D6B5A] hover:underline"
+              >
+                Kelola User Administrator &rarr;
+              </a>
+            </div>
           </div>
         </div>
       </div>

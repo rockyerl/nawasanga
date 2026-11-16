@@ -46,10 +46,10 @@ const clientNavMain = [
     url: "#",
     icon: Truck,
     items: [
-      { title: "Aset & Kendaraan", url: "/dashboard/assets", icon: Truck },
-      { title: "Driver / Pengemudi", url: "/dashboard/drivers", icon: UserCheck },
-      { title: "Pool & Lokasi", url: "/dashboard/locations", icon: MapPin },
-      { title: "Pencatatan BBM", url: "/dashboard/logs", icon: Fuel },
+      { title: "Aset & Kendaraan", url: "/assets", icon: Truck },
+      { title: "Driver / Pengemudi", url: "/drivers", icon: UserCheck },
+      { title: "Pool & Lokasi", url: "/locations", icon: MapPin },
+      { title: "Pencatatan BBM", url: "/logs", icon: Fuel },
     ],
   },
   {
@@ -57,10 +57,10 @@ const clientNavMain = [
     url: "#",
     icon: BarChart3,
     items: [
-      { title: "Ringkasan Emisi", url: "/dashboard/reports/summary" },
-      { title: "Laporan per Aset", url: "/dashboard/reports/per-asset" },
-      { title: "Tren Konsumsi", url: "/dashboard/reports/trends" },
-      { title: "Audit Emisi Scope 1", url: "/dashboard/reports/audit" },
+      { title: "Ringkasan Emisi", url: "/reports/summary" },
+      { title: "Laporan per Aset", url: "/reports/per-asset" },
+      { title: "Tren Konsumsi", url: "/reports/trends" },
+      { title: "Audit Emisi Scope 1", url: "/reports/audit" },
     ],
   },
   {
@@ -68,8 +68,8 @@ const clientNavMain = [
     url: "#",
     icon: CreditCard,
     items: [
-      { title: "Billing & Paket", url: "/dashboard/billing", icon: Receipt },
-      { title: "Tiket Bantuan", url: "/dashboard/support", icon: Headphones },
+      { title: "Billing & Paket", url: "/billing", icon: Receipt },
+      { title: "Tiket Bantuan", url: "/support", icon: Headphones },
     ],
   },
 ];
@@ -77,7 +77,7 @@ const clientNavMain = [
 const internalNavMain = [
   {
     title: "Super Admin Dashboard",
-    url: "/internals",
+    url: "/admin",
     icon: LayoutDashboard,
   },
   {
@@ -85,10 +85,10 @@ const internalNavMain = [
     url: "#",
     icon: Building2,
     items: [
-      { title: "Daftar Organisasi", url: "/internals/organization", icon: Building2 },
-      { title: "Akun PIC Perusahaan", url: "/internals/account", icon: ShieldCheck },
-      { title: "Master Paket Langganan", url: "/internals/subscription", icon: CreditCard },
-      { title: "Faktur & Billing Global", url: "/internals/billing", icon: Receipt },
+      { title: "Daftar Organisasi", url: "/admin/organization", icon: Building2 },
+      { title: "Akun PIC Perusahaan", url: "/admin/account", icon: ShieldCheck },
+      { title: "Master Paket Langganan", url: "/admin/subscription", icon: CreditCard },
+      { title: "Faktur & Billing Global", url: "/admin/billing", icon: Receipt },
     ],
   },
   {
@@ -96,9 +96,9 @@ const internalNavMain = [
     url: "#",
     icon: Settings2,
     items: [
-      { title: "Faktor Emisi BBM (IPCC)", url: "/internals/fuel-type", icon: Flame },
-      { title: "Kategori Kendaraan", url: "/internals/vehicle-type", icon: Truck },
-      { title: "Artikel & Regulasi ESG", url: "/internals/article", icon: Newspaper },
+      { title: "Faktor Emisi BBM (IPCC)", url: "/admin/fuel-type", icon: Flame },
+      { title: "Kategori Kendaraan", url: "/admin/vehicle-type", icon: Truck },
+      { title: "Artikel & Regulasi ESG", url: "/admin/article", icon: Newspaper },
     ],
   },
   {
@@ -106,9 +106,9 @@ const internalNavMain = [
     url: "#",
     icon: Activity,
     items: [
-      { title: "Helpdesk & Tiket Global", url: "/internals/ticketing", icon: Headphones },
-      { title: "Voucher Promo", url: "/internals/promo", icon: Percent },
-      { title: "Pemantauan Server & Armada", url: "/internals/monitoring", icon: Activity },
+      { title: "Helpdesk & Tiket Global", url: "/admin/ticketing", icon: Headphones },
+      { title: "Voucher Promo", url: "/admin/promo", icon: Percent },
+      { title: "Pemantauan Server & Armada", url: "/admin/monitoring", icon: Activity },
     ],
   },
   {
@@ -116,15 +116,15 @@ const internalNavMain = [
     url: "#",
     icon: ShieldCheck,
     items: [
-      { title: "User Administrator", url: "/internals/users", icon: Users2 },
-      { title: "Role & Matriks RBAC", url: "/internals/role", icon: ShieldCheck },
+      { title: "User Administrator", url: "/admin/users", icon: Users2 },
+      { title: "Role & Matriks RBAC", url: "/admin/role", icon: ShieldCheck },
     ],
   },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const isInternal = pathname.startsWith("/internals");
+  const isInternal = pathname.startsWith("/internals") || pathname.startsWith("/admin");
 
   const teams = isInternal
     ? [
@@ -156,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarFooter className="p-3 border-t border-[#DEDAD0]/40">
         <Link
-          href={isInternal ? "/dashboard" : "/internals"}
+          href={isInternal ? "/dashboard" : "/admin"}
           className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-[#7A7A72] hover:text-[#1D6B5A] hover:bg-[#1D6B5A]/10 transition-colors"
         >
           <ArrowLeftRight className="h-4 w-4 shrink-0" />

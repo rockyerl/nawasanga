@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useCreateArticle, useUpdateArticle } from "@/features/article/hooks/article-queries";
 import { ArticleTypes } from "@/types/features/article.type";
 import { STATUS_LABEL } from "@/features/article/constants/article.constants";
+import { toast } from "sonner";
 
 interface Props {
     open: boolean;
@@ -27,6 +29,10 @@ const emptyForm = {
 
 export function ArticleFormDialog({ open, setOpen, initialData }: Props) {
     const isEdit = !!initialData;
+    const createMutation = useCreateArticle();
+    const updateMutation = useUpdateArticle();
+    const isLoading = createMutation.isPending || updateMutation.isPending;
+
     const [form, setForm] = useState(emptyForm);
     const [errors, setErrors] = useState<Partial<Record<keyof typeof emptyForm, string>>>({});
 
@@ -64,7 +70,40 @@ export function ArticleFormDialog({ open, setOpen, initialData }: Props) {
 
     const handleSave = () => {
         if (!validate()) return;
-        setOpen(false);
+
+        const payload = {
+            title: form.title.trim(),
+            author: form.author.trim(),
+            category: form.category.trim(),
+            content: form.content.trim(),
+            publishedAt: form.publishedAt,
+            status: form.status,
+        };
+
+        if (isEdit && initialData) {
+            updateMutation.mutate(
+                { id: initialData.id, payload },
+                {
+                    onSuccess: () => {
+                        toast.success("Artikel berhasil diperbarui");
+                        setOpen(false);
+                    },
+                    onError: () => {
+                        toast.error("Gagal memperbarui artikel");
+                    },
+                }
+            );
+        } else {
+            createMutation.mutate(payload, {
+                onSuccess: () => {
+                    toast.success("Artikel berhasil diterbitkan");
+                    setOpen(false);
+                },
+                onError: () => {
+                    toast.error("Gagal menambahkan artikel");
+                },
+            });
+        }
     };
 
     const fieldClass = (key: keyof typeof emptyForm) =>
@@ -179,10 +218,11 @@ export function ArticleFormDialog({ open, setOpen, initialData }: Props) {
                     </Button>
                     <Button
                         onClick={handleSave}
+                        disabled={isLoading}
                         className="text-sm font-medium"
                         style={{ background: "#1D6B5A", color: "#F7F5EF" }}
                     >
-                        {isEdit ? "Simpan Perubahan" : "Terbitkan"}
+                        {isLoading ? "Menyimpan..." : isEdit ? "Simpan Perubahan" : "Terbitkan"}
                     </Button>
                 </div>
             </DialogContent>

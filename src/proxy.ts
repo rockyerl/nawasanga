@@ -68,7 +68,7 @@ export async function proxy(request: NextRequest) {
   if (pathname === "/auth" || pathname === "/login") {
     if (isAuthenticated) {
       if (session?.roleCode === "SUPERADMIN") {
-        return NextResponse.redirect(new URL("/internals", request.url));
+        return NextResponse.redirect(new URL("/admin", request.url));
       }
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
@@ -118,8 +118,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Admin Backoffice Route Protection (/internals and /internals/*)
-  if (pathname.startsWith("/internals")) {
+  // 4. Admin Backoffice Route Protection (/admin, /admin/*, /internals, /internals/*)
+  if (pathname.startsWith("/admin") || pathname.startsWith("/internals")) {
     if (!isAuthenticated) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
@@ -137,8 +137,23 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Client Portal Route Protection (/dashboard and /dashboard/*)
-  if (pathname.startsWith("/dashboard")) {
+  // 5. Client Portal Route Protection (/dashboard, /assets, /drivers, /locations, /logs, /reports, /billing, /support)
+  const CLIENT_PORTAL_ROUTES = [
+    "/dashboard",
+    "/assets",
+    "/drivers",
+    "/locations",
+    "/logs",
+    "/reports",
+    "/billing",
+    "/support",
+  ];
+
+  const isClientRoute = CLIENT_PORTAL_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+
+  if (isClientRoute) {
     if (!isAuthenticated) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);

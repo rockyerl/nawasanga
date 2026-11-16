@@ -11,10 +11,10 @@ export default function SubscriptionPage(): JSX.Element {
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-semibold" style={{ color: "#1A1A18" }}>
-                            Akun
+                            Master Paket Langganan
                         </h2>
                         <p className="text-sm mt-0.5" style={{ color: "#7A7A72" }}>
-                            Kelola akun organisasi, penanggung jawab, dan subscription.
+                            Kelola paket langganan, batas aset kendaraan, dan skema harga platform.
                         </p>
                     </div>
                     <span className="text-sm" style={{ color: "#29A2A5" }}>

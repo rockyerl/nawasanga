@@ -88,7 +88,7 @@ function FleetQuickSummary({
                     <span className="text-sm font-semibold text-gray-800">{title}</span>
                 </div>
                 <Link
-                    href="/dashboard/assets"
+                    href="/assets"
                     className="text-xs text-[#1D6B5A] hover:underline font-medium flex items-center gap-1"
                 >
                     Kelola Aset & Kendaraan <ArrowRight className="w-3.5 h-3.5" />
@@ -108,7 +108,7 @@ function FleetQuickSummary({
                 <div className="rounded-lg bg-[#F7F5EF] p-3 flex flex-col items-center justify-center border border-[#EDEAE0]">
                     <span className="text-[11px] text-[#7A7A72] mb-1">Manajemen Inventaris</span>
                     <Link
-                        href="/dashboard/assets"
+                        href="/assets"
                         className="text-xs bg-[#1D6B5A] text-white px-3 py-1.5 rounded font-medium hover:bg-[#1D6B5A]/90 transition-colors shadow-xs"
                     >
                         Buka Menu Aset →
