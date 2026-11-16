@@ -61,6 +61,49 @@ class LogService {
       throw errServiceHandler(err as Error);
     }
   }
+
+  async updateLog(id: string, payload: unknown) {
+    try {
+      const res = await Client.put<HttpClientTypes.Response<unknown>, unknown>(
+        `internal/fuel-logs/${id}`,
+        payload
+      );
+
+      if ((res.data as HttpClientTypes.Response<unknown>).code >= 400) {
+        throw createApiError(
+          (res.data as HttpClientTypes.Response<unknown>).code,
+          (res.data as HttpClientTypes.Response<unknown>).status || "Error",
+          (res.data as HttpClientTypes.Response<unknown>).message || "Request failed"
+        );
+      }
+
+      return res.data;
+    } catch (err) {
+      if (isApiError(err)) throw err;
+      throw errServiceHandler(err as Error);
+    }
+  }
+
+  async deleteLog(id: string) {
+    try {
+      const res = await Client.del<HttpClientTypes.Response<unknown>, unknown>(
+        `internal/fuel-logs/${id}`
+      );
+
+      if ((res.data as HttpClientTypes.Response<unknown>).code >= 400) {
+        throw createApiError(
+          (res.data as HttpClientTypes.Response<unknown>).code,
+          (res.data as HttpClientTypes.Response<unknown>).status || "Error",
+          (res.data as HttpClientTypes.Response<unknown>).message || "Request failed"
+        );
+      }
+
+      return res.data;
+    } catch (err) {
+      if (isApiError(err)) throw err;
+      throw errServiceHandler(err as Error);
+    }
+  }
 }
 
 export default new LogService();

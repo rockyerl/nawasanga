@@ -132,6 +132,10 @@ export const locations = sqliteTable(
     name: text("name").notNull(),
     type: text("type").notNull().default("pool"), // pool, depot, site, branch
     address: text("address"),
+    city: text("city"),
+    province: text("province"),
+    pic: text("pic"),
+    picPhone: text("pic_phone"),
     latitude: real("latitude"),
     longitude: real("longitude"),
     isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),

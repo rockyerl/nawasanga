@@ -31,12 +31,27 @@ export async function GET(request: NextRequest) {
     const start = (page - 1) * itemPerPage;
     const items = filtered.slice(start, start + itemPerPage);
 
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
     return NextResponse.json({
       code: 200,
       status: "OK",
       message: "Data lokasi berhasil diambil",
       data: {
-        items,
+        items: items.map((l) => ({
+          id: l.id,
+          name: l.name,
+          type: (l.type ? capitalize(l.type) : "Pool") as any,
+          province: l.province || "Jawa Barat",
+          city: l.city || "Bekasi",
+          address: l.address || "",
+          pic: l.pic || "Koordinator Lapangan",
+          picPhone: l.picPhone || "-",
+          latitude: l.latitude,
+          longitude: l.longitude,
+          status: l.isActive ? "Aktif" : "Tidak Aktif",
+          organizationId: l.organizationId,
+        })),
         count: filtered.length,
         page,
         itemPerPage,
@@ -66,11 +81,15 @@ export async function POST(request: NextRequest) {
       id: `loc_${Date.now()}`,
       organizationId: targetOrgId,
       name: body.name,
-      type: body.type || "pool",
+      type: (body.type || "pool").toLowerCase(),
       address: body.address || "",
-      latitude: parseFloat(body.latitude) || 0,
-      longitude: parseFloat(body.longitude) || 0,
-      isActive: true,
+      city: body.city || "",
+      province: body.province || "",
+      pic: body.pic || "Koordinator Lapangan",
+      picPhone: body.picPhone || "",
+      latitude: typeof body.latitude === "number" ? body.latitude : parseFloat(body.latitude) || 0,
+      longitude: typeof body.longitude === "number" ? body.longitude : parseFloat(body.longitude) || 0,
+      isActive: body.status === "Tidak Aktif" ? false : true,
     };
 
     await db.insert(locations).values(newLoc);

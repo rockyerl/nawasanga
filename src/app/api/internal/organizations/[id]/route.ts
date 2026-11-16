@@ -23,7 +23,7 @@ export async function PUT(
         province: body.province,
         latitude: body.latitude != null ? Number(body.latitude) : undefined,
         longitude: body.longitude != null ? Number(body.longitude) : undefined,
-        plan: body.plan,
+        plan: body.subscriptionPlan || body.plan,
         maxAssets: body.maxAssets !== undefined ? parseInt(body.maxAssets, 10) : undefined,
         status: body.status,
         updatedAt: new Date(),

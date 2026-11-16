@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import type { Table } from "@tanstack/table-core";
-import { X, ChevronDown, Search } from "lucide-react";
+import { X, ChevronDown, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
@@ -18,6 +18,7 @@ interface LogTableToolbarProps<TData> {
   setFilterVehicle: (value: string) => void;
   filterAsset: string;
   setFilterAsset: (value: string) => void;
+  onAdd?: () => void;
 }
 
 interface SearchDropdownProps {
@@ -120,6 +121,7 @@ export function LogTableToolbar<TData>({
   setFilterVehicle,
   filterAsset,
   setFilterAsset,
+  onAdd,
 }: LogTableToolbarProps<TData>) {
   const isFiltered = !!search || !!filterDriver || !!filterVehicle || !!filterAsset;
 
@@ -175,7 +177,18 @@ export function LogTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className="flex items-center gap-2">
+        <DataTableViewOptions table={table} />
+        {onAdd && (
+          <Button
+            onClick={onAdd}
+            className="h-8 text-xs font-medium text-white shadow-sm"
+            style={{ background: "#1D6B5A" }}
+          >
+            <Plus className="h-3.5 w-3.5 mr-1" /> Catat BBM
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

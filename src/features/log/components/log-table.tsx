@@ -12,6 +12,7 @@ import { useMemo, useState } from "react";
 import { DataGrid } from "@/components/data-grid";
 import { logColumns } from "@/features/log/components/log-columns";
 import { LogTableToolbar } from "@/features/log/components/log-table-toolbar";
+import { LogFormDialog } from "@/features/log/components/log-form-dialog";
 import { useLogs } from "@/features/log/hooks/use-log-queries";
 import { QueryDirection } from "@/types/lib/query.type";
 import type { LogTypes } from "@/types/features/log.type";
@@ -23,6 +24,7 @@ export function LogTable() {
   const [filterDriver, setFilterDriver] = useState("");
   const [filterVehicle, setFilterVehicle] = useState("");
   const [filterAsset, setFilterAsset] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
 
   const { data, isLoading, isError } = useLogs({
     page: pagination.pageIndex + 1,
@@ -72,6 +74,7 @@ export function LogTable() {
         setFilterVehicle={setFilterVehicle}
         filterAsset={filterAsset}
         setFilterAsset={setFilterAsset}
+        onAdd={() => setFormOpen(true)}
       />
       <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
         <DataGrid
@@ -81,6 +84,7 @@ export function LogTable() {
           isError={isError}
         />
       </div>
+      <LogFormDialog open={formOpen} setOpen={setFormOpen} />
     </div>
   );
 }

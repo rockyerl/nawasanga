@@ -30,6 +30,19 @@ export function useCreateAsset() {
     });
 }
 
+export function useUpdateAsset() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: string; payload: unknown }) =>
+            operationalService.updateAsset(id, payload),
+        onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
+            await queryClient.invalidateQueries({ queryKey: ["operational", "assets"] });
+            toast.success(res.message);
+        },
+        onError: (err) => onQueryError(err),
+    });
+}
+
 export function useDeleteAsset() {
     const queryClient = useQueryClient();
     return useMutation({

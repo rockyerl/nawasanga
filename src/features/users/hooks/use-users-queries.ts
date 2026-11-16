@@ -33,6 +33,22 @@ export function useCreateUserPage() {
     });
 }
 
+export function useUpdateUserPage() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: string; payload: unknown }) =>
+            UsersService.updateUser(id, payload),
+        onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
+            await queryClient.invalidateQueries({
+                queryKey: ["users-page"],
+            });
+            toast.success(res.message);
+        },
+        onError: (err) => onQueryError(err),
+    });
+}
+
 export function useDeleteUserPage() {
     const queryClient = useQueryClient();
 
@@ -40,7 +56,7 @@ export function useDeleteUserPage() {
         mutationFn: (id: string) => UsersService.deleteUser(id),
         onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
             await queryClient.invalidateQueries({
-                queryKey: usersKeys.list({ page: 1, itemPerPage: 10 }),
+                queryKey: ["users-page"],
             });
             toast.success(res.message);
         },

@@ -56,8 +56,17 @@ export async function POST(request: NextRequest) {
     const now = new Date();
     const defaultPassword = await bcrypt.hash("User@12345", 10);
     
-    // Find role
-    const defaultRole = await db.query.roles.findFirst();
+    let targetRoleId = body.roleId;
+    if (!targetRoleId && body.role) {
+      const foundRole = await db.query.roles.findFirst({
+        where: (r, { eq, or }) => or(eq(r.name, body.role), eq(r.id, body.role)),
+      });
+      if (foundRole) targetRoleId = foundRole.id;
+    }
+    if (!targetRoleId) {
+      const defaultRole = await db.query.roles.findFirst();
+      targetRoleId = defaultRole?.id || "role_company_admin";
+    }
 
     const newUser = {
       id: `usr_${Date.now()}`,
@@ -65,7 +74,7 @@ export async function POST(request: NextRequest) {
       name: body.name,
       email: body.email,
       passwordHash: defaultPassword,
-      roleId: body.roleId || defaultRole?.id || "role_company_admin",
+      roleId: targetRoleId,
       isActive: body.status !== "Tidak Aktif",
       createdAt: now,
       updatedAt: now,

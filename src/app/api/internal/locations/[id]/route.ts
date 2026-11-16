@@ -11,16 +11,19 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    await db
-      .update(locations)
-      .set({
-        name: body.name,
-        type: body.type,
-        address: body.address,
-        latitude: body.latitude !== undefined ? parseFloat(body.latitude) : undefined,
-        longitude: body.longitude !== undefined ? parseFloat(body.longitude) : undefined,
-      })
-      .where(eq(locations.id, id));
+    const updateData: Partial<typeof locations.$inferInsert> = {};
+    if (body.name !== undefined) updateData.name = body.name;
+    if (body.type !== undefined) updateData.type = (body.type || "pool").toLowerCase();
+    if (body.address !== undefined) updateData.address = body.address;
+    if (body.city !== undefined) updateData.city = body.city;
+    if (body.province !== undefined) updateData.province = body.province;
+    if (body.pic !== undefined) updateData.pic = body.pic;
+    if (body.picPhone !== undefined) updateData.picPhone = body.picPhone;
+    if (body.latitude !== undefined) updateData.latitude = typeof body.latitude === "number" ? body.latitude : parseFloat(body.latitude) || 0;
+    if (body.longitude !== undefined) updateData.longitude = typeof body.longitude === "number" ? body.longitude : parseFloat(body.longitude) || 0;
+    if (body.status !== undefined) updateData.isActive = body.status === "Tidak Aktif" ? false : true;
+
+    await db.update(locations).set(updateData).where(eq(locations.id, id));
 
     return NextResponse.json({
       code: 200,

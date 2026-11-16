@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { organizations } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { organizations, users, roles } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 
 export async function GET(request: NextRequest) {
   try {
@@ -79,6 +80,34 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
     await db.insert(organizations).values(newOrg);
+
+    // Auto-provision PIC client admin user if contact email is provided
+    if (newOrg.contactEmail && newOrg.contactEmail.includes("@")) {
+      try {
+        const existingUser = await db.query.users.findFirst({
+          where: eq(users.email, newOrg.contactEmail.toLowerCase()),
+        });
+        if (!existingUser) {
+          const clientAdminRole = await db.query.roles.findFirst({
+            where: eq(roles.code, "CLIENT_ADMIN"),
+          });
+          const passwordHash = await bcrypt.hash("Password@123", 10);
+          await db.insert(users).values({
+            id: `usr_${Date.now()}`,
+            organizationId: newOrg.id,
+            name: body.picName || `Admin ${newOrg.name}`,
+            email: newOrg.contactEmail.toLowerCase(),
+            passwordHash,
+            roleId: clientAdminRole?.id || "role_client_admin",
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      } catch (userErr) {
+        console.error("Failed to auto-provision PIC user:", userErr);
+      }
+    }
+
     return NextResponse.json({ code: 201, status: "Created", message: "Organisasi berhasil didaftarkan", data: newOrg });
   } catch (err) {
     return NextResponse.json({ code: 500, status: "Error", message: String(err) }, { status: 500 });

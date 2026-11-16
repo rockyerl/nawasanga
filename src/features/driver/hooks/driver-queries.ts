@@ -33,6 +33,22 @@ export function useCreateDriver() {
     });
 }
 
+export function useUpdateDriver() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: string; payload: unknown }) =>
+            DriverService.updateDriver(id, payload),
+        onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
+            await queryClient.invalidateQueries({
+                queryKey: driverKeys.list({ page: 1, itemPerPage: 10 }),
+            });
+            toast.success(res.message);
+        },
+        onError: (err) => onQueryError(err),
+    });
+}
+
 export function useDeleteDriver() {
     const queryClient = useQueryClient();
 

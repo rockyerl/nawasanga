@@ -1,255 +1,342 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { useCreateLocation, useUpdateLocation } from "@/features/location/hooks/use-location-queries";
+import type { Location, LocationType, LocationStatus } from "@/types/features/location.type";
+import { MapPin, UserCheck, Phone, Building2, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 
-const PROVINCES = [
-    "DKI Jakarta", "Jawa Barat", "Jawa Tengah", "Jawa Timur", "DI Yogyakarta",
-    "Bali", "Sumatera Utara", "Sumatera Selatan", "Kalimantan Timur", "Sulawesi Selatan",
-    "Banten", "Riau",
+// Dynamic import for Leaflet interactive map
+const LocationMap = dynamic(
+    () => import("@/features/organization/components/organization-location-map"),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="h-64 w-full rounded-xl border border-[#DEDAD0] bg-[#F7F5EF] flex items-center justify-center text-xs text-[#7A7A72] gap-2">
+                <MapPin className="w-4 h-4 text-[#1D6B5A] animate-pulse" />
+                Memuat peta interaktif...
+            </div>
+        ),
+    }
+);
+
+const TYPES: { value: LocationType; label: string }[] = [
+    { value: "Pool", label: "Pool Kendaraan / Armada" },
+    { value: "Site", label: "Site Proyek / Operasional" },
+    { value: "Warehouse", label: "Gudang / Warehouse / Depo" },
+    { value: "Branch", label: "Kantor Cabang / Kantor Operasional" },
 ];
 
-const CITIES: Record<string, string[]> = {
-    "DKI Jakarta": ["Jakarta Pusat", "Jakarta Utara", "Jakarta Selatan", "Jakarta Barat", "Jakarta Timur"],
-    "Jawa Barat": ["Bandung", "Cirebon", "Cimahi", "Bogor", "Sukabumi", "Karawang", "Depok", "Bekasi"],
-    "Jawa Tengah": ["Semarang", "Solo", "Magelang", "Salatiga"],
-    "Jawa Timur": ["Surabaya", "Malang", "Sidoarjo", "Mojokerto"],
-    "DI Yogyakarta": ["Yogyakarta", "Sleman", "Bantul"],
-    "Bali": ["Denpasar", "Badung", "Gianyar"],
-    "Sumatera Utara": ["Medan", "Deli Serdang"],
-    "Sumatera Selatan": ["Palembang", "Prabumulih"],
-    "Kalimantan Timur": ["Balikpapan", "Samarinda"],
-    "Sulawesi Selatan": ["Makassar", "Gowa"],
-    "Banten": ["Tangerang Selatan", "Tangerang", "Serang"],
-    "Riau": ["Pekanbaru", "Dumai"],
-};
-
-const TYPES = ["Pool", "Site", "Warehouse", "Branch"] as const;
-
-const STATUSES = [
-    { value: "Aktif", color: "#22c55e" },
-    { value: "Tidak Aktif", color: "#f97316" },
-];
-
-const ALL_PICS = [
-    "Ahmad Fauzi", "Budi Santoso", "Dewi Lestari", "Rizki Pratama", "Eko Wahyudi",
-    "Siti Rahayu", "Hendra Kusuma", "Rina Wulandari", "Joko Purnomo", "Ayu Maharani",
-    "Dimas Setiawan", "Mega Putri", "Bagas Nugroho", "Intan Permata", "Wahyu Hidayat",
+const STATUSES: { value: LocationStatus; label: string; color: string }[] = [
+    { value: "Aktif", label: "Aktif (Beroperasi)", color: "#22c55e" },
+    { value: "Tidak Aktif", label: "Tidak Aktif / Nonaktif", color: "#f97316" },
 ];
 
 interface LocationFormDialogProps {
     open: boolean;
     setOpen: (open: boolean) => void;
+    initialData?: Location;
 }
 
-export function LocationFormDialog({ open, setOpen }: LocationFormDialogProps) {
-    const [form, setForm] = useState({
-        name: "",
-        type: "",
-        province: "",
-        city: "",
-        address: "",
-        pic: "",
-        status: "",
-    });
-    const [picSearch, setPicSearch] = useState("");
-    const [picOpen, setPicOpen] = useState(false);
+export function LocationFormDialog({ open, setOpen, initialData }: LocationFormDialogProps) {
+    const isEdit = !!initialData;
+    const createMutation = useCreateLocation();
+    const updateMutation = useUpdateLocation();
+    const isLoading = createMutation.isPending || updateMutation.isPending;
 
-    const filteredPics = ALL_PICS.filter((p) =>
-        p.toLowerCase().includes(picSearch.toLowerCase())
-    );
+    const [name, setName] = useState("");
+    const [type, setType] = useState<LocationType>("Pool");
+    const [address, setAddress] = useState("");
+    const [city, setCity] = useState("");
+    const [province, setProvince] = useState("");
+    const [latitude, setLatitude] = useState<number | null>(-6.1754);
+    const [longitude, setLongitude] = useState<number | null>(106.8272);
+    const [pic, setPic] = useState("");
+    const [picPhone, setPicPhone] = useState("");
+    const [status, setStatus] = useState<LocationStatus>("Aktif");
 
-    const availableCities = form.province ? CITIES[form.province] ?? [] : [];
+    useEffect(() => {
+        if (open && initialData) {
+            setName(initialData.name || "");
+            setType(initialData.type || "Pool");
+            setAddress(initialData.address || "");
+            setCity(initialData.city || "");
+            setProvince(initialData.province || "");
+            setLatitude(typeof initialData.latitude === "number" ? initialData.latitude : -6.1754);
+            setLongitude(typeof initialData.longitude === "number" ? initialData.longitude : 106.8272);
+            setPic(initialData.pic || "");
+            setPicPhone(initialData.picPhone || "");
+            setStatus(initialData.status || "Aktif");
+        } else if (open && !initialData) {
+            setName("");
+            setType("Pool");
+            setAddress("");
+            setCity("");
+            setProvince("");
+            setLatitude(-6.1754);
+            setLongitude(106.8272);
+            setPic("");
+            setPicPhone("");
+            setStatus("Aktif");
+        }
+    }, [open, initialData]);
 
-    const handleProvinceChange = (v: string) => {
-        setForm({ ...form, province: v, city: "" });
+    const handleLocationSelect = (data: {
+        lat: number;
+        lng: number;
+        address: string;
+        city: string;
+        province: string;
+    }) => {
+        setLatitude(data.lat);
+        setLongitude(data.lng);
+        if (data.address && !address) setAddress(data.address);
+        if (data.city) setCity(data.city);
+        if (data.province) setProvince(data.province);
+        toast.success("Titik lokasi dan alamat berhasil dipin");
     };
 
-    const handleReset = () => {
-        setForm({ name: "", type: "", province: "", city: "", address: "", pic: "", status: "" });
-        setPicSearch("");
-    };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const handleClose = () => {
-        handleReset();
-        setOpen(false);
+        if (!name.trim()) {
+            toast.error("Nama lokasi / pool wajib diisi.");
+            return;
+        }
+
+        if (!address.trim()) {
+            toast.error("Alamat lokasi wajib diisi atau dipin pada peta.");
+            return;
+        }
+
+        if (!pic.trim()) {
+            toast.error("Nama PIC / Penanggung Jawab wajib diisi.");
+            return;
+        }
+
+        const payload = {
+            name: name.trim(),
+            type,
+            address: address.trim(),
+            city: city.trim(),
+            province: province.trim(),
+            latitude,
+            longitude,
+            pic: pic.trim(),
+            picPhone: picPhone.trim(),
+            status,
+        };
+
+        if (isEdit && initialData) {
+            updateMutation.mutate(
+                { id: initialData.id, payload },
+                {
+                    onSuccess: () => {
+                        setOpen(false);
+                    },
+                }
+            );
+        } else {
+            createMutation.mutate(payload, {
+                onSuccess: () => {
+                    setOpen(false);
+                },
+            });
+        }
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-2xl">
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto" style={{ background: "#FDFCFA" }}>
                 <DialogHeader>
-                    <DialogTitle className="text-lg font-semibold text-gray-800">Tambah Lokasi</DialogTitle>
+                    <DialogTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <Building2 className="w-5 h-5 text-[#1D6B5A]" />
+                        {isEdit ? "Edit Lokasi & Pool" : "Tambah Lokasi / Pool Baru"}
+                    </DialogTitle>
+                    <DialogDescription className="text-xs text-[#7A7A72]">
+                        Tentukan titik koordinat pool atau site operasional pada peta, lengkapi alamat dan kontak PIC penanggung jawab.
+                    </DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-2 gap-4 py-2">
-                    {/* Nama */}
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Nama <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            placeholder="Masukkan nama lokasi"
-                            className="border-neutral-200"
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        />
-                    </div>
 
-                    {/* Tipe */}
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Tipe <span className="text-red-500">*</span>
-                        </Label>
-                        <Select onValueChange={(v) => setForm({ ...form, type: v })} value={form.type}>
-                            <SelectTrigger className="border-neutral-200">
-                                <SelectValue placeholder="Pilih tipe" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {TYPES.map((t) => (
-                                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                <form onSubmit={handleSubmit} className="space-y-4 pt-1">
+                    {/* General info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">
+                                Nama Lokasi / Pool <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                placeholder="cth: Pool Utama Cikarang / Site Palembang"
+                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                    {/* Provinsi */}
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Provinsi <span className="text-red-500">*</span>
-                        </Label>
-                        <Select onValueChange={handleProvinceChange} value={form.province}>
-                            <SelectTrigger className="border-neutral-200">
-                                <SelectValue placeholder="Pilih provinsi" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {PROVINCES.map((p) => (
-                                    <SelectItem key={p} value={p}>{p}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* Kota */}
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Kota <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                            onValueChange={(v) => setForm({ ...form, city: v })}
-                            value={form.city}
-                            disabled={!form.province}
-                        >
-                            <SelectTrigger className="border-neutral-200">
-                                <SelectValue placeholder={form.province ? "Pilih kota" : "Pilih provinsi terlebih dahulu"} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {availableCities.map((c) => (
-                                    <SelectItem key={c} value={c}>{c}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {/* PIC — searchable dropdown */}
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium text-gray-700">
-                            PIC <span className="text-red-500">*</span>
-                        </Label>
-                        <div className="relative">
-                            <button
-                                type="button"
-                                className="w-full flex items-center justify-between rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#29A2A5]"
-                                onClick={() => setPicOpen((prev) => !prev)}
-                            >
-                                <span className={form.pic ? "text-gray-700" : "text-[#8E8E8E]"}>
-                                    {form.pic || "Cari PIC..."}
-                                </span>
-                                <Search className="h-4 w-4 text-[#8E8E8E]" />
-                            </button>
-                            {picOpen && (
-                                <div className="absolute z-50 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg">
-                                    <div className="p-2 border-b border-neutral-100">
-                                        <Input
-                                            autoFocus
-                                            placeholder="Cari berdasarkan nama..."
-                                            className="h-8 border-neutral-200 text-sm"
-                                            value={picSearch}
-                                            onChange={(e) => setPicSearch(e.target.value)}
-                                        />
-                                    </div>
-                                    <ul className="max-h-48 overflow-y-auto py-1">
-                                        {filteredPics.length > 0 ? (
-                                            filteredPics.map((p) => (
-                                                <li
-                                                    key={p}
-                                                    className="cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-neutral-50"
-                                                    onClick={() => {
-                                                        setForm({ ...form, pic: p });
-                                                        setPicSearch("");
-                                                        setPicOpen(false);
-                                                    }}
-                                                >
-                                                    {p}
-                                                </li>
-                                            ))
-                                        ) : (
-                                            <li className="px-3 py-2 text-sm text-[#8E8E8E]">Data tidak ditemukan.</li>
-                                        )}
-                                    </ul>
-                                </div>
-                            )}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">
+                                Tipe Lokasi <span className="text-red-500">*</span>
+                            </Label>
+                            <Select value={type} onValueChange={(v) => setType(v as LocationType)}>
+                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                    <SelectValue placeholder="Pilih tipe lokasi" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {TYPES.map((t) => (
+                                        <SelectItem key={t.value} value={t.value}>
+                                            {t.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
-                    {/* Status */}
-                    <div className="space-y-1.5">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Status <span className="text-red-500">*</span>
-                        </Label>
-                        <Select onValueChange={(v) => setForm({ ...form, status: v })} value={form.status}>
-                            <SelectTrigger className="border-neutral-200">
-                                <SelectValue placeholder="Pilih status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {STATUSES.map((s) => (
-                                    <SelectItem key={s.value} value={s.value}>
-                                        <span className="flex items-center gap-2">
-                                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-                                            {s.value}
-                                        </span>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    {/* Interactive Leaflet Map */}
+                    <div className="space-y-1.5 border-t border-b border-[#DEDAD0]/60 py-3">
+                        <div className="flex items-center justify-between mb-1">
+                            <Label className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
+                                <MapPin className="w-4 h-4 text-[#1D6B5A]" />
+                                Titik Peta Lokasi & Geocoding
+                            </Label>
+                            <span className="text-[11px] text-[#7A7A72]">
+                                Klik atau geser pin untuk auto-fill alamat dan koordinat
+                            </span>
+                        </div>
+
+                        <div className="rounded-xl overflow-hidden border border-[#DEDAD0] shadow-sm">
+                            <LocationMap
+                                latitude={latitude}
+                                longitude={longitude}
+                                address={address}
+                                city={city}
+                                province={province}
+                                onLocationSelect={handleLocationSelect}
+                            />
+                        </div>
                     </div>
 
-                    {/* Alamat */}
-                    <div className="col-span-2 space-y-1.5">
-                        <Label className="text-sm font-medium text-gray-700">
-                            Alamat <span className="text-red-500">*</span>
-                        </Label>
-                        <textarea
-                            placeholder="Masukkan alamat lengkap..."
-                            className="w-full min-h-[100px] rounded-md border border-neutral-200 px-3 py-2 text-sm text-gray-700 placeholder:text-[#8E8E8E] outline-none resize-none focus:border-[#29A2A5]"
-                            value={form.address}
-                            onChange={(e) => setForm({ ...form, address: e.target.value })}
-                            maxLength={1000}
-                        />
-                        <p className="text-xs text-[#8E8E8E]">Maks. 1000 karakter. ({form.address.length}/1000)</p>
-                    </div>
-                </div>
+                    {/* Address & Coordinates */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="md:col-span-3 space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">
+                                Alamat Lengkap <span className="text-red-500">*</span>
+                            </Label>
+                            <textarea
+                                placeholder="Alamat jalan, nomor, RT/RW, kawasan industri..."
+                                className="w-full min-h-[60px] rounded-lg border border-[#DEDAD0] bg-[#F7F5EF] px-3 py-2 text-xs focus:border-[#1D6B5A] outline-none resize-none"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                <div className="flex justify-end gap-2 pt-2">
-                    <Button variant="outline" onClick={handleClose}>Batal</Button>
-                    <Button className="bg-[#29A2A5] hover:bg-[#29A2A5]/90 text-white" onClick={handleClose}>
-                        Simpan
-                    </Button>
-                </div>
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">Kota / Kabupaten</Label>
+                            <Input
+                                placeholder="cth: Bekasi"
+                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">Provinsi</Label>
+                            <Input
+                                placeholder="cth: Jawa Barat"
+                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                value={province}
+                                onChange={(e) => setProvince(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">Status Operasional</Label>
+                            <Select value={status} onValueChange={(v) => setStatus(v as LocationStatus)}>
+                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                    <SelectValue placeholder="Pilih status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {STATUSES.map((s) => (
+                                        <SelectItem key={s.value} value={s.value}>
+                                            <span className="flex items-center gap-2">
+                                                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+                                                {s.label}
+                                            </span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {/* PIC Section - Direct Input */}
+                    <div className="p-3.5 rounded-xl bg-[#F7F5EF] border border-[#DEDAD0] space-y-3">
+                        <div className="flex items-center gap-2">
+                            <UserCheck className="w-4 h-4 text-[#1D6B5A]" />
+                            <Label className="text-xs font-semibold text-gray-800">
+                                Penanggung Jawab Lapangan (PIC Pool / Site)
+                            </Label>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-gray-700">
+                                    Nama PIC / Koordinator <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    placeholder="cth: Hendra Setiawan"
+                                    className="h-9 text-xs bg-white border-[#DEDAD0]"
+                                    value={pic}
+                                    onChange={(e) => setPic(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-gray-700">
+                                    No. Telepon / WhatsApp PIC
+                                </Label>
+                                <div className="relative">
+                                    <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7A7A72]" />
+                                    <Input
+                                        placeholder="cth: +62 812-3456-7890"
+                                        className="h-9 pl-8 text-xs bg-white border-[#DEDAD0]"
+                                        value={picPhone}
+                                        onChange={(e) => setPicPhone(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="flex justify-end gap-2 pt-2 border-t border-[#DEDAD0]/60">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setOpen(false)}
+                            className="text-xs border-[#DEDAD0]"
+                        >
+                            Batal
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isLoading}
+                            className="bg-[#1D6B5A] hover:bg-[#1D6B5A]/90 text-white text-xs px-5 shadow-sm"
+                        >
+                            {isLoading ? "Menyimpan..." : isEdit ? "Simpan Perubahan" : "Tambah Lokasi"}
+                        </Button>
+                    </div>
+                </form>
             </DialogContent>
         </Dialog>
     );

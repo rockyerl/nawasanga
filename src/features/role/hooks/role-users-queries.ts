@@ -44,3 +44,40 @@ export function useCreateRole() {
         onError: (err) => onQueryError(err),
     });
 }
+
+export function useUpdateRole() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, payload }: { id: string; payload: unknown }) => {
+            const res = await Client.put<HttpClientTypes.Response<unknown>, unknown>(
+                `internal/roles/${id}`,
+                payload
+            );
+            return res.data;
+        },
+        onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
+            await queryClient.invalidateQueries({ queryKey: ["roles"] });
+            toast.success(res.message || "Role berhasil diperbarui.");
+        },
+        onError: (err) => onQueryError(err),
+    });
+}
+
+export function useDeleteRole() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const res = await Client.del<HttpClientTypes.Response<unknown>, unknown>(
+                `internal/roles/${id}`
+            );
+            return res.data;
+        },
+        onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
+            await queryClient.invalidateQueries({ queryKey: ["roles"] });
+            toast.success(res.message || "Role berhasil dihapus.");
+        },
+        onError: (err) => onQueryError(err),
+    });
+}

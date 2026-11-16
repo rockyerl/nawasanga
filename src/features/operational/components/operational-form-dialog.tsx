@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateAsset } from "@/features/operational/hooks/operational-user-queries";
+import { useCreateAsset, useUpdateAsset } from "@/features/operational/hooks/operational-user-queries";
 import { useFuelTypes } from "@/features/fuel-type/hooks/fuel-type-queries";
 import { useDrivers } from "@/features/driver/hooks/driver-queries";
 import { useLocations } from "@/features/location/hooks/use-location-queries";
 import { Truck, Cpu, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { OperationalTypes } from "@/types/features/operational.type";
 
 const VEHICLE_TYPES = [
     { value: "Heavy Truck", label: "Truk Berat (Tronton / Trailer / Gandengan)" },
@@ -40,9 +41,11 @@ const STATUSES = [
 interface Props {
     open: boolean;
     setOpen: (v: boolean) => void;
+    initialData?: OperationalTypes.Service.AssetData;
 }
 
-export function AssetFormDialog({ open, setOpen }: Props) {
+export function AssetFormDialog({ open, setOpen, initialData }: Props) {
+    const isEdit = !!initialData;
     const [assetCategory, setAssetCategory] = useState<"vehicle" | "equipment">("vehicle");
 
     // Form fields
@@ -80,6 +83,26 @@ export function AssetFormDialog({ open, setOpen }: Props) {
     }>);
 
     const createMutation = useCreateAsset();
+    const updateMutation = useUpdateAsset();
+    const isPending = createMutation.isPending || updateMutation.isPending;
+
+    useEffect(() => {
+        if (open && initialData) {
+            const isEquip = (initialData as any).category === "equipment";
+            setAssetCategory(isEquip ? "equipment" : "vehicle");
+            setPlateOrSerial(initialData.serialNumber || (initialData as any).plateNumber || "");
+            setBrandModel((initialData as any).brandModel || initialData.name || "");
+            setAssetType(initialData.type || (isEquip ? EQUIPMENT_TYPES[0].value : VEHICLE_TYPES[0].value));
+            setFuelTypeId((initialData as any).fuelTypeId || "");
+            setDriverId((initialData as any).assignedDriverId || "none");
+            setLocationId((initialData as any).locationId || "");
+            setYearOrPower(String((initialData as any).year || 2023));
+            setStatus(initialData.status || "Aktif");
+            setNotes(initialData.notes || "");
+        } else if (open && !initialData) {
+            resetForm();
+        }
+    }, [open, initialData]);
 
     const selectedFuel = fuelItems.find((f) => f.id === fuelTypeId);
     const isElectricity = selectedFuel?.category === "electricity" || selectedFuel?.name.toLowerCase().includes("listrik");
@@ -138,12 +161,24 @@ export function AssetFormDialog({ open, setOpen }: Props) {
             notes: notes.trim(),
         };
 
-        createMutation.mutate(payload as any, {
-            onSuccess: () => {
-                resetForm();
-                setOpen(false);
-            },
-        });
+        if (isEdit && initialData) {
+            updateMutation.mutate(
+                { id: initialData.id, payload },
+                {
+                    onSuccess: () => {
+                        resetForm();
+                        setOpen(false);
+                    },
+                }
+            );
+        } else {
+            createMutation.mutate(payload as any, {
+                onSuccess: () => {
+                    resetForm();
+                    setOpen(false);
+                },
+            });
+        }
     };
 
     return (
@@ -151,10 +186,10 @@ export function AssetFormDialog({ open, setOpen }: Props) {
             <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: "#FDFCFA" }}>
                 <DialogHeader>
                     <DialogTitle className="text-lg font-semibold text-gray-800">
-                        Tambah Aset Operasional
+                        {isEdit ? "Edit Aset Operasional" : "Tambah Aset Operasional"}
                     </DialogTitle>
                     <DialogDescription className="text-xs text-[#7A7A72]">
-                        Daftarkan armada kendaraan atau aset alat berat & mesin stasioner ke sistem monitoring emisi.
+                        {isEdit ? "Perbarui informasi armada atau alat berat operasional." : "Daftarkan armada kendaraan atau aset alat berat & mesin stasioner ke sistem monitoring emisi."}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -374,10 +409,10 @@ export function AssetFormDialog({ open, setOpen }: Props) {
                         </Button>
                         <Button
                             type="submit"
-                            disabled={createMutation.isPending}
+                            disabled={isPending}
                             className="bg-[#1D6B5A] hover:bg-[#1D6B5A]/90 text-white text-xs px-5"
                         >
-                            {createMutation.isPending ? "Menyimpan..." : "Simpan Aset"}
+                            {isPending ? "Menyimpan..." : isEdit ? "Simpan Perubahan" : "Simpan Aset"}
                         </Button>
                     </div>
                 </form>

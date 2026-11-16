@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCreateOrganization, useUpdateOrganization } from "@/features/organization/hooks/organization-queries";
 import { OrganizationTypes } from "@/types/features/organization.type";
 import { INDUSTRY_LABEL, PLAN_LABEL, PLAN_MAX_ASSETS } from "@/features/organization/constants/organization.constants";
-import { MapPin, Crosshair, Sparkles, Building2, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { MapPin, Crosshair, Sparkles, Building2, ShieldCheck, CheckCircle2, UserCheck } from "lucide-react";
 
 // Dynamically import Leaflet Map to ensure zero SSR conflicts in Next.js Turbopack
 const OrganizationLocationMap = dynamic(
@@ -54,6 +54,9 @@ interface Props {
 const emptyForm = {
     name:                   "",
     industry:               "" as OrganizationTypes.Service.Industry | "",
+    picName:                "",
+    contactEmail:           "",
+    contactPhone:           "",
     npwp:                   "",
     address:                "",
     city:                   "",
@@ -86,6 +89,9 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
             setForm({
                 name:                  initialData.name,
                 industry:              initialData.industry,
+                picName:               (initialData as any).personInCharge || (initialData as any).picName || "",
+                contactEmail:          (initialData as any).contactEmail || "",
+                contactPhone:          (initialData as any).contactPhone || "",
                 npwp:                  initialData.npwp ?? "",
                 address:               initialData.address,
                 city:                  initialData.city,
@@ -203,6 +209,8 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
         const e: typeof errors = {};
         if (!form.name.trim())     e.name     = "Nama wajib diisi.";
         if (!form.industry)        e.industry  = "Pilih industri.";
+        if (!form.contactEmail.trim() || !form.contactEmail.includes("@"))
+            e.contactEmail = "Email PIC / perusahaan valid wajib diisi.";
         if (!form.address.trim())  e.address   = "Alamat wajib diisi.";
         if (!form.city.trim())     e.city      = "Kota wajib diisi.";
         if (!form.province.trim()) e.province  = "Provinsi wajib diisi.";
@@ -217,6 +225,9 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
         const payload = {
             name:                  form.name.trim(),
             industry:              form.industry as OrganizationTypes.Service.Industry,
+            contactEmail:          form.contactEmail.trim().toLowerCase(),
+            contactPhone:          form.contactPhone.trim(),
+            picName:               form.picName.trim(),
             npwp:                  form.npwp.trim() || null,
             address:               form.address.trim(),
             city:                  form.city.trim(),
@@ -361,6 +372,50 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
                                         className={fieldClass("npwp")}
                                         style={{ background: "#F7F5EF", color: "#1A1A18" }}
                                     />
+                                </div>
+                            </div>
+
+                            {/* Kontak & PIC Penanggung Jawab */}
+                            <div className="p-2.5 rounded-lg bg-[#F7F5EF] border border-[#DEDAD0] space-y-2">
+                                <Label className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5">
+                                    <UserCheck className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                                    Penanggung Jawab (PIC Perusahaan)
+                                </Label>
+                                <div className="space-y-1">
+                                    <Label className="text-[11px] font-medium text-[#1A1A18]">Nama PIC</Label>
+                                    <input
+                                        value={form.picName}
+                                        onChange={(e) => set("picName")(e.target.value)}
+                                        placeholder="cth: Bambang Sutrisno"
+                                        className={fieldClass("picName")}
+                                        style={{ background: "#FFFFFF", color: "#1A1A18" }}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <Label className="text-[11px] font-medium text-[#1A1A18]">
+                                            Email PIC / Kontak <span className="text-[#C14B2A]">*</span>
+                                        </Label>
+                                        <input
+                                            type="email"
+                                            value={form.contactEmail}
+                                            onChange={(e) => set("contactEmail")(e.target.value)}
+                                            placeholder="pic@perusahaan.co.id"
+                                            className={fieldClass("contactEmail")}
+                                            style={{ background: "#FFFFFF", color: "#1A1A18" }}
+                                        />
+                                        {errors.contactEmail && <p className="text-[10px] text-[#C14B2A]">{errors.contactEmail}</p>}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-[11px] font-medium text-[#1A1A18]">No. WhatsApp / HP</Label>
+                                        <input
+                                            value={form.contactPhone}
+                                            onChange={(e) => set("contactPhone")(e.target.value)}
+                                            placeholder="+62 812-3456-7890"
+                                            className={fieldClass("contactPhone")}
+                                            style={{ background: "#FFFFFF", color: "#1A1A18" }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

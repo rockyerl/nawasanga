@@ -62,6 +62,28 @@ class OperationalService {
     }
   }
 
+  async updateAsset(id: string, payload: unknown) {
+    try {
+      const res = await Client.put<HttpClientTypes.Response<unknown>, unknown>(
+        `internal/vehicles/${id}`,
+        payload
+      );
+
+      if ((res.data as HttpClientTypes.Response<unknown>).code >= 400) {
+        throw createApiError(
+          (res.data as HttpClientTypes.Response<unknown>).code,
+          (res.data as HttpClientTypes.Response<unknown>).status || "Error",
+          (res.data as HttpClientTypes.Response<unknown>).message || "Request failed"
+        );
+      }
+
+      return res.data;
+    } catch (err) {
+      if (isApiError(err)) throw err;
+      throw errServiceHandler(err as Error);
+    }
+  }
+
   async deleteAsset(id: string) {
     try {
       const res = await Client.del<HttpClientTypes.Response<unknown>, unknown>(

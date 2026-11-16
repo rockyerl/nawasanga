@@ -10,6 +10,9 @@ export interface Location {
     city: string;
     address: string;
     pic: string;
+    picPhone?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     status: LocationStatus;
 }
 
@@ -20,6 +23,9 @@ export interface LocationFormValues {
     city: string;
     address: string;
     pic: string;
+    picPhone?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     status: LocationStatus | "";
 }
 
