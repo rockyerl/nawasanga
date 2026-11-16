@@ -318,125 +318,136 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
                         />
                     </div>
 
-                    {/* Form Input Columns */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Kolom 1: Profil Perusahaan & Geografis */}
-                        <div className="space-y-3 rounded-xl border border-[#EDEAE0] bg-white p-3.5 shadow-xs">
-                            <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
-                                <ShieldCheck className="w-3.5 h-3.5 text-[#1D6B5A]" />
-                                Profil & Alamat Organisasi
-                            </h4>
+                    {/* Section 1: Profil & Identitas Perusahaan */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                            Profil & Legalitas Perusahaan
+                        </h4>
 
-                            {/* Nama Perusahaan */}
-                            <div className="space-y-1">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5 sm:col-span-2">
                                 <Label className="text-xs font-medium text-[#1A1A18]">
                                     Nama Perusahaan <span className="text-[#C14B2A]">*</span>
                                 </Label>
                                 <input
                                     value={form.name}
                                     onChange={(e) => set("name")(e.target.value)}
-                                    placeholder="PT Sinergi Logistik Nusantara"
+                                    placeholder="cth: PT Sinergi Logistik Nusantara"
                                     className={fieldClass("name")}
                                     style={{ background: "#F7F5EF", color: "#1A1A18" }}
                                 />
                                 {errors.name && <p className="text-[11px] text-[#C14B2A]">{errors.name}</p>}
                             </div>
 
-                            {/* Industri & NPWP Grid */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-medium text-[#1A1A18]">
-                                        Industri <span className="text-[#C14B2A]">*</span>
-                                    </Label>
-                                    <Select value={form.industry} onValueChange={set("industry")}>
-                                        <SelectTrigger className="border-[#DEDAD0] text-sm rounded-lg" style={{ background: "#F7F5EF" }}>
-                                            <SelectValue placeholder="Pilih industri" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {INDUSTRIES.map((i) => (
-                                                <SelectItem key={i} value={i}>{INDUSTRY_LABEL[i]}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.industry && <p className="text-[11px] text-[#C14B2A]">{errors.industry}</p>}
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-medium text-[#1A1A18]">
-                                        NPWP <span className="text-[10px] text-[#7A7A72]">(opsional)</span>
-                                    </Label>
-                                    <input
-                                        value={form.npwp}
-                                        onChange={(e) => set("npwp")(e.target.value)}
-                                        placeholder="01.234.567.8-091.000"
-                                        className={fieldClass("npwp")}
-                                        style={{ background: "#F7F5EF", color: "#1A1A18" }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Kontak & PIC Penanggung Jawab */}
-                            <div className="p-2.5 rounded-lg bg-[#F7F5EF] border border-[#DEDAD0] space-y-2">
-                                <Label className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5">
-                                    <UserCheck className="w-3.5 h-3.5 text-[#1D6B5A]" />
-                                    Penanggung Jawab (PIC Perusahaan)
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    Bidang Industri <span className="text-[#C14B2A]">*</span>
                                 </Label>
-                                <div className="space-y-1">
-                                    <Label className="text-[11px] font-medium text-[#1A1A18]">Nama PIC</Label>
-                                    <input
-                                        value={form.picName}
-                                        onChange={(e) => set("picName")(e.target.value)}
-                                        placeholder="cth: Bambang Sutrisno"
-                                        className={fieldClass("picName")}
-                                        style={{ background: "#FFFFFF", color: "#1A1A18" }}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="space-y-1">
-                                        <Label className="text-[11px] font-medium text-[#1A1A18]">
-                                            Email PIC / Kontak <span className="text-[#C14B2A]">*</span>
-                                        </Label>
-                                        <input
-                                            type="email"
-                                            value={form.contactEmail}
-                                            onChange={(e) => set("contactEmail")(e.target.value)}
-                                            placeholder="pic@perusahaan.co.id"
-                                            className={fieldClass("contactEmail")}
-                                            style={{ background: "#FFFFFF", color: "#1A1A18" }}
-                                        />
-                                        {errors.contactEmail && <p className="text-[10px] text-[#C14B2A]">{errors.contactEmail}</p>}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[11px] font-medium text-[#1A1A18]">No. WhatsApp / HP</Label>
-                                        <input
-                                            value={form.contactPhone}
-                                            onChange={(e) => set("contactPhone")(e.target.value)}
-                                            placeholder="+62 812-3456-7890"
-                                            className={fieldClass("contactPhone")}
-                                            style={{ background: "#FFFFFF", color: "#1A1A18" }}
-                                        />
-                                    </div>
-                                </div>
+                                <Select value={form.industry} onValueChange={set("industry")}>
+                                    <SelectTrigger className="border-[#DEDAD0] text-xs h-10 rounded-lg" style={{ background: "#F7F5EF" }}>
+                                        <SelectValue placeholder="Pilih sektor industri" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {INDUSTRIES.map((i) => (
+                                            <SelectItem key={i} value={i}>{INDUSTRY_LABEL[i]}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.industry && <p className="text-[11px] text-[#C14B2A]">{errors.industry}</p>}
                             </div>
 
-                            {/* Alamat Lengkap (Auto-filled by Map or custom typed) */}
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-xs font-medium text-[#1A1A18]">
-                                        Alamat Lengkap <span className="text-[#C14B2A]">*</span>
-                                    </Label>
-                                    {autoFilled && (
-                                        <span className="text-[10px] text-[#2A9478] font-medium flex items-center gap-0.5">
-                                            <CheckCircle2 className="w-3 h-3" /> Auto-filled
-                                        </span>
-                                    )}
-                                </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    NPWP Perusahaan <span className="text-[10px] text-[#7A7A72]">(opsional)</span>
+                                </Label>
+                                <input
+                                    value={form.npwp}
+                                    onChange={(e) => set("npwp")(e.target.value)}
+                                    placeholder="01.234.567.8-091.000"
+                                    className={fieldClass("npwp")}
+                                    style={{ background: "#F7F5EF", color: "#1A1A18" }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 2: Penanggung Jawab Lapangan (PIC Perusahaan) */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
+                            <UserCheck className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                            Penanggung Jawab Akun (PIC Perusahaan)
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    Nama Lengkap PIC <span className="text-[#C14B2A]">*</span>
+                                </Label>
+                                <input
+                                    value={form.picName}
+                                    onChange={(e) => set("picName")(e.target.value)}
+                                    placeholder="cth: Bambang Sutrisno"
+                                    className={fieldClass("picName")}
+                                    style={{ background: "#F7F5EF", color: "#1A1A18" }}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    No. Telepon / WhatsApp PIC
+                                </Label>
+                                <input
+                                    value={form.contactPhone}
+                                    onChange={(e) => set("contactPhone")(e.target.value)}
+                                    placeholder="+62 812-3456-7890"
+                                    className={fieldClass("contactPhone")}
+                                    style={{ background: "#F7F5EF", color: "#1A1A18" }}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5 sm:col-span-2">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    Email Resmi PIC / Kontak Login <span className="text-[#C14B2A]">*</span>
+                                </Label>
+                                <input
+                                    type="email"
+                                    value={form.contactEmail}
+                                    onChange={(e) => set("contactEmail")(e.target.value)}
+                                    placeholder="bambang@nusantaralogistik.co.id"
+                                    className={fieldClass("contactEmail")}
+                                    style={{ background: "#F7F5EF", color: "#1A1A18" }}
+                                />
+                                {errors.contactEmail && <p className="text-[11px] text-[#C14B2A]">{errors.contactEmail}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 3: Alamat & Wilayah */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-3 shadow-xs">
+                        <div className="flex items-center justify-between pb-1 border-b border-[#F0EFEA]">
+                            <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                                Alamat Kantor & Lokasi
+                            </h4>
+                            {autoFilled && (
+                                <span className="text-[11px] text-[#2A9478] font-medium flex items-center gap-1">
+                                    <CheckCircle2 className="w-3.5 h-3.5" /> Alamat terisi otomatis dari peta
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    Alamat Lengkap <span className="text-[#C14B2A]">*</span>
+                                </Label>
                                 <textarea
                                     value={form.address}
                                     onChange={(e) => handleLocationInputChange("address", e.target.value)}
                                     placeholder="Jl. Raya Cakung No. 88, Kawasan Industri Pulogadung"
                                     rows={2}
-                                    className={`w-full rounded-lg border border-[#DEDAD0] px-3 py-2 text-sm outline-none resize-none focus:border-[#1D6B5A] transition-colors ${
+                                    className={`w-full rounded-lg border border-[#DEDAD0] px-3 py-2 text-xs outline-none resize-none focus:border-[#1D6B5A] transition-colors ${
                                         errors.address ? "border-red-400 bg-red-50/20" : ""
                                     }`}
                                     style={{ background: "#F7F5EF", color: "#1A1A18" }}
@@ -444,23 +455,22 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
                                 {errors.address && <p className="text-[11px] text-[#C14B2A]">{errors.address}</p>}
                             </div>
 
-                            {/* Kota & Provinsi (Auto-filled by Map or custom typed) */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
                                     <Label className="text-xs font-medium text-[#1A1A18]">
-                                        Kota <span className="text-[#C14B2A]">*</span>
+                                        Kota / Kabupaten <span className="text-[#C14B2A]">*</span>
                                     </Label>
                                     <input
                                         value={form.city}
                                         onChange={(e) => handleLocationInputChange("city", e.target.value)}
-                                        placeholder="Jakarta Pusat"
+                                        placeholder="Jakarta Timur"
                                         className={fieldClass("city")}
                                         style={{ background: "#F7F5EF", color: "#1A1A18" }}
                                     />
                                     {errors.city && <p className="text-[11px] text-[#C14B2A]">{errors.city}</p>}
                                 </div>
 
-                                <div className="space-y-1">
+                                <div className="space-y-1.5">
                                     <Label className="text-xs font-medium text-[#1A1A18]">
                                         Provinsi <span className="text-[#C14B2A]">*</span>
                                     </Label>
@@ -475,86 +485,81 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Kolom 2: Paket Langganan & Detail Sistem */}
-                        <div className="space-y-3 rounded-xl border border-[#EDEAE0] bg-white p-3.5 shadow-xs">
-                            <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
-                                <Sparkles className="w-3.5 h-3.5 text-[#C9A040]" />
-                                Paket Langganan & Konfigurasi
-                            </h4>
+                    {/* Section 4: Paket Langganan & Konfigurasi Sistem */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
+                            <Sparkles className="w-3.5 h-3.5 text-[#C9A040]" />
+                            Paket Langganan & Konfigurasi Sistem
+                        </h4>
 
-                            {/* Subscription Plan & Expired At */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-medium text-[#1A1A18]">Subscription Plan</Label>
-                                    <Select value={form.subscriptionPlan} onValueChange={handlePlanChange}>
-                                        <SelectTrigger className="border-[#DEDAD0] text-sm rounded-lg" style={{ background: "#F7F5EF" }}>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {PLANS.map((p) => (
-                                                <SelectItem key={p} value={p}>{PLAN_LABEL[p]}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-medium text-[#1A1A18]">
-                                        Tanggal Expired <span className="text-[10px] text-[#7A7A72]">(opsional)</span>
-                                    </Label>
-                                    <input
-                                        type="date"
-                                        value={form.subscriptionExpiresAt}
-                                        onChange={(e) => set("subscriptionExpiresAt")(e.target.value)}
-                                        className={fieldClass("subscriptionExpiresAt")}
-                                        style={{ background: "#F7F5EF", color: "#1A1A18" }}
-                                    />
-                                </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">Paket Langganan</Label>
+                                <Select value={form.subscriptionPlan} onValueChange={handlePlanChange}>
+                                    <SelectTrigger className="border-[#DEDAD0] text-xs h-10 rounded-lg" style={{ background: "#F7F5EF" }}>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {PLANS.map((p) => (
+                                            <SelectItem key={p} value={p}>{PLAN_LABEL[p]}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
-                            {/* Maks. Aset & Timezone */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-medium text-[#1A1A18]">
-                                        Maks. Aset <span className="text-[#C14B2A]">*</span>
-                                    </Label>
-                                    <input
-                                        value={form.maxAssets}
-                                        onChange={(e) => set("maxAssets")(e.target.value)}
-                                        type="number"
-                                        min="1"
-                                        step="1"
-                                        placeholder="500"
-                                        className={fieldClass("maxAssets")}
-                                        style={{ background: "#F7F5EF", color: "#1A1A18" }}
-                                    />
-                                    {errors.maxAssets && <p className="text-[11px] text-[#C14B2A]">{errors.maxAssets}</p>}
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs font-medium text-[#1A1A18]">Timezone</Label>
-                                    <Select value={form.timezone} onValueChange={set("timezone")}>
-                                        <SelectTrigger className="border-[#DEDAD0] text-sm rounded-lg" style={{ background: "#F7F5EF" }}>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {TIMEZONES.map((tz) => (
-                                                <SelectItem key={tz} value={tz}>{tz}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    Tanggal Expired <span className="text-[10px] text-[#7A7A72]">(opsional)</span>
+                                </Label>
+                                <input
+                                    type="date"
+                                    value={form.subscriptionExpiresAt}
+                                    onChange={(e) => set("subscriptionExpiresAt")(e.target.value)}
+                                    className={fieldClass("subscriptionExpiresAt")}
+                                    style={{ background: "#F7F5EF", color: "#1A1A18" }}
+                                />
                             </div>
 
-                            {/* Status Organisasi */}
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">
+                                    Batas Maksimal Aset <span className="text-[#C14B2A]">*</span>
+                                </Label>
+                                <input
+                                    value={form.maxAssets}
+                                    onChange={(e) => set("maxAssets")(e.target.value)}
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    placeholder="50"
+                                    className={fieldClass("maxAssets")}
+                                    style={{ background: "#F7F5EF", color: "#1A1A18" }}
+                                />
+                                {errors.maxAssets && <p className="text-[11px] text-[#C14B2A]">{errors.maxAssets}</p>}
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-[#1A1A18]">Zona Waktu (Timezone)</Label>
+                                <Select value={form.timezone} onValueChange={set("timezone")}>
+                                    <SelectTrigger className="border-[#DEDAD0] text-xs h-10 rounded-lg" style={{ background: "#F7F5EF" }}>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {TIMEZONES.map((tz) => (
+                                            <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-1.5">
                                 <Label className="text-xs font-medium text-[#1A1A18]">Status Organisasi</Label>
                                 <Select
                                     value={form.isActive ? "true" : "false"}
                                     onValueChange={(v) => set("isActive")(v === "true")}
                                 >
-                                    <SelectTrigger className="border-[#DEDAD0] text-sm rounded-lg" style={{ background: "#F7F5EF" }}>
+                                    <SelectTrigger className="border-[#DEDAD0] text-xs h-10 rounded-lg" style={{ background: "#F7F5EF" }}>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -564,15 +569,14 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
                                 </Select>
                             </div>
 
-                            {/* Logo URL */}
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                                 <Label className="text-xs font-medium text-[#1A1A18]">
-                                    URL Logo <span className="text-[10px] text-[#7A7A72]">(opsional)</span>
+                                    URL Logo Perusahaan <span className="text-[10px] text-[#7A7A72]">(opsional)</span>
                                 </Label>
                                 <input
                                     value={form.logoUrl}
                                     onChange={(e) => set("logoUrl")(e.target.value)}
-                                    placeholder="https://cdn.example.com/logo.png"
+                                    placeholder="https://perusahaan.co.id/logo.png"
                                     className={fieldClass("logoUrl")}
                                     style={{ background: "#F7F5EF", color: "#1A1A18" }}
                                 />

@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layouts/layout";
-import { OperationalTable } from "@/features/operational/components/operational-table";
+import { AssetTable } from "@/features/asset";
 
 export const metadata = {
   title: "Aset Kendaraan & Alat Berat | Client Portal",
@@ -16,7 +16,7 @@ export default function ClientAssetsPage() {
             <p className="text-xs text-[#7A7A72] mt-0.5">Daftar armada aktif dan inventaris aset emisi organisasi Anda</p>
           </div>
         </div>
-        <OperationalTable />
+        <AssetTable />
       </section>
     </Layout>
   );

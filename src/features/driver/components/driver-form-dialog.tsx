@@ -126,8 +126,8 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-2xl" style={{ background: "#FDFCFA" }}>
-                <DialogHeader>
+            <DialogContent className="sm:max-w-2xl p-6" style={{ background: "#FDFCFA" }}>
+                <DialogHeader className="pb-3 border-b border-[#EDEAE0]">
                     <DialogTitle className="text-lg font-semibold text-gray-800">
                         {isEdit ? "Edit Data Driver" : "Tambah Driver Pengemudi"}
                     </DialogTitle>
@@ -137,7 +137,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Nama */}
                         <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">
@@ -145,7 +145,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             </Label>
                             <Input
                                 placeholder="cth: Bambang Sutrisno"
-                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                 value={form.name}
                                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                                 required
@@ -158,7 +158,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             <Input
                                 value={employeeId}
                                 disabled
-                                className="h-9 text-xs border-[#DEDAD0] bg-neutral-100 text-[#7A7A72] cursor-not-allowed"
+                                className="h-10 text-xs border-[#DEDAD0] bg-neutral-100 text-[#7A7A72] cursor-not-allowed"
                             />
                         </div>
 
@@ -171,7 +171,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                                 onValueChange={(v) => setForm({ ...form, licenseType: v as LicenseType })}
                                 value={form.licenseType}
                             >
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
                                     <SelectValue placeholder="Pilih jenis SIM" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -191,7 +191,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             </Label>
                             <Input
                                 placeholder="cth: 9812-3456-789012"
-                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                 value={form.licenseNumber}
                                 onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })}
                                 required
@@ -205,7 +205,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             </Label>
                             <Input
                                 placeholder="cth: 081234567890"
-                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                 value={form.phone}
                                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                 required
@@ -219,7 +219,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                                 value={form.locationId}
                                 onValueChange={(v) => setForm({ ...form, locationId: v })}
                             >
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
                                     <SelectValue placeholder="Pilih pool penempatan" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -233,13 +233,13 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                         </div>
 
                         {/* Status */}
-                        <div className="space-y-1.5 md:col-span-2">
+                        <div className="space-y-1.5 sm:col-span-2">
                             <Label className="text-xs font-medium text-gray-700">Status Driver</Label>
                             <Select
                                 onValueChange={(v) => setForm({ ...form, status: v as any })}
                                 value={form.status}
                             >
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
                                     <SelectValue placeholder="Pilih status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -254,13 +254,12 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                                 </SelectContent>
                             </Select>
                         </div>
-
                         {/* Catatan */}
-                        <div className="col-span-1 md:col-span-2 space-y-1.5">
+                        <div className="col-span-1 sm:col-span-2 space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">Catatan Pengemudi (Opsional)</Label>
                             <textarea
                                 placeholder="Catatan sertifikasi, riwayat rute, atau catatan medis..."
-                                className="w-full min-h-[60px] rounded-lg border border-[#DEDAD0] bg-[#F7F5EF] px-3 py-2 text-xs focus:border-[#1D6B5A] outline-none resize-none"
+                                className="w-full min-h-[64px] rounded-lg border border-[#DEDAD0] bg-[#F7F5EF] px-3 py-2 text-xs focus:border-[#1D6B5A] outline-none resize-none"
                                 value={form.notes}
                                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
                             />

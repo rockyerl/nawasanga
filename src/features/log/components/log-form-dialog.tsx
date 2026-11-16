@@ -146,26 +146,26 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" style={{ background: "#FDFCFA" }}>
-                <DialogHeader>
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-6" style={{ background: "#FDFCFA" }}>
+                <DialogHeader className="pb-3 border-b border-[#EDEAE0]">
                     <DialogTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                         <Fuel className="w-5 h-5 text-[#1D6B5A]" />
-                        {isEdit ? "Edit Catatan Pengisian BBM" : "Catat Konsumsi BBM / Energi"}
+                        {isEdit ? "Edit Catatan Pengisian BBM" : "Catat Konsumsi BBM & Energi"}
                     </DialogTitle>
                     <DialogDescription className="text-xs text-[#7A7A72]">
-                        Catat transaksi pengisian bahan bakar atau daya listrik untuk kalkulasi emisi Scope 1 & 2 secara real-time.
+                        Catat transaksi pengisian bahan bakar atau daya listrik untuk kalkulasi emisi Scope 1 & 2 secara akurat.
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Pilih Armada */}
                         <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">
                                 Kendaraan / Armada <span className="text-red-500">*</span>
                             </Label>
                             <Select value={vehicleId} onValueChange={handleVehicleChange}>
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
                                     <SelectValue placeholder="Pilih armada..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -182,7 +182,7 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
                         <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">Pengemudi / Operator</Label>
                             <Select value={driverId} onValueChange={setDriverId}>
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
                                     <SelectValue placeholder="Pilih supir..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -202,7 +202,7 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
                                 Jenis BBM / Energi <span className="text-red-500">*</span>
                             </Label>
                             <Select value={fuelTypeId} onValueChange={setFuelTypeId}>
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
                                     <SelectValue placeholder="Pilih bahan bakar..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -229,7 +229,7 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
                                 type="number"
                                 step="0.01"
                                 placeholder={isElectricity ? "cth: 45.5" : "cth: 120.0"}
-                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                 value={liters}
                                 onChange={(e) => setLiters(e.target.value)}
                                 required
@@ -240,11 +240,11 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
                         <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">Odometer Saat Isi (km)</Label>
                             <div className="relative">
-                                <Gauge className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7A7A72]" />
+                                <Gauge className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A7A72]" />
                                 <Input
                                     type="number"
                                     placeholder="cth: 84520"
-                                    className="h-9 pl-8 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                    className="h-10 pl-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                     value={odometerKm}
                                     onChange={(e) => setOdometerKm(e.target.value)}
                                 />
@@ -255,10 +255,10 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
                         <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">Waktu Transaksi</Label>
                             <div className="relative">
-                                <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7A7A72]" />
+                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A7A72]" />
                                 <Input
                                     type="datetime-local"
-                                    className="h-9 pl-8 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                    className="h-10 pl-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                     value={loggedAt}
                                     onChange={(e) => setLoggedAt(e.target.value)}
                                 />
@@ -267,7 +267,7 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
                     </div>
 
                     {/* Live Calculation Preview Card */}
-                    <div className="p-3.5 rounded-xl bg-[#1D6B5A]/5 border border-[#1D6B5A]/20 grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-[#1D6B5A]/5 border border-[#1D6B5A]/20 grid grid-cols-2 gap-4">
                         <div className="space-y-0.5">
                             <span className="text-[10px] font-medium text-[#7A7A72] uppercase tracking-wider">
                                 Estimasi Emisi Gas Buang

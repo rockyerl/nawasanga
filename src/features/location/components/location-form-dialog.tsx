@@ -165,45 +165,75 @@ export function LocationFormDialog({ open, setOpen, initialData }: LocationFormD
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-                    {/* General info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">
-                                Nama Lokasi / Pool <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                                placeholder="cth: Pool Utama Cikarang / Site Palembang"
-                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </div>
+                    {/* Section 1: Informasi Fasilitas & Status */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
+                            <Building2 className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                            Informasi Fasilitas & Status Operasional
+                        </h4>
 
-                        <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">
-                                Tipe Lokasi <span className="text-red-500">*</span>
-                            </Label>
-                            <Select value={type} onValueChange={(v) => setType(v as LocationType)}>
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
-                                    <SelectValue placeholder="Pilih tipe lokasi" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {TYPES.map((t) => (
-                                        <SelectItem key={t.value} value={t.value}>
-                                            {t.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-gray-700">
+                                    Nama Lokasi / Pool / Site <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    placeholder="cth: Pool Utama Cikarang / Site Tambang Palembang"
+                                    className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-medium text-gray-700">
+                                        Tipe Fasilitas <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select value={type} onValueChange={(v) => setType(v as LocationType)}>
+                                        <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                            <SelectValue placeholder="Pilih tipe lokasi" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {TYPES.map((t) => (
+                                                <SelectItem key={t.value} value={t.value}>
+                                                    {t.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-medium text-gray-700">
+                                        Status Operasional <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select value={status} onValueChange={(v) => setStatus(v as LocationStatus)}>
+                                        <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                            <SelectValue placeholder="Pilih status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {STATUSES.map((s) => (
+                                                <SelectItem key={s.value} value={s.value}>
+                                                    <span className="flex items-center gap-2">
+                                                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+                                                        {s.label}
+                                                    </span>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Interactive Leaflet Map */}
-                    <div className="space-y-1.5 border-t border-b border-[#DEDAD0]/60 py-3">
-                        <div className="flex items-center justify-between mb-1">
+                    {/* Section 2: Interactive Leaflet Map */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-2 shadow-xs">
+                        <div className="flex items-center justify-between pb-1 border-b border-[#F0EFEA]">
                             <Label className="text-xs font-semibold text-gray-800 flex items-center gap-1.5">
-                                <MapPin className="w-4 h-4 text-[#1D6B5A]" />
+                                <MapPin className="w-3.5 h-3.5 text-[#1D6B5A]" />
                                 Titik Peta Lokasi & Geocoding
                             </Label>
                             <span className="text-[11px] text-[#7A7A72]">
@@ -223,78 +253,66 @@ export function LocationFormDialog({ open, setOpen, initialData }: LocationFormD
                         </div>
                     </div>
 
-                    {/* Address & Coordinates */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div className="md:col-span-3 space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">
-                                Alamat Lengkap <span className="text-red-500">*</span>
-                            </Label>
-                            <textarea
-                                placeholder="Alamat jalan, nomor, RT/RW, kawasan industri..."
-                                className="w-full min-h-[60px] rounded-lg border border-[#DEDAD0] bg-[#F7F5EF] px-3 py-2 text-xs focus:border-[#1D6B5A] outline-none resize-none"
-                                value={address}
-                                onChange={(e) => setAddress(e.target.value)}
-                                required
-                            />
-                        </div>
+                    {/* Section 3: Alamat & Wilayah */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
+                            <MapPin className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                            Alamat Lengkap Pool / Fasilitas
+                        </h4>
 
-                        <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">Kota / Kabupaten</Label>
-                            <Input
-                                placeholder="cth: Bekasi"
-                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                            />
-                        </div>
+                        <div className="space-y-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-medium text-gray-700">
+                                    Alamat Lengkap <span className="text-red-500">*</span>
+                                </Label>
+                                <textarea
+                                    placeholder="Alamat jalan, kawasan industri, nomor blok / kavling..."
+                                    className="w-full min-h-[64px] rounded-lg border border-[#DEDAD0] bg-[#F7F5EF] px-3 py-2 text-xs focus:border-[#1D6B5A] outline-none resize-none"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-                        <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">Provinsi</Label>
-                            <Input
-                                placeholder="cth: Jawa Barat"
-                                className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
-                                value={province}
-                                onChange={(e) => setProvince(e.target.value)}
-                            />
-                        </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-medium text-gray-700">Kota / Kabupaten</Label>
+                                    <Input
+                                        placeholder="cth: Bekasi"
+                                        className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                    />
+                                </div>
 
-                        <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">Status Operasional</Label>
-                            <Select value={status} onValueChange={(v) => setStatus(v as LocationStatus)}>
-                                <SelectTrigger className="h-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
-                                    <SelectValue placeholder="Pilih status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {STATUSES.map((s) => (
-                                        <SelectItem key={s.value} value={s.value}>
-                                            <span className="flex items-center gap-2">
-                                                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-                                                {s.label}
-                                            </span>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-medium text-gray-700">Provinsi</Label>
+                                    <Input
+                                        placeholder="cth: Jawa Barat"
+                                        className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                        value={province}
+                                        onChange={(e) => setProvince(e.target.value)}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* PIC Section - Direct Input */}
-                    <div className="p-3.5 rounded-xl bg-[#F7F5EF] border border-[#DEDAD0] space-y-3">
-                        <div className="flex items-center gap-2">
-                            <UserCheck className="w-4 h-4 text-[#1D6B5A]" />
-                            <Label className="text-xs font-semibold text-gray-800">
-                                Penanggung Jawab Lapangan (PIC Pool / Site)
-                            </Label>
-                        </div>
+                    {/* Section 4: Penanggung Jawab Lapangan (PIC Pool / Site) */}
+                    <div className="rounded-xl border border-[#EDEAE0] bg-white p-4 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5 pb-1 border-b border-[#F0EFEA]">
+                            <UserCheck className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                            Penanggung Jawab Lapangan (PIC Pool / Site)
+                        </h4>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-medium text-gray-700">
-                                    Nama PIC / Koordinator <span className="text-red-500">*</span>
+                                    Nama Lengkap PIC / Koordinator <span className="text-red-500">*</span>
                                 </Label>
                                 <Input
                                     placeholder="cth: Hendra Setiawan"
-                                    className="h-9 text-xs bg-white border-[#DEDAD0]"
+                                    className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                     value={pic}
                                     onChange={(e) => setPic(e.target.value)}
                                     required
@@ -306,10 +324,10 @@ export function LocationFormDialog({ open, setOpen, initialData }: LocationFormD
                                     No. Telepon / WhatsApp PIC
                                 </Label>
                                 <div className="relative">
-                                    <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#7A7A72]" />
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A7A72]" />
                                     <Input
                                         placeholder="cth: +62 812-3456-7890"
-                                        className="h-9 pl-8 text-xs bg-white border-[#DEDAD0]"
+                                        className="h-10 pl-9 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
                                         value={picPhone}
                                         onChange={(e) => setPicPhone(e.target.value)}
                                     />

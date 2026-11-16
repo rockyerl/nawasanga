@@ -2,6 +2,7 @@
 
 import { Layout } from "@/components/layouts/layout";
 import { useState } from "react";
+import Link from "next/link";
 import {
     LineChart, Line, BarChart, Bar,
     XAxis, YAxis, CartesianGrid, Tooltip,
@@ -10,14 +11,15 @@ import {
 import {
     ChevronDown, Lock, Lightbulb, AlertTriangle,
     Sparkles, Download, FileText, Plus, TrendingUp, TrendingDown, Minus,
+    ArrowRight, Truck,
 } from "lucide-react";
 import {
-    trialStatCards, trialEmissionsData, trialTopEmitters, trialAssets,
-    starterStatCards, starterEmissionsData, starterTopEmitters, starterAssets, starterAssetUsage,
-    proStatCards, proEmissionsData, proTopEmitters, proInsights, proAssets,
+    trialStatCards, trialEmissionsData, trialTopEmitters,
+    starterStatCards, starterEmissionsData, starterTopEmitters, starterAssetUsage,
+    proStatCards, proEmissionsData, proTopEmitters, proInsights,
     enterpriseStatCards, enterpriseEmissionsData, enterpriseLocationBars,
-    enterprisePerformanceCategories, enterpriseInsights, enterpriseAssets,
-    type PlanType, type StatCard, type TopEmitter, type AssetRow, type InsightBox,
+    enterprisePerformanceCategories, enterpriseInsights,
+    type PlanType, type StatCard, type TopEmitter, type InsightBox,
 } from "@/features/dashboard/constants/dashboard.constants";
 import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard-queries";
 
@@ -65,52 +67,55 @@ function TopEmitterList({ emitters }: { emitters: TopEmitter[] }) {
     );
 }
 
-function AssetTable({ rows, showLocation, showEfisiensi, showTrend }: {
-    rows: AssetRow[];
-    showLocation?: boolean;
-    showEfisiensi?: boolean;
-    showTrend?: boolean;
+function FleetQuickSummary({
+    title = "Ringkasan Status Armada Operasional",
+    total = "3 Unit",
+    active = "3 Unit (100%)",
+    emissionsPerUnit = "0.68 ton CO₂e",
+    subtext = "Sesuai Batas Regulasi",
+}: {
+    title?: string;
+    total?: string;
+    active?: string;
+    emissionsPerUnit?: string;
+    subtext?: string;
 }) {
     return (
-        <table className="w-full text-xs">
-            <thead>
-            <tr className="border-b border-neutral-100">
-                <th className="text-left text-[#8E8E8E] font-medium py-2 pr-3">Nama Asset</th>
-                {showLocation && <th className="text-left text-[#8E8E8E] font-medium py-2 pr-3">Lokasi</th>}
-                <th className="text-left text-[#8E8E8E] font-medium py-2 pr-3">Kategori</th>
-                <th className="text-left text-[#8E8E8E] font-medium py-2 pr-3">Konsumsi (L)</th>
-                <th className="text-left text-[#8E8E8E] font-medium py-2 pr-3">Emisi (ton CO₂e)</th>
-                {showEfisiensi && <th className="text-left text-[#8E8E8E] font-medium py-2 pr-3">Efisiensi (km/l)</th>}
-                {showTrend && <th className="text-left text-[#8E8E8E] font-medium py-2 pr-3">Trend</th>}
-                <th className="text-left text-[#8E8E8E] font-medium py-2">Status</th>
-            </tr>
-            </thead>
-            <tbody>
-            {rows.map((row) => (
-                <tr key={row.name} className="border-b border-neutral-50 last:border-0">
-                    <td className="py-2 pr-3 text-gray-700 font-medium">{row.name}</td>
-                    {showLocation && <td className="py-2 pr-3 text-[#8E8E8E]">{row.location ?? "—"}</td>}
-                    <td className="py-2 pr-3 text-[#8E8E8E]">{row.kategori}</td>
-                    <td className="py-2 pr-3 text-[#8E8E8E]">{row.konsumsi.toLocaleString("id-ID")}</td>
-                    <td className="py-2 pr-3 text-[#8E8E8E]">{row.emisi}</td>
-                    {showEfisiensi && <td className="py-2 pr-3 text-[#8E8E8E]">{row.efisiensi ?? "—"}</td>}
-                    {showTrend && (
-                        <td className="py-2 pr-3">
-                            {row.trend === "up"   && <TrendingUp   className="h-3.5 w-3.5 text-red-400" />}
-                            {row.trend === "down" && <TrendingDown className="h-3.5 w-3.5 text-green-500" />}
-                            {row.trend === "flat" && <Minus        className="h-3.5 w-3.5 text-[#8E8E8E]" />}
-                        </td>
-                    )}
-                    <td className="py-2">
-              <span className="flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${row.status === "Aktif" ? "bg-green-500" : "bg-neutral-300"}`} />
-                <span className="text-[#8E8E8E]">{row.status}</span>
-              </span>
-                    </td>
-                </tr>
-            ))}
-            </tbody>
-        </table>
+        <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-[#1D6B5A]" />
+                    <span className="text-sm font-semibold text-gray-800">{title}</span>
+                </div>
+                <Link
+                    href="/dashboard/assets"
+                    className="text-xs text-[#1D6B5A] hover:underline font-medium flex items-center gap-1"
+                >
+                    Kelola Aset & Kendaraan <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-lg bg-[#F7F5EF] p-3 text-center border border-[#EDEAE0]">
+                    <span className="text-[11px] text-[#7A7A72]">Total Armada Terdaftar</span>
+                    <p className="text-xl font-bold text-[#1A1A18] mt-0.5">{total}</p>
+                    <span className="text-[10px] text-emerald-600 font-medium">{active} Aktif</span>
+                </div>
+                <div className="rounded-lg bg-[#F7F5EF] p-3 text-center border border-[#EDEAE0]">
+                    <span className="text-[11px] text-[#7A7A72]">Rata-rata Emisi / Aset</span>
+                    <p className="text-xl font-bold text-[#1D6B5A] mt-0.5">{emissionsPerUnit}</p>
+                    <span className="text-[10px] text-emerald-600 font-medium">{subtext}</span>
+                </div>
+                <div className="rounded-lg bg-[#F7F5EF] p-3 flex flex-col items-center justify-center border border-[#EDEAE0]">
+                    <span className="text-[11px] text-[#7A7A72] mb-1">Manajemen Inventaris</span>
+                    <Link
+                        href="/dashboard/assets"
+                        className="text-xs bg-[#1D6B5A] text-white px-3 py-1.5 rounded font-medium hover:bg-[#1D6B5A]/90 transition-colors shadow-xs"
+                    >
+                        Buka Menu Aset →
+                    </Link>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -203,13 +208,14 @@ function TrialDashboard() {
                 </button>
             </div>
 
-            {/* Asset table */}
-            <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-gray-800">Asset Anda (3/3)</span>
-                </div>
-                <AssetTable rows={trialAssets} />
-            </div>
+            {/* Fleet Status Summary */}
+            <FleetQuickSummary
+                title="Ringkasan Status Armada & Operasional"
+                total="3 Unit"
+                active="3 Unit (100%)"
+                emissionsPerUnit="0.68 ton CO₂e"
+                subtext="Sesuai Batas Regulasi"
+            />
         </div>
     );
 }
@@ -292,13 +298,14 @@ function StarterDashboard() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-gray-800">Asset Terdaftar (8)</span>
-                    <span className="text-xs text-[#1D9E75] cursor-pointer hover:underline">Lihat Semua</span>
-                </div>
-                <AssetTable rows={starterAssets} showEfisiensi />
-            </div>
+            {/* Fleet Status Summary */}
+            <FleetQuickSummary
+                title="Ringkasan Status Armada & Efisiensi Pool"
+                total="8 / 10 Unit"
+                active="8 Unit (80%)"
+                emissionsPerUnit="1.28 ton CO₂e"
+                subtext="Efisiensi Normal"
+            />
         </div>
     );
 }
@@ -363,13 +370,14 @@ function ProDashboard() {
                 ))}
             </div>
 
-            <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-gray-800">Asset Terdaftar (25)</span>
-                    <span className="text-xs text-[#1D9E75] cursor-pointer hover:underline">Lihat Semua</span>
-                </div>
-                <AssetTable rows={proAssets} showEfisiensi showTrend />
-            </div>
+            {/* Fleet Status Summary */}
+            <FleetQuickSummary
+                title="Status Komposisi Armada & Dekarbonisasi"
+                total="25 / 50 Unit"
+                active="21 Fleet + 4 Mesin"
+                emissionsPerUnit="1.45 ton CO₂e"
+                subtext="3 Unit EV (12%)"
+            />
         </div>
     );
 }
@@ -479,14 +487,14 @@ function EnterpriseDashboard() {
                 <InsightCard box={enterpriseInsights[1]} />
             </div>
 
-            {/* Asset table */}
-            <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-gray-800">Asset Terdaftar (120+)</span>
-                    <span className="text-xs text-[#1D9E75] cursor-pointer hover:underline">Lihat Semua</span>
-                </div>
-                <AssetTable rows={enterpriseAssets} showLocation showEfisiensi />
-            </div>
+            {/* Fleet Status Summary */}
+            <FleetQuickSummary
+                title="Monitoring Distribusi Armada Multi-Site Nasional"
+                total="120+ Unit"
+                active="4 Hub Wilayah"
+                emissionsPerUnit="1.12 ton CO₂e"
+                subtext="Audit ESG Terverifikasi"
+            />
         </div>
     );
 }
