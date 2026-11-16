@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import "@/styles/globals.css";
-import { ColorSchemeScript } from "@mantine/core";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { StoreProvider } from "@/providers/StoreProvider";
@@ -20,9 +19,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning={true}>
-      <head>
-        <ColorSchemeScript defaultColorScheme="light" />
-      </head>
       <body className="antialiased bg-[#F7F5EF] text-[#1A1A18]">
         <MantineClientProvider>
           <QueryProvider>
