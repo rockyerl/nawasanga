@@ -114,6 +114,13 @@ export const drivers = sqliteTable(
     licenseNumber: text("license_number").notNull(),
     phoneNumber: text("phone_number").notNull(),
     status: text("status").notNull().default("active"), // active, inactive
+    licenseType: text("license_type").notNull().default("SIM B2"),
+    licenseExpiry: text("license_expiry"),
+    nik: text("nik"),
+    kycStatus: text("kyc_status").notNull().default("verified"), // verified, pending, rejected
+    locationId: text("location_id").references(() => locations.id),
+    notes: text("notes"),
+    avatarUrl: text("avatar_url"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
   },
@@ -268,6 +275,8 @@ export const tickets = sqliteTable(
       .references(() => users.id),
     subject: text("subject").notNull(),
     description: text("description").notNull(),
+    category: text("category").notNull().default("technical"), // technical, fuel_log, quota, billing, other
+    adminNotes: text("admin_notes"),
     priority: text("priority").notNull().default("medium"), // low, medium, high
     status: text("status").notNull().default("open"), // open, in_progress, resolved, closed
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
@@ -275,6 +284,27 @@ export const tickets = sqliteTable(
   },
   (table) => [
     index("idx_tickets_org_status").on(table.organizationId, table.status),
+  ]
+);
+
+export const notifications = sqliteTable(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id"),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    type: text("type").notNull().default("info"), // info, warning, success, error
+    category: text("category").notNull().default("system"), // emission, operational, billing, system
+    link: text("link"),
+    isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("idx_notifications_org_date").on(table.organizationId, table.createdAt),
   ]
 );
 
@@ -341,6 +371,20 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   fuelLogs: many(fuelLogs),
   subscriptions: many(subscriptions),
   invoices: many(billingInvoices),
+  notifications: many(notifications),
+}));
+
+export const driversRelations = relations(drivers, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [drivers.organizationId],
+    references: [organizations.id],
+  }),
+  location: one(locations, {
+    fields: [drivers.locationId],
+    references: [locations.id],
+  }),
+  vehicles: many(vehicles),
+  fuelLogs: many(fuelLogs),
 }));
 
 export const rolesRelations = relations(roles, ({ many }) => ({
@@ -434,6 +478,13 @@ export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
 export const billingInvoicesRelations = relations(billingInvoices, ({ one }) => ({
   organization: one(organizations, {
     fields: [billingInvoices.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [notifications.organizationId],
     references: [organizations.id],
   }),
 }));

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TicketingTypes } from "@/types/features/ticketing.type";
 import { STATUS_LABEL } from "@/features/ticketing/constants/ticketing.constants";
 import { useCreateTicket, useUpdateTicket } from "@/features/ticketing/hooks/ticketing-queries";
-import { Building2, User, FileQuestion, HelpCircle, CheckCircle2, Lock } from "lucide-react";
+import { Building2, User, FileQuestion, HelpCircle, CheckCircle2, Lock, MessageSquare } from "lucide-react";
 
 interface Props {
     open: boolean;
@@ -33,6 +33,7 @@ const emptyForm = {
     customerName:     "",
     reportType:       "Integrasi Sensor & Telematika GPS",
     reportDetail:     "",
+    adminNotes:       "",
     priority:         "medium" as "low" | "medium" | "high",
     status:           "baru" as TicketingTypes.Service.TicketStatus,
 };
@@ -54,11 +55,12 @@ export function TicketingFormDialog({ open, setOpen, initialData }: Props) {
         if (initialData) {
             setForm({
                 organizationName: initialData.organizationName,
-                organizationId:   "",
+                organizationId:   initialData.organizationId || "",
                 customerName:     initialData.customerName,
                 reportType:       initialData.reportType,
                 reportDetail:     initialData.reportDetail,
-                priority:         "medium",
+                adminNotes:       initialData.adminNotes || "",
+                priority:         initialData.priority || "medium",
                 status:           initialData.status,
             });
             return;
@@ -71,13 +73,14 @@ export function TicketingFormDialog({ open, setOpen, initialData }: Props) {
             .then((data) => {
                 if (data.code === 200 && data.user) {
                     const u = data.user;
-                    const orgName = u.organizationName || (u.organizationId ? "PT Nusantara Logistik Makmur" : "");
+                    const orgName = u.organizationName || (u.organizationId ? "PT Sinergi Logistik Nusantara" : "");
                     setForm({
                         organizationName: orgName,
                         organizationId:   u.organizationId || "",
                         customerName:     u.name || "",
                         reportType:       "Integrasi Sensor & Telematika GPS",
                         reportDetail:     "",
+                        adminNotes:       "",
                         priority:         "medium",
                         status:           "baru",
                     });
@@ -106,6 +109,7 @@ export function TicketingFormDialog({ open, setOpen, initialData }: Props) {
             reportType: form.reportType,
             description: form.reportDetail.trim(),
             reportDetail: form.reportDetail.trim(),
+            adminNotes: form.adminNotes.trim() || null,
             priority: form.priority,
             status: form.status,
         };
@@ -128,11 +132,11 @@ export function TicketingFormDialog({ open, setOpen, initialData }: Props) {
                 <DialogHeader className="pb-3 border-b border-[#EDEAE0]">
                     <DialogTitle className="text-base font-semibold text-[#1A1A18] flex items-center gap-2">
                         <HelpCircle className="w-5 h-5 text-[#1D6B5A]" />
-                        {isEdit ? "Update Tiket Bantuan" : "Buat Tiket Bantuan Baru"}
+                        {isEdit ? "Update Tiket Bantuan & Tanggapan" : "Buat Tiket Bantuan Baru"}
                     </DialogTitle>
-                    <p className="text-xs text-[#7A7A72] mt-0.5">
+                    <DialogDescription className="text-xs text-[#7A7A72] mt-0.5">
                         Ajukan permohonan dukungan teknis, kendala input data, atau pertanyaan integrasi telematika.
-                    </p>
+                    </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-3.5 py-2">
@@ -164,7 +168,7 @@ export function TicketingFormDialog({ open, setOpen, initialData }: Props) {
                     </div>
 
                     {/* Customer Name & Priority */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="space-y-1">
                             <Label className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5">
                                 <User className="w-3.5 h-3.5 text-[#1D6B5A]" />
@@ -180,7 +184,7 @@ export function TicketingFormDialog({ open, setOpen, initialData }: Props) {
                         </div>
 
                         <div className="space-y-1">
-                            <Label className="text-xs font-semibold text-[#1A1A18]">Prioritas</Label>
+                            <Label className="text-xs font-semibold text-[#1A1A18]">Prioritas Masalah</Label>
                             <Select value={form.priority} onValueChange={(v: "low" | "medium" | "high") => set("priority")(v)}>
                                 <SelectTrigger className="border-[#DEDAD0] text-xs h-8 rounded-lg" style={{ background: "#F7F5EF" }}>
                                     <SelectValue />
@@ -229,20 +233,37 @@ export function TicketingFormDialog({ open, setOpen, initialData }: Props) {
                         />
                     </div>
 
-                    {/* Status (Visible for Superadmin or edit) */}
+                    {/* Status Penanganan & Catatan Tim (Visible in Edit) */}
                     {isEdit && (
-                        <div className="space-y-1">
-                            <Label className="text-xs font-semibold text-[#1A1A18]">Status Penanganan</Label>
-                            <Select value={form.status} onValueChange={set("status")}>
-                                <SelectTrigger className="border-[#DEDAD0] text-xs h-8 rounded-lg" style={{ background: "#F7F5EF" }}>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {STATUSES.map((s) => (
-                                        <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                        <div className="grid grid-cols-1 gap-3 pt-1 border-t border-[#EDEAE0]">
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-[#1A1A18]">Status Penanganan Tiket</Label>
+                                <Select value={form.status} onValueChange={set("status")}>
+                                    <SelectTrigger className="border-[#DEDAD0] text-xs h-8 rounded-lg" style={{ background: "#F7F5EF" }}>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {STATUSES.map((s) => (
+                                            <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label className="text-xs font-semibold text-[#1A1A18] flex items-center gap-1.5">
+                                    <MessageSquare className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                                    Tanggapan / Catatan Penanganan Tim Sundawa
+                                </Label>
+                                <textarea
+                                    value={form.adminNotes}
+                                    onChange={(e) => set("adminNotes")(e.target.value)}
+                                    placeholder="Tuliskan respon atau solusi yang telah diambil..."
+                                    rows={2}
+                                    className={`${fieldClass} resize-none`}
+                                    style={{ background: "#F7F5EF", color: "#1A1A18" }}
+                                />
+                            </div>
                         </div>
                     )}
                 </div>

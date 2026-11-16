@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAction } from "@/features/auth/actions";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -13,10 +13,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, LogOut, ChevronRight, Home } from "lucide-react";
+import { NotificationDrawer } from "@/components/notification-drawer";
 
 const SEGMENT_LABELS: Record<string, string> = {
     dashboard:        "Dashboard",
     internals:        "Super Admin",
+    admin:            "Super Admin",
     assets:           "Aset Kendaraan",
     drivers:          "Driver",
     locations:        "Lokasi & Pool",
@@ -62,10 +64,54 @@ interface LayoutProps {
     children: React.ReactNode;
 }
 
+interface CurrentUser {
+    name: string;
+    email: string;
+    roleName: string;
+    roleCode: string;
+    organizationName?: string | null;
+}
+
 export function Layout({ children }: LayoutProps) {
     const pathname = usePathname();
     const router = useRouter();
     const breadcrumbs = buildBreadcrumbs(pathname);
+
+    const [user, setUser] = useState<CurrentUser>({
+        name: "Pengguna",
+        email: "",
+        roleName: "Pengguna",
+        roleCode: "CLIENT",
+        organizationName: null,
+    });
+
+    useEffect(() => {
+        let isMounted = true;
+        fetch("/api/auth/me")
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (data?.user && isMounted) {
+                    setUser({
+                        name: data.user.name || "Pengguna",
+                        email: data.user.email || "",
+                        roleName: data.user.roleName || (data.user.roleCode === "SUPERADMIN" ? "Super Admin" : "Company Admin"),
+                        roleCode: data.user.roleCode || "CLIENT",
+                        organizationName: data.user.organizationName,
+                    });
+                }
+            })
+            .catch(() => {});
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const userInitials = user.name
+        .split(" ")
+        .map((p) => p[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase() || "NA";
 
     return (
         <SidebarProvider>
@@ -106,22 +152,25 @@ export function Layout({ children }: LayoutProps) {
                         })}
                     </nav>
 
+                    {/* Notification Bell Drawer */}
+                    <NotificationDrawer />
+
                     {/* User info — kanan */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <div className="flex items-center gap-2.5 cursor-pointer shrink-0 select-none rounded-lg px-2 py-1.5 hover:bg-[#EDEAE0] transition-colors outline-none">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src="/avatars/shadcn.jpg" alt="Jonathan" />
+                                    <AvatarImage src="/avatars/shadcn.jpg" alt={user.name} />
                                     <AvatarFallback className="text-xs font-semibold bg-[#1D6B5A] text-[#F7F5EF]">
-                                        JN
+                                        {userInitials}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="flex flex-col leading-tight">
-                                    <span className="text-sm font-semibold leading-none mb-0.5 text-[#1A1A18]">
-                                        Jonathan
+                                <div className="flex flex-col leading-tight max-w-[150px] sm:max-w-[200px]">
+                                    <span className="text-sm font-semibold leading-none mb-0.5 text-[#1A1A18] truncate">
+                                        {user.name}
                                     </span>
-                                    <span className="text-xs leading-none text-[#7A7A72]">
-                                        Super Admin
+                                    <span className="text-xs leading-none text-[#7A7A72] truncate">
+                                        {user.organizationName || user.roleName}
                                     </span>
                                 </div>
                                 <ChevronDown className="h-4 w-4 text-[#7A7A72]" />
@@ -130,8 +179,12 @@ export function Layout({ children }: LayoutProps) {
 
                         <DropdownMenuContent
                             align="end"
-                            className="w-44 border-[#DEDAD0] bg-[#F7F5EF]"
+                            className="w-48 border-[#DEDAD0] bg-[#F7F5EF]"
                         >
+                            <div className="px-3 py-2 border-b border-[#EDEAE0]">
+                                <p className="text-xs font-semibold text-gray-900 truncate">{user.name}</p>
+                                <p className="text-[11px] text-[#7A7A72] truncate">{user.email}</p>
+                            </div>
                             <DropdownMenuItem
                                 className="cursor-pointer font-medium text-[#C14B2A] focus:text-[#C14B2A] focus:bg-[#fdf2f0]"
                                 onClick={async () => {
@@ -141,7 +194,7 @@ export function Layout({ children }: LayoutProps) {
                                 }}
                             >
                                 <LogOut className="mr-2 h-4 w-4" />
-                                Logout
+                                Keluar (Logout)
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

@@ -1,25 +1,28 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { useLocations } from "@/features/location/hooks/use-location-queries";
 import { useCreateDriver, useUpdateDriver } from "@/features/driver/hooks/driver-queries";
-import type { DriverData, DriverFormValues, LicenseType } from "@/types/features/driver.type";
+import type { DriverData, DriverFormValues, LicenseType, DriverKycStatus } from "@/types/features/driver.type";
 import { toast } from "sonner";
+import { ShieldCheck, UserCheck, AlertCircle } from "lucide-react";
 
-const LICENSE_TYPES: LicenseType[] = ["SIM A", "SIM B1", "SIM B2", "SIM C", "SIM D"];
+const LICENSE_TYPES: LicenseType[] = ["SIM A", "SIM B1", "SIM B2", "SIM C", "SIM D", "SIO Alat Berat"];
 
 const STATUSES = [
     { value: "Aktif",       color: "#22c55e" },
     { value: "Tidak Aktif", color: "#f97316" },
+];
+
+const KYC_STATUS_OPTIONS: Array<{ value: DriverKycStatus; label: string; desc: string }> = [
+    { value: "verified", label: "Terverifikasi (Verified)", desc: "Dokumen KTP & SIM valid dan aktif" },
+    { value: "pending",  label: "Menunggu Review (Pending)", desc: "Berkas baru diunggah, butuh verifikasi" },
+    { value: "rejected", label: "Ditolak / Perlu Perbaikan", desc: "Dokumen buram atau kadaluarsa" },
 ];
 
 const generateEmployeeId = () =>
@@ -33,12 +36,14 @@ interface DriverFormDialogProps {
 
 const EMPTY_FORM: DriverFormValues = {
     name: "",
+    nik: "",
     licenseType: "SIM B2",
     licenseNumber: "",
     licenseExpiry: "",
     phone: "",
     locationId: "",
     status: "Aktif",
+    kycStatus: "verified",
     notes: "",
 };
 
@@ -49,25 +54,24 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
     const isPending = createMutation.isPending || updateMutation.isPending;
 
     const [form, setForm] = useState<DriverFormValues>(EMPTY_FORM);
-    const [locationOpen, setLocationOpen] = useState(false);
-    const employeeId = useMemo(() => initialData?.employeeId || generateEmployeeId(), [open, initialData]);
+    const employeeId = useMemo(() => initialData?.employeeId || generateEmployeeId(), [initialData]);
 
     const { data: locData } = useLocations({ page: 1, itemPerPage: 100 });
     const availableLocations = useMemo(() => ((locData?.data as any)?.items || []) as Array<{ id: string; name: string }>, [locData]);
-
-    const selectedLocation = availableLocations.find((l) => l.id === form.locationId);
 
     useEffect(() => {
         if (open && initialData) {
             setForm({
                 name: initialData.name || "",
-                licenseType: (initialData.licenseType?.includes("B2") ? "SIM B2" : initialData.licenseType?.includes("B1") ? "SIM B1" : "SIM A") as LicenseType,
+                nik: initialData.nik || "",
+                licenseType: initialData.licenseType || "SIM B2",
                 licenseNumber: initialData.licenseNumber || "",
-                licenseExpiry: initialData.licenseExpiry ? new Date(initialData.licenseExpiry).toISOString().split("T")[0] : "",
-                phone: initialData.phone || "",
-                locationId: (initialData as any).locationId || availableLocations[0]?.id || "",
+                licenseExpiry: initialData.licenseExpiry ? initialData.licenseExpiry.split("T")[0] : "",
+                phone: initialData.phone || initialData.phoneNumber || "",
+                locationId: initialData.locationId || availableLocations[0]?.id || "",
                 status: initialData.status === "Tidak Aktif" ? "Tidak Aktif" : "Aktif",
-                notes: (initialData as any).notes || "",
+                kycStatus: initialData.kycStatus || "verified",
+                notes: initialData.notes || "",
             });
         } else if (open && !initialData) {
             setForm(EMPTY_FORM);
@@ -88,20 +92,24 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
         }
 
         if (!form.licenseNumber.trim()) {
-            toast.error("Nomor SIM wajib diisi");
+            toast.error("Nomor SIM / SIO wajib diisi");
             return;
         }
 
         if (!form.phone.trim()) {
-            toast.error("Nomor telepon wajib diisi");
+            toast.error("Nomor telepon / WhatsApp wajib diisi");
             return;
         }
 
         const payload = {
             name: form.name.trim(),
+            nik: form.nik?.trim() || undefined,
+            licenseType: form.licenseType || "SIM B2",
             licenseNumber: form.licenseNumber.trim(),
+            licenseExpiry: form.licenseExpiry || undefined,
             phoneNumber: form.phone.trim(),
             status: form.status === "Tidak Aktif" ? "inactive" : "active",
+            kycStatus: form.kycStatus || "verified",
             locationId: form.locationId || null,
             notes: form.notes || "",
         };
@@ -111,6 +119,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                 { id: initialData.id, payload },
                 {
                     onSuccess: () => {
+                        toast.success("Data pengemudi berhasil diperbarui");
                         handleClose();
                     },
                 }
@@ -118,6 +127,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
         } else {
             createMutation.mutate(payload, {
                 onSuccess: () => {
+                    toast.success("Driver pengemudi berhasil ditambahkan");
                     handleClose();
                 },
             });
@@ -128,11 +138,12 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] max-h-[90vh] overflow-y-auto p-6" style={{ background: "#FDFCFA" }}>
                 <DialogHeader className="pb-3 border-b border-[#EDEAE0]">
-                    <DialogTitle className="text-lg font-semibold text-gray-800">
-                        {isEdit ? "Edit Data Driver" : "Tambah Driver Pengemudi"}
+                    <DialogTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                        <UserCheck className="h-5 w-5 text-[#1D6B5A]" />
+                        {isEdit ? "Edit Data Pengemudi & KYC" : "Tambah Pengemudi & Operator Baru"}
                     </DialogTitle>
                     <DialogDescription className="text-xs text-[#7A7A72]">
-                        Lengkapi identitas driver pengemudi, nomor SIM, kontak, dan penempatan pool.
+                        Lengkapi identitas KTP/NIK, lisensi mengemudi (SIM / SIO), kontak, serta status verifikasi KYC pengemudi.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -141,7 +152,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                         {/* Nama */}
                         <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">
-                                Nama Lengkap <span className="text-red-500">*</span>
+                                Nama Lengkap Pengemudi <span className="text-red-500">*</span>
                             </Label>
                             <Input
                                 placeholder="cth: Bambang Sutrisno"
@@ -162,39 +173,17 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             />
                         </div>
 
-                        {/* Jenis SIM */}
+                        {/* NIK */}
                         <div className="space-y-1.5">
                             <Label className="text-xs font-medium text-gray-700">
-                                Jenis SIM <span className="text-red-500">*</span>
-                            </Label>
-                            <Select
-                                onValueChange={(v) => setForm({ ...form, licenseType: v as LicenseType })}
-                                value={form.licenseType}
-                            >
-                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
-                                    <SelectValue placeholder="Pilih jenis SIM" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {LICENSE_TYPES.map((t) => (
-                                        <SelectItem key={t} value={t}>
-                                            {t}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {/* Nomor SIM */}
-                        <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">
-                                Nomor SIM <span className="text-red-500">*</span>
+                                Nomor Induk Kependudukan (NIK KTP)
                             </Label>
                             <Input
-                                placeholder="cth: 9812-3456-789012"
+                                placeholder="cth: 3201012304900005 (16 digit)"
+                                maxLength={16}
                                 className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
-                                value={form.licenseNumber}
-                                onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })}
-                                required
+                                value={form.nik || ""}
+                                onChange={(e) => setForm({ ...form, nik: e.target.value })}
                             />
                         </div>
 
@@ -212,9 +201,58 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             />
                         </div>
 
+                        {/* Jenis SIM */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">
+                                Golongan SIM / SIO <span className="text-red-500">*</span>
+                            </Label>
+                            <Select
+                                onValueChange={(v) => setForm({ ...form, licenseType: v as LicenseType })}
+                                value={form.licenseType}
+                            >
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                    <SelectValue placeholder="Pilih jenis SIM / SIO" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {LICENSE_TYPES.map((t) => (
+                                        <SelectItem key={t} value={t}>
+                                            {t}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Nomor SIM */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">
+                                Nomor Surat Izin Mengemudi (SIM) <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                                placeholder="cth: 9812-3456-789012"
+                                className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                value={form.licenseNumber}
+                                onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })}
+                                required
+                            />
+                        </div>
+
+                        {/* Kadaluarsa SIM */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">
+                                Masa Berlaku SIM
+                            </Label>
+                            <Input
+                                type="date"
+                                className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]"
+                                value={form.licenseExpiry}
+                                onChange={(e) => setForm({ ...form, licenseExpiry: e.target.value })}
+                            />
+                        </div>
+
                         {/* Penempatan Pool / Lokasi */}
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">Penempatan Pool</Label>
+                            <Label className="text-xs font-medium text-gray-700">Penempatan Pool Operasional</Label>
                             <Select
                                 value={form.locationId}
                                 onValueChange={(v) => setForm({ ...form, locationId: v })}
@@ -232,9 +270,9 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             </Select>
                         </div>
 
-                        {/* Status */}
-                        <div className="space-y-1.5 sm:col-span-2">
-                            <Label className="text-xs font-medium text-gray-700">Status Driver</Label>
+                        {/* Status Operasional */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700">Status Keaktifan</Label>
                             <Select
                                 onValueChange={(v) => setForm({ ...form, status: v as any })}
                                 value={form.status}
@@ -254,11 +292,35 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* Status KYC Verification */}
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
+                                <ShieldCheck className="h-3.5 w-3.5 text-[#1D6B5A]" />
+                                Verifikasi Dokumen KYC
+                            </Label>
+                            <Select
+                                onValueChange={(v) => setForm({ ...form, kycStatus: v as DriverKycStatus })}
+                                value={form.kycStatus}
+                            >
+                                <SelectTrigger className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0]">
+                                    <SelectValue placeholder="Pilih status verifikasi" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {KYC_STATUS_OPTIONS.map((k) => (
+                                        <SelectItem key={k.value} value={k.value}>
+                                            {k.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                         {/* Catatan */}
                         <div className="col-span-1 sm:col-span-2 space-y-1.5">
-                            <Label className="text-xs font-medium text-gray-700">Catatan Pengemudi (Opsional)</Label>
+                            <Label className="text-xs font-medium text-gray-700">Catatan Pengemudi & Riwayat Sertifikasi</Label>
                             <textarea
-                                placeholder="Catatan sertifikasi, riwayat rute, atau catatan medis..."
+                                placeholder="Catatan sertifikasi defensif driving, sertifikasi B3, catatan medis atau rute..."
                                 className="w-full min-h-[64px] rounded-lg border border-[#DEDAD0] bg-[#F7F5EF] px-3 py-2 text-xs focus:border-[#1D6B5A] outline-none resize-none"
                                 value={form.notes}
                                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
@@ -275,7 +337,7 @@ export function DriverFormDialog({ open, setOpen, initialData }: DriverFormDialo
                             disabled={isPending}
                             className="bg-[#1D6B5A] hover:bg-[#1D6B5A]/90 text-white text-xs px-5 shadow-sm"
                         >
-                            {isPending ? "Menyimpan..." : isEdit ? "Simpan Perubahan" : "Simpan Driver"}
+                            {isPending ? "Menyimpan..." : isEdit ? "Simpan Perubahan" : "Simpan Pengemudi"}
                         </Button>
                     </div>
                 </form>

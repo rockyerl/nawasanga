@@ -22,6 +22,13 @@ export async function PUT(
     if (body.status !== undefined) {
       updateData.status = body.status === "Aktif" ? "active" : body.status === "Tidak Aktif" ? "inactive" : body.status;
     }
+    if (body.licenseType !== undefined) updateData.licenseType = body.licenseType;
+    if (body.licenseExpiry !== undefined) updateData.licenseExpiry = body.licenseExpiry;
+    if (body.nik !== undefined) updateData.nik = body.nik ? body.nik.trim() : null;
+    if (body.kycStatus !== undefined) updateData.kycStatus = body.kycStatus;
+    if (body.locationId !== undefined) updateData.locationId = body.locationId || null;
+    if (body.notes !== undefined) updateData.notes = body.notes ? body.notes.trim() : null;
+    if (body.avatarUrl !== undefined) updateData.avatarUrl = body.avatarUrl || null;
 
     await db.update(drivers).set(updateData).where(eq(drivers.id, id));
 

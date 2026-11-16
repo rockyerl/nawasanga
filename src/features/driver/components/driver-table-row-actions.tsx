@@ -1,7 +1,7 @@
 "use client";
 
 import type { Row } from "@tanstack/table-core";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useDeleteDriver } from "@/features/driver/hooks/driver-queries";
 import { DriverFormDialog } from "@/features/driver/components/driver-form-dialog";
+import { DriverKycDialog } from "@/features/driver/components/driver-kyc-dialog";
 import type { DriverData } from "@/types/features/driver.type";
 
 interface DriverTableRowActionsProps<TData> {
@@ -22,6 +23,7 @@ interface DriverTableRowActionsProps<TData> {
 
 export function DriverTableRowActions<TData>({ row }: DriverTableRowActionsProps<TData>) {
     const [editOpen, setEditOpen] = useState(false);
+    const [kycOpen, setKycOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
     const deleteMutation = useDeleteDriver();
     const original = row.original as DriverData;
@@ -41,10 +43,14 @@ export function DriverTableRowActions<TData>({ row }: DriverTableRowActionsProps
                         <span className="sr-only">Buka menu</span>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[160px]">
+                <DropdownMenuContent align="end" className="w-[180px]">
+                    <DropdownMenuItem onClick={() => setKycOpen(true)} className="cursor-pointer">
+                        <ShieldCheck size={14} className="mr-2 text-[#1D6B5A]" />
+                        <span>Verifikasi KYC & SIM</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setEditOpen(true)} className="cursor-pointer">
-                        <Pencil size={14} className="mr-2 text-[#1D6B5A]" />
-                        <span>Edit</span>
+                        <Pencil size={14} className="mr-2 text-gray-700" />
+                        <span>Edit Driver</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -62,6 +68,14 @@ export function DriverTableRowActions<TData>({ row }: DriverTableRowActionsProps
                     open={editOpen}
                     setOpen={setEditOpen}
                     initialData={original}
+                />
+            )}
+
+            {kycOpen && (
+                <DriverKycDialog
+                    open={kycOpen}
+                    setOpen={setKycOpen}
+                    driver={original}
                 />
             )}
 
