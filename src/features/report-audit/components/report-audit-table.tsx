@@ -16,6 +16,7 @@ import { ReportAuditTableToolbar } from "@/features/report-audit/components/repo
 import { useAuditInsights } from "@/features/report-audit/hooks/use-report-audit-queries";
 import { exportToCsv } from "@/lib/export";
 import { AuditCertificateDialog } from "@/features/report-audit/components/audit-certificate-dialog";
+import { CarbonOffsetSimulator } from "@/features/report-audit/components/carbon-offset-simulator";
 import type { PlanType, AuditTypes } from "@/types/features/report-audit.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
@@ -412,6 +413,12 @@ export function ReportAuditTable() {
                     {data.auditReport && (
                         <AuditReportSection report={data.auditReport} onOpenCert={() => setCertOpen(true)} />
                     )}
+
+                    {/* Simulator Dekarbonisasi & Kredit Karbon IDXCarbon */}
+                    <CarbonOffsetSimulator
+                        initialEmissionsTon={data.auditReport?.totalEmission ? Math.round(data.auditReport.totalEmission / 1000 * 10) / 10 : 48.2}
+                        organizationName={orgName}
+                    />
 
                     {/* Tabel insight */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

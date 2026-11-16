@@ -16,7 +16,8 @@ import {
   RotateCcw,
   Sparkles,
   DollarSign,
-  CloudRain
+  CloudRain,
+  Smartphone
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ export function DriverMobileLogView() {
     plateNumber: string;
     fuelType: string;
   } | null>(null);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
 
   // Fetch active vehicles on load
   useEffect(() => {
@@ -294,6 +296,44 @@ export function DriverMobileLogView() {
             Foto struk SPBU &amp; odometer untuk verifikasi audit anti-fraud.
           </p>
         </div>
+
+        {/* PWA Install Guide Banner */}
+        <div className="bg-[#FAF8F5] border-b border-[#DEDAD0] px-4 py-2.5 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-[#1D6B5A]" />
+            <span className="text-[11px] font-semibold text-gray-800">
+              Pasang ke Layar Utama HP (PWA)
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowInstallGuide(!showInstallGuide)}
+            className="text-[11px] font-bold text-[#1D6B5A] hover:underline cursor-pointer"
+          >
+            {showInstallGuide ? "Tutup Panduan" : "Cara Pasang →"}
+          </button>
+        </div>
+
+        {showInstallGuide && (
+          <div className="p-4 bg-emerald-50/70 border-b border-emerald-100 text-xs space-y-2 animate-fade-in">
+            <p className="font-bold text-emerald-950 text-[11px]">
+              Tanpa Perlu Unduh di Google Play Store / App Store:
+            </p>
+            <div className="space-y-1.5 text-[11px] text-gray-700">
+              <div className="flex items-start gap-2">
+                <span className="font-bold text-[#1D6B5A]">• Android (Chrome):</span>
+                <span>Tekan titik tiga (⋮) di kanan atas &rarr; pilih <strong>&quot;Tambahkan ke Layar Utama&quot;</strong> atau <strong>&quot;Instal Aplikasi&quot;</strong>.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="font-bold text-[#1D6B5A]">• iPhone (Safari):</span>
+                <span>Tekan tombol <strong>Bagikan (Share)</strong> &rarr; pilih <strong>&quot;Add to Home Screen&quot;</strong>.</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-500 italic">
+              Aplikasi akan muncul langsung di layar HP dan dapat dibuka layar penuh dengan 1 klik.
+            </p>
+          </div>
+        )}
 
         {/* Active Vehicle Banner */}
         <div className="p-4 bg-[#EDEAE0]/40 border-b border-[#DEDAD0] flex items-center justify-between">
