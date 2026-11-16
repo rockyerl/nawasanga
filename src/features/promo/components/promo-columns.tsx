@@ -59,13 +59,13 @@ export const promoColumns: ColumnDef<PromoTypes.Service.PromoData>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
         cell: ({ row }) => {
             const status = row.getValue("status") as PromoTypes.Service.PromoStatus;
-            const color = STATUS_COLOR[status];
+            const color = STATUS_COLOR[status] || { bg: "#eef5f3", text: "#1D6B5A" };
             return (
                 <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
                     style={{ backgroundColor: color.bg, color: color.text }}
                 >
-                    {status}
+                    {status || "ACTIVE"}
                 </span>
             );
         },

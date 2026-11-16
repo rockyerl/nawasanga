@@ -31,13 +31,13 @@ export const fuelTypeColumns: ColumnDef<FuelTypeTypes.Service.FuelTypeData>[] = 
         header: ({ column }) => <DataTableColumnHeader column={column} title="Satuan" />,
         cell: ({ row }) => {
             const unit = row.getValue("unit") as FuelTypeTypes.Service.Unit;
-            const color = UNIT_COLOR[unit];
+            const color = UNIT_COLOR[unit] || { bg: "#eef5f3", text: "#1D6B5A" };
             return (
                 <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
                     style={{ backgroundColor: color.bg, color: color.text }}
                 >
-                    {UNIT_LABEL[unit]}
+                    {UNIT_LABEL[unit] || unit || "Liter"}
                 </span>
             );
         },

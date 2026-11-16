@@ -18,32 +18,32 @@ interface Props {
 export function SubscriptionFormDialog({ open, setOpen, initialData }: Props) {
     const updateMutation = useUpdatePlan();
     const isLoading = updateMutation.isPending;
-    const color = PLAN_COLOR[initialData.key];
+    const color = (initialData?.key && PLAN_COLOR[initialData.key]) || { bg: "#DBEAFE", text: "#1D4ED8", border: "#93C5FD" };
 
     const [form, setForm] = useState({
-        name:         initialData.name,
-        description:  initialData.description,
-        maxAssets:    String(initialData.maxAssets),
-        maxUsers:     String(initialData.maxUsers),
-        priceMonthly: String(initialData.priceMonthly),
-        priceYearly:  String(initialData.priceYearly),
-        isActive:     initialData.isActive,
-        features:     initialData.features.map((f) => ({ ...f })),
+        name:         initialData?.name || "",
+        description:  initialData?.description || "",
+        maxAssets:    String(initialData?.maxAssets || 10),
+        maxUsers:     String(initialData?.maxUsers || 5),
+        priceMonthly: String(initialData?.priceMonthly || 0),
+        priceYearly:  String(initialData?.priceYearly || 0),
+        isActive:     initialData?.isActive ?? true,
+        features:     (initialData?.features || []).map((f) => ({ ...f })),
     });
 
     const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
     useEffect(() => {
-        if (open) {
+        if (open && initialData) {
             setForm({
-                name:         initialData.name,
-                description:  initialData.description,
-                maxAssets:    String(initialData.maxAssets),
-                maxUsers:     String(initialData.maxUsers),
-                priceMonthly: String(initialData.priceMonthly),
-                priceYearly:  String(initialData.priceYearly),
-                isActive:     initialData.isActive,
-                features:     initialData.features.map((f) => ({ ...f })),
+                name:         initialData.name || "",
+                description:  initialData.description || "",
+                maxAssets:    String(initialData.maxAssets || 10),
+                maxUsers:     String(initialData.maxUsers || 5),
+                priceMonthly: String(initialData.priceMonthly || 0),
+                priceYearly:  String(initialData.priceYearly || 0),
+                isActive:     initialData.isActive ?? true,
+                features:     (initialData.features || []).map((f) => ({ ...f })),
             });
             setErrors({});
         }

@@ -27,8 +27,8 @@ export function SubscriptionTable() {
 
   const items = useMemo(() => {
     return rawItems.filter((row) =>
-      row.name.toLowerCase().includes(search.toLowerCase()) ||
-      row.description.toLowerCase().includes(search.toLowerCase())
+      (row.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (row.description || "").toLowerCase().includes(search.toLowerCase())
     );
   }, [rawItems, search]);
 

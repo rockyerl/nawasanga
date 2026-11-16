@@ -28,14 +28,16 @@ export const organizationColumns: ColumnDef<OrganizationTypes.Service.Organizati
         accessorKey: "industry",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Industri" />,
         cell: ({ row }) => {
-            const ind = row.getValue("industry") as OrganizationTypes.Service.Industry;
-            const color = INDUSTRY_COLOR[ind];
+            const rawInd = (row.getValue("industry") as string) || "logistics";
+            const indLower = rawInd.toLowerCase();
+            const color = INDUSTRY_COLOR[indLower] || INDUSTRY_COLOR[rawInd] || { bg: "#eef5f3", text: "#1D6B5A" };
+            const label = INDUSTRY_LABEL[indLower] || INDUSTRY_LABEL[rawInd] || rawInd;
             return (
                 <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
                     style={{ backgroundColor: color.bg, color: color.text }}
                 >
-                    {INDUSTRY_LABEL[ind]}
+                    {label}
                 </span>
             );
         },
@@ -56,14 +58,16 @@ export const organizationColumns: ColumnDef<OrganizationTypes.Service.Organizati
         accessorKey: "subscriptionPlan",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Plan" />,
         cell: ({ row }) => {
-            const plan = row.getValue("subscriptionPlan") as OrganizationTypes.Service.SubscriptionPlan;
-            const color = PLAN_COLOR[plan];
+            const rawPlan = (row.getValue("subscriptionPlan") as string) || (row.original as any)?.plan || "starter";
+            const planLower = rawPlan.toLowerCase();
+            const color = PLAN_COLOR[planLower] || PLAN_COLOR[rawPlan] || { bg: "#EFF6FF", text: "#1D4ED8" };
+            const label = PLAN_LABEL[planLower] || PLAN_LABEL[rawPlan] || rawPlan;
             return (
                 <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
                     style={{ backgroundColor: color.bg, color: color.text }}
                 >
-                    {PLAN_LABEL[plan]}
+                    {label}
                 </span>
             );
         },

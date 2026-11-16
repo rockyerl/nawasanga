@@ -10,13 +10,13 @@ export const vehicleTypeColumns: ColumnDef<VehicleTypeTypes.Service.VehicleTypeD
         header: ({ column }) => <DataTableColumnHeader column={column} title="Kategori" />,
         cell: ({ row }) => {
             const cat = row.getValue("category") as VehicleTypeTypes.Service.Category;
-            const color = CATEGORY_COLOR[cat];
+            const color = CATEGORY_COLOR[cat] || { bg: "#eef5f3", text: "#1D6B5A" };
             return (
                 <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
                     style={{ backgroundColor: color.bg, color: color.text }}
                 >
-          {CATEGORY_LABEL[cat]}
+          {CATEGORY_LABEL[cat] || cat || "Kendaraan"}
         </span>
             );
         },

@@ -41,13 +41,13 @@ export const ticketingColumns: ColumnDef<TicketingTypes.Service.TicketData>[] = 
         header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
         cell: ({ row }) => {
             const status = row.getValue("status") as TicketingTypes.Service.TicketStatus;
-            const color = STATUS_COLOR[status];
+            const color = STATUS_COLOR[status] || { bg: "#eef5f3", text: "#1D6B5A" };
             return (
                 <span
                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
                     style={{ backgroundColor: color.bg, color: color.text }}
                 >
-                    {STATUS_LABEL[status]}
+                    {STATUS_LABEL[status] || status || "Open"}
                 </span>
             );
         },

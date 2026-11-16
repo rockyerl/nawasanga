@@ -13,8 +13,8 @@ export const subscriptionColumns: ColumnDef<SubscriptionTypes.Service.PlanData>[
         accessorKey: "name",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Plan" />,
         cell: ({ row }) => {
-            const key = row.original.key;
-            const color = PLAN_COLOR[key];
+            const rawKey = (row.original.key || row.original.id || "starter").toLowerCase();
+            const color = PLAN_COLOR[rawKey] || { bg: "#DBEAFE", text: "#1D4ED8", border: "#93C5FD" };
             return (
                 <div>
                     <span
@@ -24,7 +24,7 @@ export const subscriptionColumns: ColumnDef<SubscriptionTypes.Service.PlanData>[
                         {row.getValue("name")}
                     </span>
                     <p className="text-[11px] mt-1" style={{ color: "#7A7A72" }}>
-                        {row.original.description}
+                        {row.original.description || "Paket langganan operasional armada."}
                     </p>
                 </div>
             );
@@ -70,8 +70,14 @@ export const subscriptionColumns: ColumnDef<SubscriptionTypes.Service.PlanData>[
         accessorKey: "features",
         header: () => <span className="text-xs font-medium" style={{ color: "#7A7A72" }}>Fitur Aktif</span>,
         cell: ({ row }) => {
-            const features = row.getValue("features") as SubscriptionTypes.Service.PlanFeature[];
-            const activeCount = features.filter((f) => f.enabled).length;
+            const rawFeatures = row.getValue("features");
+            const features: SubscriptionTypes.Service.PlanFeature[] = Array.isArray(rawFeatures)
+                ? rawFeatures.map((f: any, idx: number) =>
+                    typeof f === "string"
+                        ? { key: `feat_${idx}`, label: f, enabled: true }
+                        : { key: f?.key || `feat_${idx}`, label: f?.label || String(f), enabled: f?.enabled !== false }
+                )
+                : [];
             return (
                 <div className="flex flex-wrap gap-1 max-w-[220px]">
                     {features.map((feat) => (
