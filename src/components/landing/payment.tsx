@@ -280,9 +280,10 @@ export default function Payment() {
     const [loading, setLoading] = useState(false);
     const [paid, setPaid] = useState(false);
 
+    const [promoDiscountPct, setPromoDiscountPct] = useState(0.1);
     const basePrice = plan.price || 0;
     const yearlyDiscount = 0.2;
-    const promoDiscount = promoApplied ? 0.1 : 0;
+    const promoDiscount = promoApplied ? promoDiscountPct : 0;
     const periodMultiplier = billingPeriod === "yearly" ? 12 * (1 - yearlyDiscount) : 1;
     const subtotal = basePrice * periodMultiplier;
     const promoAmount = subtotal * promoDiscount;
@@ -293,13 +294,31 @@ export default function Payment() {
         return "Rp " + Math.round(n).toLocaleString("id-ID");
     }
 
-    function handlePromo() {
-        if (promoCode.toUpperCase() === "NAWASANGA10") {
-            setPromoApplied(true);
-            setPromoError("");
-        } else {
-            setPromoApplied(false);
-            setPromoError("Kode promo tidak valid.");
+    async function handlePromo() {
+        if (!promoCode.trim()) return;
+        const code = promoCode.trim().toUpperCase();
+        try {
+            const res = await fetch(`/api/internal/promos?search=${encodeURIComponent(code)}`);
+            const data = await res.json();
+            const matched = data?.data?.items?.find((p: any) => p.code?.toUpperCase() === code && p.status === "aktif");
+            if (matched || code === "NAWASANGA10") {
+                const discountVal = matched?.discountValue || 10;
+                setPromoDiscountPct(discountVal / 100);
+                setPromoApplied(true);
+                setPromoError("");
+            } else {
+                setPromoApplied(false);
+                setPromoError("Kode promo tidak ditemukan atau sudah tidak aktif.");
+            }
+        } catch {
+            if (code === "NAWASANGA10") {
+                setPromoDiscountPct(0.1);
+                setPromoApplied(true);
+                setPromoError("");
+            } else {
+                setPromoApplied(false);
+                setPromoError("Gagal memverifikasi kode promo.");
+            }
         }
     }
 
@@ -600,6 +619,87 @@ export default function Payment() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Interactive Payment Instructions Box */}
+                        <div className="mt-4 p-4 rounded-xl border border-rimba/20 bg-white shadow-xs">
+                            {method.startsWith("va_") && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between pb-2 border-b border-pasir">
+                                        <span className="font-ui text-xs font-semibold text-arang">
+                                            Nomor Rekening Virtual Account ({method.replace("va_", "").toUpperCase()})
+                                        </span>
+                                        <span className="text-[10px] font-bold text-rimba bg-rimba/10 px-2 py-0.5 rounded-full">
+                                            Otomatis Terverifikasi
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-pasir/60 border border-rimba/15">
+                                        <span className="font-mono text-base font-bold tracking-wider text-arang">
+                                            {method === "va_bca" ? "88012 8491 0293 8472" : method === "va_mandiri" ? "89128 4019 2810 1928" : "82710 5910 2938 1029"}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(method === "va_bca" ? "88012849102938472" : method === "va_mandiri" ? "89128401928101928" : "82710591029381029");
+                                                alert("Nomor Virtual Account berhasil disalin ke clipboard!");
+                                            }}
+                                            className="text-xs font-semibold text-rimba hover:underline cursor-pointer px-2 py-1 bg-white rounded border border-rimba/20"
+                                        >
+                                            Salin Nomor VA
+                                        </button>
+                                    </div>
+                                    <div className="text-[11.5px] text-abu/70 space-y-1 pt-1">
+                                        <p>1. Buka aplikasi m-Banking atau ATM bank Anda.</p>
+                                        <p>2. Pilih menu <strong>Transfer &gt; Virtual Account</strong>.</p>
+                                        <p>3. Masukkan nomor VA di atas dan pastikan nominal tepat <strong>{fmtRp(total)}</strong>.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {method === "qris" && (
+                                <div className="space-y-3 text-center">
+                                    <span className="font-ui text-xs font-semibold text-arang block">
+                                        Scan QRIS Resmi Nawasanga ESG
+                                    </span>
+                                    <div className="h-44 w-44 mx-auto p-2 bg-white border-2 border-rimba/30 rounded-xl shadow-inner flex flex-col items-center justify-center">
+                                        <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
+                                            <rect width="100" height="100" fill="#fff" />
+                                            {/* Outer QR squares */}
+                                            <rect x="10" y="10" width="28" height="28" fill="#1A1A18" />
+                                            <rect x="14" y="14" width="20" height="20" fill="#fff" />
+                                            <rect x="18" y="18" width="12" height="12" fill="#1D6B5A" />
+                                            
+                                            <rect x="62" y="10" width="28" height="28" fill="#1A1A18" />
+                                            <rect x="66" y="14" width="20" height="20" fill="#fff" />
+                                            <rect x="70" y="18" width="12" height="12" fill="#1D6B5A" />
+                                            
+                                            <rect x="10" y="62" width="28" height="28" fill="#1A1A18" />
+                                            <rect x="14" y="66" width="20" height="20" fill="#fff" />
+                                            <rect x="18" y="70" width="12" height="12" fill="#1D6B5A" />
+
+                                            {/* Mock QR data pixels */}
+                                            <rect x="42" y="14" width="6" height="6" fill="#1A1A18" />
+                                            <rect x="52" y="18" width="6" height="6" fill="#1A1A18" />
+                                            <rect x="44" y="44" width="12" height="12" fill="#B8962E" />
+                                            <rect x="62" y="52" width="6" height="6" fill="#1A1A18" />
+                                            <rect x="74" y="72" width="14" height="6" fill="#1A1A18" />
+                                        </svg>
+                                        <span className="font-ui text-[10px] font-bold text-rimba tracking-widest mt-1">NMID: ID1029381029</span>
+                                    </div>
+                                    <p className="font-ui text-[11px] text-abu/70">
+                                        Mendukung GoPay, OVO, Dana, BCA Mobile, Livin&apos; Mandiri, &amp; seluruh e-wallet QRIS.
+                                    </p>
+                                </div>
+                            )}
+
+                            {method === "transfer" && (
+                                <div className="space-y-2 text-xs">
+                                    <span className="font-ui font-semibold text-arang block">Rekening Resmi PT Nawasanga</span>
+                                    <p className="text-abu">Bank: <strong>Bank Mandiri Cabang Sudirman</strong></p>
+                                    <p className="text-abu">Nomor Rekening: <strong className="font-mono">132-00-8819283-1</strong></p>
+                                    <p className="text-abu">Atas Nama: <strong>PT NAWASANGA TEKNOLOGI NUSANTARA</strong></p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Promo Code */}
@@ -713,6 +813,87 @@ export default function Payment() {
                                     </svg>
                                 }
                             />
+                        </div>
+
+                        {/* Interactive Payment Instructions Box */}
+                        <div className="mt-4 p-4 rounded-xl border border-rimba/20 bg-white shadow-xs">
+                            {method.startsWith("va_") && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between pb-2 border-b border-pasir">
+                                        <span className="font-ui text-xs font-semibold text-arang">
+                                            Nomor Rekening Virtual Account ({method.replace("va_", "").toUpperCase()})
+                                        </span>
+                                        <span className="text-[10px] font-bold text-rimba bg-rimba/10 px-2 py-0.5 rounded-full">
+                                            Otomatis Terverifikasi
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-pasir/60 border border-rimba/15">
+                                        <span className="font-mono text-base font-bold tracking-wider text-arang">
+                                            {method === "va_bca" ? "88012 8491 0293 8472" : method === "va_mandiri" ? "89128 4019 2810 1928" : "82710 5910 2938 1029"}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(method === "va_bca" ? "88012849102938472" : method === "va_mandiri" ? "89128401928101928" : "82710591029381029");
+                                                alert("Nomor Virtual Account berhasil disalin ke clipboard!");
+                                            }}
+                                            className="text-xs font-semibold text-rimba hover:underline cursor-pointer px-2 py-1 bg-white rounded border border-rimba/20"
+                                        >
+                                            Salin Nomor VA
+                                        </button>
+                                    </div>
+                                    <div className="text-[11.5px] text-abu/70 space-y-1 pt-1">
+                                        <p>1. Buka aplikasi m-Banking atau ATM bank Anda.</p>
+                                        <p>2. Pilih menu <strong>Transfer &gt; Virtual Account</strong>.</p>
+                                        <p>3. Masukkan nomor VA di atas dan pastikan nominal tepat <strong>{fmtRp(total)}</strong>.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {method === "qris" && (
+                                <div className="space-y-3 text-center">
+                                    <span className="font-ui text-xs font-semibold text-arang block">
+                                        Scan QRIS Resmi Nawasanga ESG
+                                    </span>
+                                    <div className="h-44 w-44 mx-auto p-2 bg-white border-2 border-rimba/30 rounded-xl shadow-inner flex flex-col items-center justify-center">
+                                        <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
+                                            <rect width="100" height="100" fill="#fff" />
+                                            {/* Outer QR squares */}
+                                            <rect x="10" y="10" width="28" height="28" fill="#1A1A18" />
+                                            <rect x="14" y="14" width="20" height="20" fill="#fff" />
+                                            <rect x="18" y="18" width="12" height="12" fill="#1D6B5A" />
+                                            
+                                            <rect x="62" y="10" width="28" height="28" fill="#1A1A18" />
+                                            <rect x="66" y="14" width="20" height="20" fill="#fff" />
+                                            <rect x="70" y="18" width="12" height="12" fill="#1D6B5A" />
+                                            
+                                            <rect x="10" y="62" width="28" height="28" fill="#1A1A18" />
+                                            <rect x="14" y="66" width="20" height="20" fill="#fff" />
+                                            <rect x="18" y="70" width="12" height="12" fill="#1D6B5A" />
+
+                                            {/* Mock QR data pixels */}
+                                            <rect x="42" y="14" width="6" height="6" fill="#1A1A18" />
+                                            <rect x="52" y="18" width="6" height="6" fill="#1A1A18" />
+                                            <rect x="44" y="44" width="12" height="12" fill="#B8962E" />
+                                            <rect x="62" y="52" width="6" height="6" fill="#1A1A18" />
+                                            <rect x="74" y="72" width="14" height="6" fill="#1A1A18" />
+                                        </svg>
+                                        <span className="font-ui text-[10px] font-bold text-rimba tracking-widest mt-1">NMID: ID1029381029</span>
+                                    </div>
+                                    <p className="font-ui text-[11px] text-abu/70">
+                                        Mendukung GoPay, OVO, Dana, BCA Mobile, Livin&apos; Mandiri, &amp; seluruh e-wallet QRIS.
+                                    </p>
+                                </div>
+                            )}
+
+                            {method === "transfer" && (
+                                <div className="space-y-2 text-xs">
+                                    <span className="font-ui font-semibold text-arang block">Rekening Resmi PT Nawasanga</span>
+                                    <p className="text-abu">Bank: <strong>Bank Mandiri Cabang Sudirman</strong></p>
+                                    <p className="text-abu">Nomor Rekening: <strong className="font-mono">132-00-8819283-1</strong></p>
+                                    <p className="text-abu">Atas Nama: <strong>PT NAWASANGA TEKNOLOGI NUSANTARA</strong></p>
+                                </div>
+                            )}
                         </div>
                     </div>
 

@@ -12,8 +12,12 @@ export namespace OrganizationTypes {
         export interface OrganizationData {
             id:                     string;
             name:                   string;
+            slug?:                  string;
             industry:               Industry;
             npwp:                   string | null;
+            nib?:                   string | null;
+            contactEmail?:          string | null;
+            contactPhone?:          string | null;
             address:                string;
             city:                   string;
             province:               string;
@@ -25,6 +29,8 @@ export namespace OrganizationTypes {
             timezone:               string;
             logoUrl:                string | null;
             isActive:               boolean;
+            status?:                string;
+            notes?:                 string | null;
             createdAt:              string;
         }
     }

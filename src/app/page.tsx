@@ -1,7 +1,8 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
-import InteractiveCalculator from "@/components/landing/InteractiveCalculator";
+import CaseStudies from "@/components/landing/CaseStudies";
 import Features from "@/components/landing/Features";
+import InteractiveCalculator from "@/components/landing/InteractiveCalculator";
 import Pricing from "@/components/landing/Pricing";
 import Regulasi from "@/components/landing/Regulasi";
 import InteractiveArticles, { type ArticleItem } from "@/components/landing/InteractiveArticles";
@@ -42,8 +43,9 @@ export default async function Home() {
     <main className="relative min-h-screen">
       <Navbar />
       <Hero />
-      <InteractiveCalculator />
+      <CaseStudies />
       <Features />
+      <InteractiveCalculator />
       <Pricing />
       <Regulasi />
       <InteractiveArticles initialArticles={articleList} />

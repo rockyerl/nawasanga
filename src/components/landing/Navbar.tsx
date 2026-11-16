@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-function NawasangaLogo({ size = 28 }: { size?: number }) {
+function NawasangaLogo({ size = 32 }: { size?: number }) {
   const r = size / 2;
   const cx = r, cy = r;
   const nodeR = size * 0.095;
@@ -35,6 +35,15 @@ function NawasangaLogo({ size = 28 }: { size?: number }) {
   );
 }
 
+const navItems = [
+  { label: "Studi Kasus", href: "#case-studies" },
+  { label: "Fitur Enterprise", href: "#fitur" },
+  { label: "Kalkulator ROI", href: "#kalkulator" },
+  { label: "Paket & Harga", href: "#pricing" },
+  { label: "Regulasi", href: "#regulasi" },
+  { label: "Knowledge Base", href: "#artikel" },
+];
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -45,39 +54,37 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const links = ["Fitur", "Pricing", "Regulasi", "Artikel"];
-
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-lontar/92 backdrop-blur-md border-b border-rimba/10 shadow-sm"
+          ? "bg-[#F7F5EF]/95 backdrop-blur-md border-b border-[#1D6B5A]/15 shadow-sm"
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="flex items-center gap-3">
-          <NawasangaLogo size={32} />
+          <NawasangaLogo size={34} />
           <div className="flex flex-col leading-none">
-            <span className="font-display font-bold text-base tracking-tight text-arang">
+            <span className="font-display font-bold text-lg tracking-tight text-[#1A1A18]">
               Nawasanga
             </span>
-            <span className="font-ui text-[9px] uppercase tracking-[0.15em] text-abu leading-none mt-0.5">
-              ESG Platform
+            <span className="font-ui text-[9px] uppercase tracking-[0.2em] text-[#1D6B5A] font-bold leading-none mt-0.5">
+              Enterprise ESG Platform
             </span>
           </div>
         </a>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
+        <div className="hidden lg:flex items-center gap-7">
+          {navItems.map((item) => (
             <a
-              key={l}
-              href={`#${l.toLowerCase()}`}
-              className="text-sm text-abu hover:text-arang transition-colors duration-200 font-ui tracking-wide"
+              key={item.label}
+              href={item.href}
+              className="text-xs font-semibold text-[#7A7A72] hover:text-[#1D6B5A] transition-colors duration-150 font-ui tracking-wide"
             >
-              {l}
+              {item.label}
             </a>
           ))}
         </div>
@@ -86,25 +93,25 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           <a
             href="/login"
-            className="text-sm text-abu hover:text-rimba font-semibold px-3 py-2 transition-colors duration-200 font-ui"
+            className="text-xs text-[#7A7A72] hover:text-[#1A1A18] font-bold px-3 py-2 transition-colors duration-200 font-ui"
           >
-            Masuk Portal
+            Login Portal
           </a>
           <a
             href="#pricing"
-            className="text-sm bg-rimba hover:bg-jati text-lontar font-semibold px-5 py-2 rounded-lg transition-colors duration-200 font-ui"
+            className="text-xs bg-[#1D6B5A] hover:bg-[#175749] text-white font-bold px-4 py-2.5 rounded-xl transition-all duration-200 font-ui shadow-sm hover:shadow"
           >
-            Mulai Gratis
+            Mulai Uji Coba Gratis
           </a>
         </div>
 
         {/* Mobile toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-abu hover:text-arang"
+          className="lg:hidden text-[#7A7A72] hover:text-[#1A1A18] p-1.5"
           aria-label="Menu"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="currentColor">
             {menuOpen ? (
               <path fillRule="evenodd" clipRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
             ) : (
@@ -115,21 +122,33 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="md:hidden bg-lontar/97 backdrop-blur-md border-t border-rimba/10 px-6 py-4 flex flex-col gap-4">
-          {links.map((l) => (
-            <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setMenuOpen(false)}
-              className="text-sm text-abu hover:text-arang font-ui">
-              {l}
+        <div className="lg:hidden bg-[#F7F5EF]/98 backdrop-blur-md border-t border-[#1D6B5A]/15 px-6 py-5 flex flex-col gap-3 shadow-lg">
+          {navItems.map((item) => (
+            <a 
+              key={item.label} 
+              href={item.href} 
+              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium text-[#7A7A72] hover:text-[#1D6B5A] py-1 font-ui"
+            >
+              {item.label}
             </a>
           ))}
-          <a href="/login" onClick={() => setMenuOpen(false)}
-            className="text-sm border border-rimba/30 text-rimba font-semibold px-4 py-2 rounded-lg text-center font-ui">
-            Masuk Portal
-          </a>
-          <a href="#pricing" onClick={() => setMenuOpen(false)}
-            className="text-sm bg-rimba text-lontar font-semibold px-4 py-2 rounded-lg text-center font-ui">
-            Mulai Gratis
-          </a>
+          <div className="pt-2 border-t border-[#EDEAE0] flex flex-col gap-2">
+            <a 
+              href="/login" 
+              onClick={() => setMenuOpen(false)}
+              className="text-xs border border-[#1D6B5A]/30 text-[#1D6B5A] font-bold px-4 py-2.5 rounded-xl text-center font-ui"
+            >
+              Login Portal
+            </a>
+            <a 
+              href="#pricing" 
+              onClick={() => setMenuOpen(false)}
+              className="text-xs bg-[#1D6B5A] text-white font-bold px-4 py-2.5 rounded-xl text-center font-ui shadow-sm"
+            >
+              Mulai Uji Coba Gratis
+            </a>
+          </div>
         </div>
       )}
     </nav>

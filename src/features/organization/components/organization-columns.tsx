@@ -100,20 +100,27 @@ export const organizationColumns: ColumnDef<OrganizationTypes.Service.Organizati
         ),
     },
     {
-        accessorKey: "isActive",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+        accessorKey: "status",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Status Akun &amp; KYC" />,
         cell: ({ row }) => {
-            const active = row.getValue("isActive") as boolean;
+            const status = (row.original as any).status || (row.getValue("isActive") ? "active" : "suspended");
+            if (status === "pending_kyc") {
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        Review KYC
+                    </span>
+                );
+            }
+            if (status === "active") {
+                return (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Aktif
+                    </span>
+                );
+            }
             return (
-                <span
-                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
-                    style={
-                        active
-                            ? { background: "#DCFCE7", color: "#15803D" }
-                            : { background: "#FEE2E2", color: "#B91C1C" }
-                    }
-                >
-                    {active ? "Aktif" : "Nonaktif"}
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                    Ditangguhkan
                 </span>
             );
         },

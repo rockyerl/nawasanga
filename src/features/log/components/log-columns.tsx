@@ -2,32 +2,26 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { LogTableRowActions } from "@/features/log/components/log-table-row-actions";
 import type { LogTypes } from "@/types/features/log.type";
-import { ImageIcon } from "lucide-react";
+import { Fuel, CloudRain } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export const logColumns: ColumnDef<LogTypes.Service.LogData>[] = [
     {
         accessorKey: "id",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Log ID" />,
         cell: ({ row }) => (
-            <span className="text-sm text-gray-700 font-medium truncate">{row.getValue("id")}</span>
+            <span className="text-xs text-gray-700 font-mono font-medium truncate">
+                {row.getValue("id")}
+            </span>
         ),
     },
     {
         id: "datetime",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tanggal & Jam" />,
         cell: ({ row }) => (
-            <span className="text-sm text-[#8E8E8E] truncate">
-        {row.original.date} {row.original.time}
-      </span>
-        ),
-    },
-    {
-        accessorKey: "driverName",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Driver" />,
-        cell: ({ row }) => (
             <div className="flex flex-col">
-                <span className="text-sm text-gray-700 truncate">{row.getValue("driverName")}</span>
-                <span className="text-xs text-[#8E8E8E]">{row.original.driverId}</span>
+                <span className="text-xs font-medium text-gray-800">{row.original.date}</span>
+                <span className="text-[11px] text-[#7A7A72]">{row.original.time} WIB</span>
             </div>
         ),
     },
@@ -36,48 +30,77 @@ export const logColumns: ColumnDef<LogTypes.Service.LogData>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Kendaraan" />,
         cell: ({ row }) => (
             <div className="flex flex-col">
-                <span className="text-sm text-gray-700 truncate">{row.getValue("vehicleName")}</span>
-                <span className="text-xs text-[#8E8E8E]">{row.original.vehicleId}</span>
+                <span className="text-xs font-semibold text-gray-900 truncate">{row.getValue("vehicleName")}</span>
+                <span className="text-[11px] text-[#7A7A72] truncate">{row.original.assetName}</span>
             </div>
         ),
     },
     {
-        accessorKey: "assetName",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Aset" />,
+        accessorKey: "driverName",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Driver / Operator" />,
         cell: ({ row }) => (
             <div className="flex flex-col">
-                <span className="text-sm text-gray-700 truncate">{row.getValue("assetName")}</span>
-                <span className="text-xs text-[#8E8E8E]">{row.original.assetId}</span>
+                <span className="text-xs text-gray-800 truncate">{row.getValue("driverName")}</span>
+                <span className="text-[11px] text-[#7A7A72]">{row.original.fuelStation || "SPBU Terdaftar"}</span>
             </div>
         ),
     },
     {
-        accessorKey: "lastOdometer",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Last Odometer" />,
-        cell: ({ row }) => (
-            <span className="text-sm text-[#8E8E8E] truncate">
-        {(row.getValue("lastOdometer") as number).toLocaleString("id-ID")} km
-      </span>
-        ),
-    },
-    {
-        accessorKey: "pictureUrl",
-        header: () => <span className="text-xs font-medium text-[#8E8E8E]">Foto</span>,
+        accessorKey: "liters",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Volume BBM" />,
         cell: ({ row }) => {
-            const url = row.getValue("pictureUrl") as string | undefined;
-            if (!url) return <span className="text-xs text-neutral-300">—</span>;
+            const liters = row.original.liters ?? 0;
             return (
-                <div className="flex items-center gap-1">
-                    <ImageIcon className="h-3.5 w-3.5 text-blue-400" />
-                    <img
-                        src={url}
-                        alt="log"
-                        className="h-8 w-10 rounded object-cover border border-neutral-200"
-                    />
+                <div className="flex items-center gap-1.5">
+                    <Fuel className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                    <span className="text-xs font-bold text-gray-900">
+                        {liters.toLocaleString("id-ID")} <span className="font-normal text-[11px] text-[#7A7A72]">L</span>
+                    </span>
+                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4 border-[#1D6B5A]/20 bg-[#1D6B5A]/5 text-[#1D6B5A]">
+                        {row.original.fuelTypeName || "BBM"}
+                    </Badge>
                 </div>
             );
         },
-        enableSorting: false,
+    },
+    {
+        accessorKey: "costIdr",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Biaya BBM" />,
+        cell: ({ row }) => {
+            const cost = row.original.costIdr ?? 0;
+            return (
+                <span className="text-xs font-semibold text-gray-900">
+                    Rp {cost.toLocaleString("id-ID")}
+                </span>
+            );
+        },
+    },
+    {
+        accessorKey: "emissionCo2Kg",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Emisi Karbon" />,
+        cell: ({ row }) => {
+            const emission = row.original.emissionCo2Kg ?? 0;
+            return (
+                <div className="flex items-center gap-1.5">
+                    <CloudRain className="w-3.5 h-3.5 text-[#1D6B5A]" />
+                    <span className="text-xs font-bold text-[#1D6B5A]">
+                        {emission.toLocaleString("id-ID")} <span className="font-normal text-[11px] text-gray-500">kg CO₂e</span>
+                    </span>
+                </div>
+            );
+        },
+    },
+    {
+        accessorKey: "lastOdometer",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Odometer" />,
+        cell: ({ row }) => {
+            const odo = row.original.lastOdometer ?? row.original.odometerKm ?? 0;
+            return (
+                <span className="text-xs text-[#7A7A72] font-mono">
+                    {odo.toLocaleString("id-ID")} km
+                </span>
+            );
+        },
     },
     {
         id: "actions",

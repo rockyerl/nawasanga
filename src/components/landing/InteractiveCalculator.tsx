@@ -26,7 +26,7 @@ export default function InteractiveCalculator() {
   const potentialSavingsTon = parseFloat((monthlyCo2Ton * 0.12).toFixed(2)); // 12% eco-driving & route optimization
 
   return (
-    <section className="py-20 relative bg-[#F7F5EF] border-t border-b border-[#1D6B5A]/10">
+    <section id="kalkulator" className="py-24 relative bg-[#F7F5EF] border-t border-b border-[#1D6B5A]/15">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1D6B5A]/10 border border-[#1D6B5A]/20 mb-3">

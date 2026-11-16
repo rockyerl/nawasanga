@@ -16,8 +16,17 @@ export declare namespace LogTypes {
             assetId: string;
             assetName: string;
             lastOdometer: number;
+            odometerKm?: number;
+            liters?: number;
+            costIdr?: number;
+            emissionCo2Kg?: number;
+            fuelStation?: string;
+            fuelTypeName?: string;
+            fuelTypeId?: string;
+            receiptImageUrl?: string;
             pictureUrl?: string;
             notes?: string;
+            organizationId?: string;
         }
 
         type LogPagination =
