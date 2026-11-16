@@ -81,6 +81,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/kyc") ||
     pathname.startsWith("/payment") ||
     pathname.startsWith("/api/health") ||
+    pathname.startsWith("/api/internal/geocode") ||
     pathname.startsWith("/api/auth/login") ||
     pathname.startsWith("/api/auth/logout")
   ) {

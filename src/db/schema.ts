@@ -57,6 +57,10 @@ export const organizations = sqliteTable("organizations", {
   contactEmail: text("contact_email").notNull(),
   contactPhone: text("contact_phone"),
   address: text("address"),
+  city: text("city"),
+  province: text("province"),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   plan: text("plan").notNull().default("starter"), // trial, starter, pro, enterprise
   maxAssets: integer("max_assets").notNull().default(10),
   status: text("status").notNull().default("active"), // active, suspended, pending_kyc

@@ -17,6 +17,8 @@ export namespace OrganizationTypes {
             address:                string;
             city:                   string;
             province:               string;
+            latitude?:              number | null;
+            longitude?:             number | null;
             subscriptionPlan:       SubscriptionPlan;
             subscriptionExpiresAt:  string | null;
             maxAssets:              number;
