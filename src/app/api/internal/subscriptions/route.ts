@@ -5,12 +5,18 @@ import { desc, eq } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const allSubs = await db.query.subscriptions.findMany({
-      with: {
-        organization: true,
-      },
-      orderBy: [desc(subscriptions.startsAt)],
-    });
+    let allSubs: any[] = [];
+    try {
+      allSubs = await db.query.subscriptions.findMany({
+        with: {
+          organization: true,
+        },
+        orderBy: [desc(subscriptions.startsAt)],
+      });
+    } catch (dbErr) {
+      console.warn("Notice: Subscriptions query fallback to table scan:", dbErr);
+      allSubs = await db.select().from(subscriptions);
+    }
 
     const defaultPlans = [
       {

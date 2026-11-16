@@ -419,3 +419,17 @@ export const ticketsRelations = relations(tickets, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [subscriptions.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const billingInvoicesRelations = relations(billingInvoices, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [billingInvoices.organizationId],
+    references: [organizations.id],
+  }),
+}));
