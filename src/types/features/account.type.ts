@@ -4,6 +4,7 @@ export namespace AccountTypes {
 
         export interface AccountData {
             id:               string;
+            organizationId?:  string;
             companyName:      string;
             picName:          string;
             position:         string;
@@ -15,13 +16,15 @@ export namespace AccountTypes {
         }
 
         export interface CreateAccountRequest {
-            companyName:      string;
+            organizationId:   string;
+            companyName?:     string;
             picName:          string;
             position:         string;
             email:            string;
-            subscriptionPlan: "free" | "starter" | "pro" | "enterprise";
-            lastActivityAt:   string | null;
-            status:           AccountStatus;
+            password?:        string;
+            subscriptionPlan?: "free" | "starter" | "pro" | "enterprise";
+            lastActivityAt?:  string | null;
+            status?:          AccountStatus;
         }
     }
 }

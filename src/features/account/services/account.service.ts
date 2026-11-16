@@ -55,7 +55,17 @@ class AccountService {
   }
 
   async updateAccount(id: string, payload: unknown) {
-    return { code: 200, status: "OK", message: "Akun berhasil diperbarui" };
+    try {
+      const res = await Client.put<HttpClientTypes.Response<unknown>, unknown>(
+        `internal/accounts/${id}`,
+        payload
+      );
+
+      return res.data;
+    } catch (err) {
+      if (isApiError(err)) throw err;
+      throw errServiceHandler(err as Error);
+    }
   }
 
   async deleteAccount(id: string) {

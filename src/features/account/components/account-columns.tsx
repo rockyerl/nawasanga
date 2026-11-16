@@ -42,6 +42,22 @@ export const accountColumns: ColumnDef<AccountTypes.Service.AccountData>[] = [
         ),
     },
     {
+        accessorKey: "status",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+        cell: ({ row }) => {
+            const val = ((row.getValue("status") as string) || "active").toLowerCase();
+            const color = STATUS_COLOR[val] || STATUS_COLOR.active;
+            return (
+                <span
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium"
+                    style={{ backgroundColor: color.bg, color: color.text }}
+                >
+                    {STATUS_LABEL[val] || val}
+                </span>
+            );
+        },
+    },
+    {
         accessorKey: "lastActivityAt",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Last Activity" />,
         cell: ({ row }) => {
