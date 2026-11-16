@@ -305,9 +305,46 @@ export default function Payment() {
 
     async function handlePay() {
         setLoading(true);
-        await new Promise((r) => setTimeout(r, 1800));
-        setLoading(false);
-        setPaid(true);
+        try {
+            // Get full stored KYC data
+            let rawKyc: any = {};
+            try {
+                const stored = sessionStorage.getItem("nawasanga_kyc");
+                if (stored) rawKyc = JSON.parse(stored);
+            } catch {}
+
+            const registerPayload = {
+                email: rawKyc.email || kycData.email || `klien.${Date.now()}@nawasanga.id`,
+                password: rawKyc.password || "Nawasanga2026!",
+                name: kycData.name || `${rawKyc.firstName || ""} ${rawKyc.lastName || ""}`.trim() || "Penanggung Jawab Klien",
+                companyName: kycData.company || rawKyc.companyName || "PT Nawasanga Klien Baru",
+                phone: rawKyc.phone || "-",
+                industry: rawKyc.sector || "Fleet & Logistik",
+                npwp: kycData.npwp || rawKyc.npwp || "-",
+                nib: rawKyc.nib || "-",
+                corpAddress: rawKyc.corpAddress || "-",
+                plan: plan.id === "freemium" ? "starter" : plan.id,
+                billingPeriod: billingPeriod,
+                paymentMethod: method === "transfer" ? "Bank Transfer" : method.startsWith("va_") ? `Virtual Account (${method.replace("va_", "").toUpperCase()})` : "QRIS",
+                amountIdr: total,
+            };
+
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(registerPayload),
+            });
+
+            const data = await res.json();
+            if (!res.ok && res.status !== 409) {
+                console.error("Registration error:", data.message);
+            }
+        } catch (e) {
+            console.error("Payment network error:", e);
+        } finally {
+            setLoading(false);
+            setPaid(true);
+        }
     }
 
     // ─── Success State ─────────────────────────────────────────────────────────
@@ -354,11 +391,14 @@ export default function Payment() {
                     </div>
 
                     <button
-                        onClick={() => router.push("/")}
-                        className="w-full font-ui text-sm py-3 rounded-xl text-lontar font-semibold transition-all duration-200"
+                        onClick={() => {
+                            router.push("/dashboard");
+                            router.refresh();
+                        }}
+                        className="w-full font-ui text-sm py-3.5 rounded-xl text-white font-semibold shadow-md transition-all duration-200 cursor-pointer hover:opacity-95"
                         style={{ background: "#1D6B5A" }}
                     >
-                        Kembali ke Home →
+                        Buka Executive Dashboard Sekarang →
                     </button>
                 </div>
             </div>

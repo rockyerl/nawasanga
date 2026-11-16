@@ -9,12 +9,13 @@ import {
     type SortingState,
 } from "@tanstack/react-table";
 import { useMemo, useState, useEffect } from "react";
-import { Lock, AlertTriangle, Zap, Lightbulb, Download } from "lucide-react";
+import { Lock, AlertTriangle, Zap, Lightbulb, Download, Award } from "lucide-react";
 import { DataGrid } from "@/components/data-grid";
 import { auditColumns } from "@/features/report-audit/components/report-audit-columns";
 import { ReportAuditTableToolbar } from "@/features/report-audit/components/report-audit-table-toolbar";
 import { useAuditInsights } from "@/features/report-audit/hooks/use-report-audit-queries";
 import { exportToCsv } from "@/lib/export";
+import { AuditCertificateDialog } from "@/features/report-audit/components/audit-certificate-dialog";
 import type { PlanType, AuditTypes } from "@/types/features/report-audit.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
@@ -201,7 +202,7 @@ function BenchmarkSection({ benchmarks }: { benchmarks: AuditTypes.Service.Bench
     );
 }
 
-function AuditReportSection({ report }: { report: AuditTypes.Service.AuditReport }) {
+function AuditReportSection({ report, onOpenCert }: { report: AuditTypes.Service.AuditReport; onOpenCert?: () => void }) {
     const total = report.totalEmission;
     // Donut arc calculation
     let offset = 0;
@@ -289,26 +290,38 @@ function AuditReportSection({ report }: { report: AuditTypes.Service.AuditReport
                 </div>
             </div>
 
-            {/* Download */}
-            <div className="border-t border-neutral-100 pt-3 flex flex-col gap-1">
+            {/* Download & Certificate Actions */}
+            <div className="border-t border-neutral-100 pt-3 flex flex-col gap-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-[#8E8E8E]">
-                    Lampiran Data Lengkap
+                    Dokumen &amp; Sertifikat Resmi
                 </span>
-                <span className="text-[11px] text-[#8E8E8E]">Unduh data emisi seluruh perusahaan</span>
-                <button
-                    type="button"
-                    onClick={() => {
-                        exportToCsv("Audit_Kepatuhan_ESG", report.breakdown || [], [
-                            { key: "label", label: "Sumber Emisi / Kategori" },
-                            { key: "tonCO2e", label: "Emisi (ton CO2e)" },
-                            { key: "percent", label: "Porsi (%)" },
-                        ]);
-                    }}
-                    className="mt-1 self-start flex items-center gap-1.5 text-xs font-medium text-[#1D6B5A] border border-[#1D6B5A] bg-[#1D6B5A]/5 rounded-lg px-3 py-1.5 hover:bg-[#1D6B5A]/10 transition-colors cursor-pointer"
-                >
-                    <Download className="h-3 w-3" />
-                    {report.downloadLabel || "Unduh Dokumen Laporan Kepatuhan Audit ESG (.CSV)"}
-                </button>
+                <span className="text-[11px] text-[#8E8E8E]">Unduh data emisi audit atau cetak sertifikat verifikasi ISO 14064</span>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            exportToCsv("Audit_Kepatuhan_ESG", report.breakdown || [], [
+                                { key: "label", label: "Sumber Emisi / Kategori" },
+                                { key: "tonCO2e", label: "Emisi (ton CO2e)" },
+                                { key: "percent", label: "Porsi (%)" },
+                            ]);
+                        }}
+                        className="flex items-center gap-1.5 text-xs font-medium text-[#1D6B5A] border border-[#1D6B5A] bg-[#1D6B5A]/5 rounded-lg px-3 py-1.5 hover:bg-[#1D6B5A]/10 transition-colors cursor-pointer"
+                    >
+                        <Download className="h-3.5 w-3.5" />
+                        {report.downloadLabel || "Unduh Dokumen Laporan Kepatuhan Audit ESG (.CSV)"}
+                    </button>
+                    {onOpenCert && (
+                        <button
+                            type="button"
+                            onClick={onOpenCert}
+                            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1D6B5A] hover:bg-[#155245] rounded-lg px-3.5 py-1.5 transition-all shadow-xs cursor-pointer"
+                        >
+                            <Award className="h-3.5 w-3.5 text-amber-300" />
+                            Pratinjau &amp; Cetak Sertifikat ISO 14064
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -318,12 +331,14 @@ function AuditReportSection({ report }: { report: AuditTypes.Service.AuditReport
 
 export function ReportAuditTable() {
     const [plan, setPlan] = useState<PlanType>("pro");
+    const [certOpen, setCertOpen] = useState(false);
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
 
     const { data: auditRes, isLoading } = useAuditInsights(plan);
     const data = auditRes?.data || { insights: [] };
+    const orgName = (auditRes as any)?.data?.organization?.name || "PT Sinergi Logistik Nusantara";
 
     useEffect(() => {
         const orgPlan = (auditRes as any)?.data?.organization?.plan;
@@ -395,16 +410,27 @@ export function ReportAuditTable() {
 
                     {/* Audit report — enterprise only */}
                     {data.auditReport && (
-                        <AuditReportSection report={data.auditReport} />
+                        <AuditReportSection report={data.auditReport} onOpenCert={() => setCertOpen(true)} />
                     )}
 
                     {/* Tabel insight */}
-                    <ReportAuditTableToolbar
-                        table={table}
-                        search={search}
-                        setSearch={setSearch}
-                        plan={plan}
-                    />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <ReportAuditTableToolbar
+                            table={table}
+                            search={search}
+                            setSearch={setSearch}
+                            plan={plan}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setCertOpen(true)}
+                            className="self-start sm:self-auto flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1D6B5A] hover:bg-[#155245] rounded-lg px-3.5 py-1.5 transition-all shadow-xs cursor-pointer shrink-0"
+                        >
+                            <Award className="h-3.5 w-3.5 text-amber-300" />
+                            Sertifikat Emisi ISO 14064
+                        </button>
+                    </div>
+
                     <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
                         <DataGrid
                             table={table}
@@ -415,6 +441,13 @@ export function ReportAuditTable() {
                     </div>
                 </div>
             )}
+
+            <AuditCertificateDialog
+                open={certOpen}
+                setOpen={setCertOpen}
+                organizationName={orgName}
+                totalTonCO2e={data.auditReport?.totalEmission ? Math.round(data.auditReport.totalEmission / 1000 * 10) / 10 : 48.2}
+            />
         </>
     );
 }
