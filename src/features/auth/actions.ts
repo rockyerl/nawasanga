@@ -64,6 +64,7 @@ export async function loginAction(formData: FormData): Promise<LoginResult> {
       roleCode: user.role.code,
       roleName: user.role.name,
       organizationId: user.organizationId,
+      organizationName: user.organization?.name || null,
       permissions: permissionCodes,
     };
 

@@ -24,6 +24,8 @@ export async function GET(request: NextRequest) {
           category: f.category,
           emissionFactor: f.emissionFactorKgCo2PerLiter,
           unitPriceIdr: f.unitPriceIdr,
+          pricePerUnit: f.unitPriceIdr,
+          unit: "liter",
           isActive: f.isActive,
         })),
         count: filtered.length,

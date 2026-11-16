@@ -1,49 +1,45 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import UsersService from "@/features/users/services/users.service";
+import { Client } from "@/lib/http-client";
 import { onQueryError } from "@/lib/utils";
 import type { HttpClientTypes } from "@/types/lib/http-client.type";
 import type { Query } from "@/types/lib/query.type";
 
-export const usersKeys = {
-    list: (params: Query.Params) => ["users-page", "list", params] as const,
+export const roleKeys = {
+    list: (params: Query.Params) => ["roles", "list", params] as const,
 };
 
-export function useUsersPage(params: Query.Params) {
+export function useRoles(params: Query.Params) {
     return useQuery({
-        queryKey: usersKeys.list(params),
-        queryFn: () => UsersService.getUsers(params),
-    });
-}
-
-export const useUsers = useUsersPage;
-export const useRoles = useUsersPage;
-
-export function useCreateUserPage() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (payload: unknown) => UsersService.createUser(payload),
-        onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
-            await queryClient.invalidateQueries({
-                queryKey: usersKeys.list({ page: 1, itemPerPage: 10 }),
+        queryKey: roleKeys.list(params),
+        queryFn: async () => {
+            const queryParams = new URLSearchParams({
+                page: String(params.page || 1),
+                itemPerPage: String(params.itemPerPage || 10),
+                search: params.search || "",
             });
-            toast.success(res.message);
+            const res = await Client.get<HttpClientTypes.Response<unknown>, unknown>(
+                `internal/roles?${queryParams.toString()}`
+            );
+            return res.data;
         },
-        onError: (err) => onQueryError(err),
     });
 }
 
-export function useDeleteUserPage() {
+export function useCreateRole() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => UsersService.deleteUser(id),
+        mutationFn: async (payload: unknown) => {
+            const res = await Client.post<HttpClientTypes.Response<unknown>, unknown>(
+                "internal/roles",
+                payload
+            );
+            return res.data;
+        },
         onSuccess: async (res: HttpClientTypes.Response<unknown>) => {
-            await queryClient.invalidateQueries({
-                queryKey: usersKeys.list({ page: 1, itemPerPage: 10 }),
-            });
-            toast.success(res.message);
+            await queryClient.invalidateQueries({ queryKey: ["roles"] });
+            toast.success(res.message || "Role berhasil ditambahkan.");
         },
         onError: (err) => onQueryError(err),
     });

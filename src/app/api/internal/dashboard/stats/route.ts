@@ -9,14 +9,24 @@ import {
   subscriptions,
   billingInvoices,
 } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const portal = searchParams.get("portal") || "client";
 
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    // Filter by organization if not Superadmin or if explicitly requested, or when accessing client portal
+    const orgFilter = searchParams.get("organizationId") || (session?.roleCode !== "SUPERADMIN" || portal === "client" ? session?.organizationId : null);
+
     const allVehicles = await db.query.vehicles.findMany({
+      where: orgFilter ? eq(vehicles.organizationId, orgFilter) : undefined,
       with: {
         location: true,
         assignedDriver: true,
@@ -24,8 +34,11 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const allDrivers = await db.query.drivers.findMany();
+    const allDrivers = await db.query.drivers.findMany({
+      where: orgFilter ? eq(drivers.organizationId, orgFilter) : undefined,
+    });
     const allLogs = await db.query.fuelLogs.findMany({
+      where: orgFilter ? eq(fuelLogs.organizationId, orgFilter) : undefined,
       orderBy: [desc(fuelLogs.loggedAt)],
     });
 
@@ -105,7 +118,11 @@ export async function GET(request: NextRequest) {
     if (portal === "internal") {
       const allOrgs = await db.query.organizations.findMany();
       const allUsers = await db.query.users.findMany();
-      const allSubs = await db.query.subscriptions.findMany();
+      const allSubs = await db.query.subscriptions.findMany({
+        with: {
+          organization: true,
+        },
+      });
       const allInvoices = await db.query.billingInvoices.findMany({
         orderBy: [desc(billingInvoices.createdAt)],
       });
@@ -155,7 +172,7 @@ export async function GET(request: NextRequest) {
           })),
           recentSubscriptions: allSubs.map((s) => ({
             id: s.id,
-            companyName: "PT Nusantara Logistik Makmur",
+            companyName: (s as any).organization?.name || "Perusahaan Pelanggan",
             plan: s.plan,
             billingCycle: s.billingCycle,
             amount: s.priceIdr,

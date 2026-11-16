@@ -25,14 +25,32 @@ class TicketingService {
         `internal/ticketing?${queryParams.toString()}`
       );
 
-      if ((res.data as HttpClientTypes.Response<unknown>).code >= 400) {
-        throw createApiError(
-          (res.data as HttpClientTypes.Response<unknown>).code,
-          (res.data as HttpClientTypes.Response<unknown>).status || "Error",
-          (res.data as HttpClientTypes.Response<unknown>).message || "Request failed"
-        );
-      }
+      return res.data;
+    } catch (err) {
+      if (isApiError(err)) throw err;
+      throw errServiceHandler(err as Error);
+    }
+  }
 
+  async createTicket(payload: unknown) {
+    try {
+      const res = await Client.post<HttpClientTypes.Response<unknown>, unknown>(
+        "internal/ticketing",
+        payload
+      );
+      return res.data;
+    } catch (err) {
+      if (isApiError(err)) throw err;
+      throw errServiceHandler(err as Error);
+    }
+  }
+
+  async updateTicket(id: string, payload: unknown) {
+    try {
+      const res = await Client.put<HttpClientTypes.Response<unknown>, unknown>(
+        `internal/ticketing/${id}`,
+        payload
+      );
       return res.data;
     } catch (err) {
       if (isApiError(err)) throw err;
@@ -45,14 +63,6 @@ class TicketingService {
       const res = await Client.del<HttpClientTypes.Response<unknown>, unknown>(
         `internal/ticketing/${id}`
       );
-
-      if ((res.data as HttpClientTypes.Response<unknown>).code >= 400) {
-        throw createApiError(
-          (res.data as HttpClientTypes.Response<unknown>).code,
-          (res.data as HttpClientTypes.Response<unknown>).status || "Error",
-          (res.data as HttpClientTypes.Response<unknown>).message || "Request failed"
-        );
-      }
 
       return res.data;
     } catch (err) {

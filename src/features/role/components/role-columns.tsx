@@ -15,17 +15,22 @@ export const roleColumns: ColumnDef<RoleData>[] = [
         accessorKey: "permissions",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Permission" />,
         cell: ({ row }) => {
-            const permissions = row.getValue("permissions") as string[];
+            const rawPerms = row.getValue("permissions") ?? (row.original as any).permissions ?? [];
+            const permissions: string[] = Array.isArray(rawPerms) ? rawPerms : [];
             return (
                 <div className="flex flex-wrap gap-1">
-                    {permissions.map((p) => (
-                        <span
-                            key={p}
-                            className="inline-flex items-center rounded-md bg-[#29A2A5]/10 px-2 py-0.5 text-xs font-medium text-[#29A2A5]"
-                        >
-                            {p}
-                        </span>
-                    ))}
+                    {permissions.length === 0 ? (
+                        <span className="text-xs text-[#7A7A72]">Tidak ada permission</span>
+                    ) : (
+                        permissions.map((p) => (
+                            <span
+                                key={p}
+                                className="inline-flex items-center rounded-md bg-[#29A2A5]/10 px-2 py-0.5 text-xs font-medium text-[#29A2A5]"
+                            >
+                                {p}
+                            </span>
+                        ))
+                    )}
                 </div>
             );
         },

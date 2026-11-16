@@ -46,12 +46,14 @@ export const fuelTypeColumns: ColumnDef<FuelTypeTypes.Service.FuelTypeData>[] = 
         accessorKey: "emissionFactor",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Faktor Emisi (kg CO₂)" />,
         cell: ({ row }) => {
-            const unit = row.original.unit;
+            const unit = row.original.unit || "liter";
+            const rawEf = row.getValue("emissionFactor") ?? (row.original as any).emissionFactorKgCo2PerLiter ?? 0;
+            const ef = typeof rawEf === "number" ? rawEf : Number(rawEf) || 0;
             return (
                 <span className="text-sm font-mono" style={{ color: "#1D6B5A" }}>
-                    {(row.getValue("emissionFactor") as number).toFixed(4)}
+                    {ef.toFixed(4)}
                     <span className="ml-1 text-[10px]" style={{ color: "#7A7A72" }}>
-                        /{UNIT_LABEL[unit]}
+                        /{UNIT_LABEL[unit] || "L"}
                     </span>
                 </span>
             );
@@ -61,7 +63,8 @@ export const fuelTypeColumns: ColumnDef<FuelTypeTypes.Service.FuelTypeData>[] = 
         accessorKey: "pricePerUnit",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Harga (Rp)" />,
         cell: ({ row }) => {
-            const price = row.getValue("pricePerUnit") as number;
+            const rawPrice = row.getValue("pricePerUnit") ?? (row.original as any).unitPriceIdr ?? 0;
+            const price = typeof rawPrice === "number" ? rawPrice : Number(rawPrice) || 0;
             return (
                 <span className="text-sm font-mono" style={{ color: "#1A1A18" }}>
                     {price.toLocaleString("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 })}

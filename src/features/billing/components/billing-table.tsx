@@ -391,7 +391,6 @@ function InvoiceTable({
 function UsageOverview({ billing }: { billing: BillingTypes.Service.BillingInfo }) {
     const cfg = PLAN_CONFIG[billing.currentPlan as PlanType] || PLAN_CONFIG.trial;
     const usagePercent = Math.round((billing.assetUsed / billing.assetLimit) * 100);
-    const plan = PLAN_OPTIONS.find((p) => p.id === billing.currentPlan);
 
     // fitur usage ringkasan sesuai plan
     const featureStats = [

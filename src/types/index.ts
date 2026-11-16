@@ -24,6 +24,7 @@ export interface UserSession {
   roleCode: string;
   roleName: string;
   organizationId?: string | null;
+  organizationName?: string | null;
   permissions: string[];
 }
 

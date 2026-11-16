@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { fuelLogs, fuelTypes } from "@/db/schema";
+import { fuelLogs, fuelTypes, organizations } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +12,14 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const itemPerPage = parseInt(searchParams.get("itemPerPage") || "10", 10);
 
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    const orgFilter = searchParams.get("organizationId") || (session?.roleCode !== "SUPERADMIN" ? session?.organizationId : null);
+
     const logs = await db.query.fuelLogs.findMany({
+      where: orgFilter ? eq(fuelLogs.organizationId, orgFilter) : undefined,
       with: {
         vehicle: true,
         driver: true,
@@ -50,6 +59,7 @@ export async function GET(request: NextRequest) {
           lastOdometer: l.odometerKm || 45000,
           pictureUrl: l.receiptImageUrl || "/images/receipt-placeholder.png",
           notes: `${l.liters} L • ${l.emissionCo2Kg} kg CO₂ • Rp ${l.costIdr.toLocaleString("id-ID")}`,
+          organizationId: l.organizationId,
         })),
         count: filtered.length,
         page,
@@ -65,30 +75,36 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const fuel = await db.query.fuelTypes.findFirst({
-      where: eq(fuelTypes.id, body.fuelTypeId || "fuel_solar"),
-    });
-
-    const liters = parseFloat(body.liters) || 0;
-    const emissionFactor = fuel?.emissionFactorKgCo2PerLiter || 2.68;
-    const emissionCo2Kg = parseFloat((liters * emissionFactor).toFixed(2));
-    const unitPrice = fuel?.unitPriceIdr || 6800;
-    const costIdr = parseInt(body.totalCostIdr || body.costIdr, 10) || Math.round(liters * unitPrice);
-
     const now = new Date();
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    let targetOrgId = body.organizationId || session?.organizationId;
+    if (!targetOrgId) {
+      const defaultOrg = await db.query.organizations.findFirst();
+      targetOrgId = defaultOrg?.id || "org_nusantara_logistik";
+    }
+
+    const liters = parseFloat(body.liters) || 50;
+    const emissionFactor = 2.68; // standard kg CO2 / liter diesel
+    const emissionCo2Kg = parseFloat((liters * emissionFactor).toFixed(2));
+    const costIdr = parseInt(body.costIdr, 10) || Math.round(liters * 14500);
+
     const newLog = {
-      id: `flog_${Date.now()}`,
-      organizationId: body.organizationId || "org_nusantara_logistik",
-      vehicleId: body.vehicleId || "veh_demo_1",
-      driverId: body.driverId || "drv_demo_1",
+      id: `log_${Date.now()}`,
+      organizationId: targetOrgId,
+      vehicleId: body.vehicleId || body.assetId || "veh_demo_1",
+      driverId: body.driverId || null,
       fuelTypeId: body.fuelTypeId || "fuel_solar",
       liters,
-      emissionCo2Kg,
       costIdr,
-      odometerKm: parseInt(body.odometerKm, 10) || null,
-      fuelStation: body.fuelStation || `SPBU Pertamina Cikarang`,
-      receiptImageUrl: body.receiptImageUrl || null,
-      loggedAt: now,
+      odometerKm: parseInt(body.odometerKm, 10) || 54000,
+      emissionCo2Kg,
+      fuelStationName: body.fuelStationName || "SPBU Pertamina Cikarang",
+      receiptImageUrl: body.receiptImageUrl || "/images/receipt-placeholder.png",
+      loggedAt: body.loggedAt ? new Date(body.loggedAt) : now,
       createdAt: now,
     };
 
@@ -97,7 +113,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       code: 201,
       status: "Created",
-      message: "Pencatatan konsumsi BBM dan emisi CO2 berhasil disimpan",
+      message: "Log pengisian BBM berhasil dicatat.",
       data: newLog,
     });
   } catch (err) {

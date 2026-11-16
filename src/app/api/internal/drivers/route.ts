@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { drivers } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { drivers, organizations } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +12,18 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const itemPerPage = parseInt(searchParams.get("itemPerPage") || "10", 10);
 
-    const allDrivers = await db.select().from(drivers).orderBy(desc(drivers.createdAt));
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    const orgFilter = searchParams.get("organizationId") || (session?.roleCode !== "SUPERADMIN" ? session?.organizationId : null);
+
+    const allDrivers = await db
+      .select()
+      .from(drivers)
+      .where(orgFilter ? eq(drivers.organizationId, orgFilter) : undefined)
+      .orderBy(desc(drivers.createdAt));
+
     const filtered = search
       ? allDrivers.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()) || d.licenseNumber.includes(search))
       : allDrivers;
@@ -39,9 +52,20 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const now = new Date();
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    let targetOrgId = body.organizationId || session?.organizationId;
+    if (!targetOrgId) {
+      const defaultOrg = await db.query.organizations.findFirst();
+      targetOrgId = defaultOrg?.id || "org_nusantara_logistik";
+    }
+
     const newDriver = {
       id: `drv_${Date.now()}`,
-      organizationId: body.organizationId || "org_nusantara_logistik",
+      organizationId: targetOrgId,
       name: body.name,
       licenseNumber: body.licenseNumber,
       phoneNumber: body.phoneNumber || body.phone || "-",
@@ -49,8 +73,15 @@ export async function POST(request: NextRequest) {
       createdAt: now,
       updatedAt: now,
     };
+
     await db.insert(drivers).values(newDriver);
-    return NextResponse.json({ code: 201, status: "Created", message: "Driver berhasil ditambahkan", data: newDriver });
+
+    return NextResponse.json({
+      code: 201,
+      status: "Created",
+      message: "Driver berhasil ditambahkan",
+      data: newDriver,
+    });
   } catch (err) {
     return NextResponse.json({ code: 500, status: "Error", message: String(err) }, { status: 500 });
   }
