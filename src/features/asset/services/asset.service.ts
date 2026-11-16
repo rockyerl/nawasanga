@@ -11,7 +11,8 @@ class AssetService {
     sortBy = "createdAt",
     direction = QueryDirection.DESC,
     search = "",
-  }: Query.Params) {
+    category,
+  }: Query.Params & { category?: string }) {
     try {
       const queryParams = new URLSearchParams({
         page: page.toString(),
@@ -20,6 +21,10 @@ class AssetService {
         direction,
         search,
       });
+
+      if (category && category !== "all") {
+        queryParams.set("category", category);
+      }
 
       const res = await Client.get<HttpClientTypes.Response<unknown>, unknown>(
         `internal/vehicles?${queryParams.toString()}`

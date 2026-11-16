@@ -23,7 +23,17 @@ export async function GET(request: NextRequest) {
     const session = token ? await verifySessionToken(token) : null;
 
     // Filter by organization if not Superadmin or if explicitly requested, or when accessing client portal
-    const orgFilter = searchParams.get("organizationId") || (session?.roleCode !== "SUPERADMIN" || portal === "client" ? session?.organizationId : null);
+    let orgFilter = searchParams.get("organizationId") || (session?.roleCode !== "SUPERADMIN" || portal === "client" ? session?.organizationId : null);
+
+    const userOrg = orgFilter
+      ? await db.query.organizations.findFirst({
+          where: eq(organizations.id, orgFilter),
+        })
+      : await db.query.organizations.findFirst();
+
+    if (!orgFilter && portal === "client" && userOrg) {
+      orgFilter = userOrg.id;
+    }
 
     const allVehicles = await db.query.vehicles.findMany({
       where: orgFilter ? eq(vehicles.organizationId, orgFilter) : undefined,
@@ -183,18 +193,32 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const activeVehiclesCount = allVehicles.filter((v) => v.status === "operational").length;
+    const avgEmissionPerAsset = allVehicles.length > 0 ? (totalEmissionsTon / allVehicles.length).toFixed(2) : "0.00";
+
     // Client Dashboard stats
     return NextResponse.json({
       code: 200,
       status: "OK",
       message: "Data statistik dashboard client berhasil diambil dari database",
       data: {
+        organization: {
+          id: userOrg?.id || "org_nusantara_logistik",
+          name: userOrg?.name || "PT Nusantara Logistik Makmur",
+          plan: userOrg?.plan?.toLowerCase() || "pro",
+        },
         statCards: [
-          { label: "Total Emisi Karbon", value: `${totalEmissionsTon}`, unit: "ton CO₂e", trend: "-3,8%", trendUp: true, comparison: "vs bulan lalu", barWidth: "65%", barColor: "#1D9E75" },
-          { label: "Konsumsi BBM", value: `${totalFuelLiters.toLocaleString("id-ID")}`, unit: "Liter", trend: "+1,2%", trendUp: false, comparison: "vs bulan lalu", barWidth: "55%", barColor: "#3B82F6" },
-          { label: "Total Biaya BBM", value: `Rp ${(totalCostIdr / 1000000).toFixed(1)}M`, unit: "IDR", trend: "-2,1%", trendUp: true, comparison: "vs bulan lalu", barWidth: "60%", barColor: "#B8962E" },
-          { label: "Armada Operasional", value: `${allVehicles.length}`, unit: "unit", trend: "100%", trendUp: true, comparison: "armada aktif", barWidth: "100%", barColor: "#1D6B5A" },
+          { label: "Total Emisi Karbon", value: `${totalEmissionsTon}`, unit: "ton CO₂e", trend: "-3,8%", trendUp: true, comparison: "vs baseline", barWidth: "65%", barColor: "#1D9E75" },
+          { label: "Konsumsi BBM", value: `${totalFuelLiters.toLocaleString("id-ID")}`, unit: "Liter", trend: "+1,2%", trendUp: false, comparison: "vs baseline", barWidth: "55%", barColor: "#3B82F6" },
+          { label: "Total Biaya BBM", value: `Rp ${(totalCostIdr / 1000000).toFixed(1)}Jt`, unit: "IDR", trend: "-2,1%", trendUp: true, comparison: "vs baseline", barWidth: "60%", barColor: "#B8962E" },
+          { label: "Armada Operasional", value: `${allVehicles.length}`, unit: "unit", trend: `${allVehicles.length > 0 ? Math.round((activeVehiclesCount / allVehicles.length) * 100) : 100}%`, trendUp: true, comparison: "armada aktif", barWidth: "100%", barColor: "#1D6B5A" },
         ],
+        fleetSummary: {
+          total: `${allVehicles.length} Unit`,
+          active: `${activeVehiclesCount} Unit (${allVehicles.length > 0 ? Math.round((activeVehiclesCount / allVehicles.length) * 100) : 100}%)`,
+          emissionsPerUnit: `${avgEmissionPerAsset} ton CO₂e`,
+          subtext: "Sesuai Standar Regulasi Scope 1",
+        },
         monthlyEmissions,
         topEmitters,
         assets,

@@ -6,10 +6,10 @@ import type { HttpClientTypes } from "@/types/lib/http-client.type";
 import type { Query } from "@/types/lib/query.type";
 
 export const assetKeys = {
-    list: (params: Query.Params) => ["assets-list", params] as const,
+    list: (params: Query.Params & { category?: string }) => ["assets-list", params] as const,
 };
 
-export function useAssets(params: Query.Params) {
+export function useAssets(params: Query.Params & { category?: string }) {
     return useQuery({
         queryKey: assetKeys.list(params),
         queryFn: () => AssetService.getAssets(params),

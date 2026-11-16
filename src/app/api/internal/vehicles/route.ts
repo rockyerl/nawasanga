@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search") || "";
+    const categoryParam = searchParams.get("category"); // "vehicle" | "equipment" | "all"
     const page = parseInt(searchParams.get("page") || "1", 10);
     const itemPerPage = parseInt(searchParams.get("itemPerPage") || "10", 10);
 
@@ -30,19 +31,8 @@ export async function GET(request: NextRequest) {
       orderBy: [desc(vehicles.createdAt)],
     });
 
-    const filtered = search
-      ? vehicleList.filter(
-          (v) =>
-            v.plateNumber.toLowerCase().includes(search.toLowerCase()) ||
-            v.brandModel.toLowerCase().includes(search.toLowerCase())
-        )
-      : vehicleList;
-
-    const start = (page - 1) * itemPerPage;
-    const items = filtered.slice(start, start + itemPerPage);
-
     const isStationary = (t: string) => {
-      const lower = t.toLowerCase();
+      const lower = (t || "").toLowerCase();
       return (
         lower.includes("excavator") ||
         lower.includes("genset") ||
@@ -52,9 +42,33 @@ export async function GET(request: NextRequest) {
         lower.includes("pompa") ||
         lower.includes("compressor") ||
         lower.includes("loader") ||
-        lower.includes("stasioner")
+        lower.includes("stasioner") ||
+        lower.includes("alat berat") ||
+        lower.includes("heavy equipment")
       );
     };
+
+    const vehicleCount = vehicleList.filter((v) => !isStationary(v.vehicleType)).length;
+    const equipmentCount = vehicleList.filter((v) => isStationary(v.vehicleType)).length;
+
+    let categoryFiltered = vehicleList;
+    if (categoryParam === "vehicle") {
+      categoryFiltered = vehicleList.filter((v) => !isStationary(v.vehicleType));
+    } else if (categoryParam === "equipment") {
+      categoryFiltered = vehicleList.filter((v) => isStationary(v.vehicleType));
+    }
+
+    const filtered = search
+      ? categoryFiltered.filter(
+          (v) =>
+            v.plateNumber.toLowerCase().includes(search.toLowerCase()) ||
+            v.brandModel.toLowerCase().includes(search.toLowerCase()) ||
+            v.vehicleType.toLowerCase().includes(search.toLowerCase())
+        )
+      : categoryFiltered;
+
+    const start = (page - 1) * itemPerPage;
+    const items = filtered.slice(start, start + itemPerPage);
 
     return NextResponse.json({
       code: 200,
@@ -91,6 +105,11 @@ export async function GET(request: NextRequest) {
           };
         }),
         count: filtered.length,
+        counts: {
+          all: vehicleList.length,
+          vehicle: vehicleCount,
+          equipment: equipmentCount,
+        },
         page,
         itemPerPage,
         totalPages: Math.max(1, Math.ceil(filtered.length / itemPerPage)),

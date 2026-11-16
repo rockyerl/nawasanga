@@ -42,11 +42,12 @@ interface Props {
     open: boolean;
     setOpen: (v: boolean) => void;
     initialData?: AssetTypes.Service.AssetData;
+    defaultCategory?: "vehicle" | "equipment";
 }
 
-export function AssetFormDialog({ open, setOpen, initialData }: Props) {
+export function AssetFormDialog({ open, setOpen, initialData, defaultCategory = "vehicle" }: Props) {
     const isEdit = !!initialData;
-    const [assetCategory, setAssetCategory] = useState<"vehicle" | "equipment">("vehicle");
+    const [assetCategory, setAssetCategory] = useState<"vehicle" | "equipment">(defaultCategory);
 
     // Form fields
     const [plateOrSerial, setPlateOrSerial] = useState("");
@@ -100,10 +101,11 @@ export function AssetFormDialog({ open, setOpen, initialData }: Props) {
             setStatus(initialData.status || "Aktif");
             setNotes(initialData.notes || "");
         } else if (open && !initialData) {
-            setAssetCategory("vehicle");
+            const initialCat = defaultCategory || "vehicle";
+            setAssetCategory(initialCat);
             setPlateOrSerial("");
             setBrandModel("");
-            setAssetType(VEHICLE_TYPES[0].value);
+            setAssetType(initialCat === "vehicle" ? VEHICLE_TYPES[0].value : EQUIPMENT_TYPES[0].value);
             setFuelTypeId(fuelItems[0]?.id || "");
             setDriverId("none");
             setLocationId(locationItems[0]?.id || "");
@@ -111,7 +113,7 @@ export function AssetFormDialog({ open, setOpen, initialData }: Props) {
             setStatus("Aktif");
             setNotes("");
         }
-    }, [open, initialData, fuelItems, locationItems]);
+    }, [open, initialData, defaultCategory, fuelItems, locationItems]);
 
     const handleCategoryChange = (cat: "vehicle" | "equipment") => {
         setAssetCategory(cat);

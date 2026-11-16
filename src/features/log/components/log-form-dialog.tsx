@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateLog, useUpdateLog } from "@/features/log/hooks/use-log-queries";
-import { useAssets } from "@/features/operational/hooks/operational-user-queries";
+import { useAssets } from "@/features/asset/hooks/use-asset-queries";
 import { useDrivers } from "@/features/driver/hooks/driver-queries";
 import { useFuelTypes } from "@/features/fuel-type/hooks/fuel-type-queries";
 import { Fuel, Zap, Calculator, Gauge, User, Calendar } from "lucide-react";
@@ -121,6 +121,7 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
             driverId: driverId && driverId !== "none" ? driverId : null,
             fuelTypeId,
             liters: parseFloat(liters),
+            costIdr: estCost,
             odometerKm: odometerKm ? parseInt(odometerKm, 10) : null,
             loggedAt: new Date(loggedAt).toISOString(),
             notes: notes.trim(),
@@ -267,28 +268,38 @@ export function LogFormDialog({ open, setOpen, initialData }: Props) {
                     </div>
 
                     {/* Live Calculation Preview Card */}
-                    <div className="p-4 rounded-xl bg-[#1D6B5A]/5 border border-[#1D6B5A]/20 grid grid-cols-2 gap-4">
-                        <div className="space-y-0.5">
-                            <span className="text-[10px] font-medium text-[#7A7A72] uppercase tracking-wider">
-                                Estimasi Emisi Gas Buang
-                            </span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-lg font-bold font-mono text-[#1D6B5A]">
+                    <div className="p-4 rounded-xl bg-[#1D6B5A]/5 border border-[#1D6B5A]/20 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-semibold text-[#1D6B5A] uppercase tracking-wider">
+                                    Estimasi Emisi Gas Buang (Scope 1/2)
+                                </span>
+                            </div>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-xl font-bold font-mono text-[#1D6B5A]">
                                     {estEmission.toLocaleString("id-ID")}
                                 </span>
-                                <span className="text-xs text-[#7A7A72]">kg CO₂e</span>
+                                <span className="text-xs font-semibold text-[#1D6B5A]">kg CO₂e</span>
                             </div>
+                            <p className="text-[10px] text-[#7A7A72]">
+                                Rumus: {numLiters} {isElectricity ? "kWh" : "L"} × {selectedFuel?.emissionFactor || 2.68} kg CO₂/{selectedFuel?.unit || "L"} (IPCC)
+                            </p>
                         </div>
 
-                        <div className="space-y-0.5">
-                            <span className="text-[10px] font-medium text-[#7A7A72] uppercase tracking-wider">
-                                Estimasi Biaya Transaksi
-                            </span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-lg font-bold font-mono text-[#1A1A18]">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-semibold text-[#1A1A18] uppercase tracking-wider">
+                                    Estimasi Biaya Transaksi
+                                </span>
+                            </div>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-xl font-bold font-mono text-[#1A1A18]">
                                     {estCost.toLocaleString("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 })}
                                 </span>
                             </div>
+                            <p className="text-[10px] text-[#7A7A72]">
+                                Tarif: {((selectedFuel?.pricePerUnit || 6800)).toLocaleString("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 })} / {selectedFuel?.unit || "L"}
+                            </p>
                         </div>
                     </div>
 

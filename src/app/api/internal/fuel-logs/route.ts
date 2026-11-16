@@ -88,21 +88,30 @@ export async function POST(request: NextRequest) {
     }
 
     const liters = parseFloat(body.liters) || 50;
-    const emissionFactor = 2.68; // standard kg CO2 / liter diesel
+
+    // Look up real fuel type from DB for accurate IPCC emission factor and unit price
+    const fuel = body.fuelTypeId
+      ? await db.query.fuelTypes.findFirst({
+          where: eq(fuelTypes.id, body.fuelTypeId),
+        })
+      : null;
+
+    const emissionFactor = fuel?.emissionFactorKgCo2PerLiter ?? 2.68;
+    const unitPrice = fuel?.unitPriceIdr ?? 14500;
     const emissionCo2Kg = parseFloat((liters * emissionFactor).toFixed(2));
-    const costIdr = parseInt(body.costIdr, 10) || Math.round(liters * 14500);
+    const costIdr = parseInt(body.costIdr, 10) || Math.round(liters * unitPrice);
 
     const newLog = {
       id: `log_${Date.now()}`,
       organizationId: targetOrgId,
       vehicleId: body.vehicleId || body.assetId || "veh_demo_1",
-      driverId: body.driverId || null,
-      fuelTypeId: body.fuelTypeId || "fuel_solar",
+      driverId: body.driverId && body.driverId !== "none" ? body.driverId : null,
+      fuelTypeId: fuel?.id || body.fuelTypeId || "fuel_solar",
       liters,
       costIdr,
-      odometerKm: parseInt(body.odometerKm, 10) || 54000,
+      odometerKm: body.odometerKm ? parseInt(body.odometerKm, 10) : null,
       emissionCo2Kg,
-      fuelStationName: body.fuelStationName || "SPBU Pertamina Cikarang",
+      fuelStationName: body.notes || body.fuelStationName || "SPBU Pertamina Cikarang",
       receiptImageUrl: body.receiptImageUrl || "/images/receipt-placeholder.png",
       loggedAt: body.loggedAt ? new Date(body.loggedAt) : now,
       createdAt: now,

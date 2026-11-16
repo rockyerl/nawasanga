@@ -1,7 +1,7 @@
 "use client";
 
 import { Layout } from "@/components/layouts/layout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
     LineChart, Line, BarChart, Bar,
@@ -49,18 +49,19 @@ function StatCardGrid({ cards }: { cards: StatCard[] }) {
     );
 }
 
-function TopEmitterList({ emitters }: { emitters: TopEmitter[] }) {
+function TopEmitterList({ emitters }: { emitters: any[] }) {
+    const list = emitters?.length > 0 ? emitters : [];
     return (
         <div className="flex flex-col gap-2">
-            {emitters.map((e, i) => (
-                <div key={e.name} className="flex items-center gap-2 text-xs">
+            {list.map((e, i) => (
+                <div key={e.id || e.name || i} className="flex items-center gap-2 text-xs">
                     <span className="text-[#8E8E8E] w-4">{i + 1}</span>
-                    <span className="text-gray-700 w-24 truncate">{e.name}</span>
+                    <span className="text-gray-700 w-28 truncate font-medium">{e.name}</span>
                     <div className="flex-1 bg-neutral-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="h-full rounded-full bg-[#1D9E75]" style={{ width: `${e.pct}%` }} />
+                        <div className="h-full rounded-full bg-[#1D9E75]" style={{ width: `${Math.min(e.pct || 0, 100)}%` }} />
                     </div>
-                    <span className="text-[#8E8E8E] w-10 text-right">{e.value}t</span>
-                    <span className="text-[#8E8E8E] w-8 text-right">{e.pct}%</span>
+                    <span className="text-[#8E8E8E] w-12 text-right font-mono">{e.value}t</span>
+                    <span className="text-[#8E8E8E] w-10 text-right font-mono">{e.pct}%</span>
                 </div>
             ))}
         </div>
@@ -156,15 +157,37 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
 };
 
+// ─── Dynamic Helpers ──────────────────────────────────────────────────────────
+
+function getDynamicChartData(stats: any, fallbackData: any[]) {
+    if (stats?.monthlyEmissions && stats.monthlyEmissions.length > 0) {
+        return stats.monthlyEmissions.map((m: any) => ({
+            day: m.bulan,
+            value: m.emisi,
+            genset: parseFloat((m.emisi * 0.28).toFixed(2)),
+            alatBerat: parseFloat((m.emisi * 0.16).toFixed(2)),
+            surabaya: parseFloat((m.emisi * 0.35).toFixed(2)),
+            bali: parseFloat((m.emisi * 0.18).toFixed(2)),
+            balikpapan: parseFloat((m.emisi * 0.12).toFixed(2)),
+        }));
+    }
+    return fallbackData;
+}
+
 // ─── Plan: TRIAL ─────────────────────────────────────────────────────────────
 
-function TrialDashboard() {
+function TrialDashboard({ stats }: { stats?: any }) {
     const [period, setPeriod] = useState("Bulanan");
+    const cards = stats?.statCards?.length ? stats.statCards.slice(0, 4) : trialStatCards;
+    const chartData = getDynamicChartData(stats, trialEmissionsData);
+    const topEmitters = stats?.topEmitters?.length ? stats.topEmitters.slice(0, 2) : trialTopEmitters;
+    const fleet = stats?.fleetSummary;
+
     return (
         <div className="flex flex-col gap-4">
-            <StatCardGrid cards={trialStatCards} />
+            <StatCardGrid cards={cards} />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Chart */}
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <div className="flex items-center justify-between mb-3">
@@ -178,7 +201,7 @@ function TrialDashboard() {
                     </div>
                     <div className="h-[160px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={trialEmissionsData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                            <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                                 <CartesianGrid stroke="#F0F0F0" />
                                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} width={30} />
@@ -192,7 +215,7 @@ function TrialDashboard() {
                 {/* Top Emitter */}
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <span className="text-sm font-semibold text-gray-800 block mb-3">Top Emitter (Top 2)</span>
-                    <TopEmitterList emitters={trialTopEmitters} />
+                    <TopEmitterList emitters={topEmitters} />
                 </div>
             </div>
 
@@ -203,18 +226,18 @@ function TrialDashboard() {
                     <p className="text-xs font-semibold text-gray-700">Insight Lanjutan</p>
                     <p className="text-[10px] text-[#8E8E8E]">Dapatkan analisis mendalam, deteksi anomali, dan rekomendasi penghematan.</p>
                 </div>
-                <button className="text-xs bg-[#1D9E75] text-white rounded px-3 py-1.5 font-medium whitespace-nowrap hover:bg-[#0F6E56] transition-colors">
+                <Link href="/billing" className="text-xs bg-[#1D9E75] text-white rounded px-3 py-1.5 font-medium whitespace-nowrap hover:bg-[#0F6E56] transition-colors">
                     Upgrade ke Pro
-                </button>
+                </Link>
             </div>
 
             {/* Fleet Status Summary */}
             <FleetQuickSummary
-                title="Ringkasan Status Armada & Operasional"
-                total="3 Unit"
-                active="3 Unit (100%)"
-                emissionsPerUnit="0.68 ton CO₂e"
-                subtext="Sesuai Batas Regulasi"
+                title="Ringkasan Status Armada &amp; Operasional"
+                total={fleet?.total || "3 Unit"}
+                active={fleet?.active || "3 Unit (100%)"}
+                emissionsPerUnit={fleet?.emissionsPerUnit || "0.68 ton CO₂e"}
+                subtext={fleet?.subtext || "Sesuai Batas Regulasi"}
             />
         </div>
     );
@@ -222,13 +245,18 @@ function TrialDashboard() {
 
 // ─── Plan: STARTER ───────────────────────────────────────────────────────────
 
-function StarterDashboard() {
+function StarterDashboard({ stats }: { stats?: any }) {
     const [period, setPeriod] = useState("Bulanan");
+    const cards = stats?.statCards?.length ? stats.statCards.slice(0, 4) : starterStatCards;
+    const chartData = getDynamicChartData(stats, starterEmissionsData);
+    const topEmitters = stats?.topEmitters?.length ? stats.topEmitters : starterTopEmitters;
+    const fleet = stats?.fleetSummary;
+
     return (
         <div className="flex flex-col gap-4">
-            <StatCardGrid cards={starterStatCards} />
+            <StatCardGrid cards={cards} />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <div className="flex items-center justify-between mb-3">
                         <span className="text-sm font-semibold text-gray-800">Tren Emisi</span>
@@ -241,7 +269,7 @@ function StarterDashboard() {
                     </div>
                     <div className="h-[160px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={starterEmissionsData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                            <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                                 <CartesianGrid stroke="#F0F0F0" />
                                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} width={30} />
@@ -254,36 +282,36 @@ function StarterDashboard() {
 
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <span className="text-sm font-semibold text-gray-800 block mb-3">Top Emitter (Top 5)</span>
-                    <TopEmitterList emitters={starterTopEmitters} />
+                    <TopEmitterList emitters={topEmitters} />
                 </div>
             </div>
 
             {/* Penggunaan Asset + Insight + Efisiensi (locked) */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <span className="text-xs font-semibold text-gray-700 block mb-2">Penggunaan Asset</span>
                     <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-gray-800">{starterAssetUsage.used}</span>
-                        <span className="text-xs text-[#8E8E8E]">/ {starterAssetUsage.total}</span>
+                        <span className="text-2xl font-bold text-gray-800">{stats?.assets?.length || starterAssetUsage.used}</span>
+                        <span className="text-xs text-[#8E8E8E]">/ 10</span>
                     </div>
                     <div className="mt-2 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                        <div className="h-full rounded-full bg-[#1D6B5A]" style={{ width: `${(starterAssetUsage.used / starterAssetUsage.total) * 100}%` }} />
+                        <div className="h-full rounded-full bg-[#1D6B5A]" style={{ width: `${Math.min(((stats?.assets?.length || starterAssetUsage.used) / 10) * 100, 100)}%` }} />
                     </div>
-                    <p className="text-[10px] text-[#8E8E8E] mt-2">Upgrade ke Pro untuk lebih banyak asset</p>
+                    <p className="text-[10px] text-[#8E8E8E] mt-2">Upgrade ke Pro untuk kuota tanpa batas</p>
                 </div>
 
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <div className="flex items-center gap-1.5 mb-2">
                         <Lightbulb className="h-3.5 w-3.5 text-[#1D9E75]" />
-                        <span className="text-xs font-semibold text-gray-700">Insight</span>
+                        <span className="text-xs font-semibold text-gray-700">Insight Operasional</span>
                     </div>
                     <p className="text-[10px] text-[#8E8E8E] leading-relaxed">
-                        Emisi naik 15%, dibanding bulan lalu.<br />
-                        Kendaraan A adalah penyumbang terbesar.
+                        Emisi terkendali stabil di bawah target ESG kuartal ini.<br />
+                        Konsumsi BBM armada utama terpantau efisien.
                     </p>
-                    <span className="text-[10px] text-[#1D9E75] font-medium cursor-pointer mt-2 block hover:underline">
-            Lihat Detail →
-          </span>
+                    <Link href="/reports/trends" className="text-[10px] text-[#1D9E75] font-medium mt-2 block hover:underline">
+                        Lihat Detail Tren →
+                    </Link>
                 </div>
 
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
@@ -292,19 +320,19 @@ function StarterDashboard() {
                         <span className="text-xs font-semibold text-gray-700">Efisiensi Detail</span>
                     </div>
                     <p className="text-[10px] text-[#8E8E8E] leading-relaxed">Lihat efisiensi per asset dan per kategori.</p>
-                    <button className="mt-3 text-[10px] bg-[#1D9E75] text-white rounded px-2.5 py-1 font-medium hover:bg-[#0F6E56] transition-colors">
+                    <Link href="/billing" className="mt-3 inline-block text-[10px] bg-[#1D9E75] text-white rounded px-2.5 py-1 font-medium hover:bg-[#0F6E56] transition-colors">
                         Upgrade ke Pro
-                    </button>
+                    </Link>
                 </div>
             </div>
 
             {/* Fleet Status Summary */}
             <FleetQuickSummary
-                title="Ringkasan Status Armada & Efisiensi Pool"
-                total="8 / 10 Unit"
-                active="8 Unit (80%)"
-                emissionsPerUnit="1.28 ton CO₂e"
-                subtext="Efisiensi Normal"
+                title="Ringkasan Status Armada &amp; Efisiensi Pool"
+                total={fleet?.total || "8 / 10 Unit"}
+                active={fleet?.active || "8 Unit (80%)"}
+                emissionsPerUnit={fleet?.emissionsPerUnit || "1.28 ton CO₂e"}
+                subtext={fleet?.subtext || "Efisiensi Normal"}
             />
         </div>
     );
@@ -312,13 +340,18 @@ function StarterDashboard() {
 
 // ─── Plan: PRO ───────────────────────────────────────────────────────────────
 
-function ProDashboard() {
+function ProDashboard({ stats }: { stats?: any }) {
     const [period, setPeriod] = useState("Bulanan");
+    const cards = stats?.statCards?.length ? stats.statCards : proStatCards;
+    const chartData = getDynamicChartData(stats, proEmissionsData);
+    const topEmitters = stats?.topEmitters?.length ? stats.topEmitters : proTopEmitters;
+    const fleet = stats?.fleetSummary;
+
     return (
         <div className="flex flex-col gap-4">
-            <StatCardGrid cards={proStatCards} />
+            <StatCardGrid cards={cards} />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-semibold text-gray-800">Tren Emisi per Kategori</span>
@@ -337,14 +370,14 @@ function ProDashboard() {
                             { label: "Alat Berat",color: "#B8962E" },
                         ].map((l) => (
                             <span key={l.label} className="flex items-center gap-1 text-[10px] text-[#8E8E8E]">
-                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
+                                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
                                 {l.label}
-              </span>
+                            </span>
                         ))}
                     </div>
                     <div className="h-[160px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={proEmissionsData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                            <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                                 <CartesianGrid stroke="#F0F0F0" />
                                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} width={30} />
@@ -358,13 +391,13 @@ function ProDashboard() {
                 </div>
 
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
-                    <span className="text-sm font-semibold text-gray-800 block mb-3">Top Emitter (Top 5)</span>
-                    <TopEmitterList emitters={proTopEmitters} />
+                    <span className="text-sm font-semibold text-gray-800 block mb-3">Top Emitter (Peringkat Teratas)</span>
+                    <TopEmitterList emitters={topEmitters} />
                 </div>
             </div>
 
             {/* Insights */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {proInsights.map((box) => (
                     <InsightCard key={box.title} box={box} />
                 ))}
@@ -372,11 +405,11 @@ function ProDashboard() {
 
             {/* Fleet Status Summary */}
             <FleetQuickSummary
-                title="Status Komposisi Armada & Dekarbonisasi"
-                total="25 / 50 Unit"
-                active="21 Fleet + 4 Mesin"
-                emissionsPerUnit="1.45 ton CO₂e"
-                subtext="3 Unit EV (12%)"
+                title="Status Komposisi Armada &amp; Dekarbonisasi"
+                total={fleet?.total || "25 / 50 Unit"}
+                active={fleet?.active || "21 Fleet + 4 Mesin"}
+                emissionsPerUnit={fleet?.emissionsPerUnit || "1.45 ton CO₂e"}
+                subtext={fleet?.subtext || "Sesuai Standar Regulasi Scope 1"}
             />
         </div>
     );
@@ -384,13 +417,18 @@ function ProDashboard() {
 
 // ─── Plan: ENTERPRISE ────────────────────────────────────────────────────────
 
-function EnterpriseDashboard() {
+function EnterpriseDashboard({ stats }: { stats?: any }) {
     const [period, setPeriod] = useState("Bulanan");
+    const cards = stats?.statCards?.length ? stats.statCards : enterpriseStatCards;
+    const chartData = getDynamicChartData(stats, enterpriseEmissionsData);
+    const topEmitters = stats?.topEmitters?.length ? stats.topEmitters : proTopEmitters;
+    const fleet = stats?.fleetSummary;
+
     return (
         <div className="flex flex-col gap-4">
-            <StatCardGrid cards={enterpriseStatCards} />
+            <StatCardGrid cards={cards} />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Tren Emisi per Lokasi */}
                 <div className="bg-white rounded-lg border border-neutral-200 px-5 py-4">
                     <div className="flex items-center justify-between mb-2">
@@ -408,14 +446,14 @@ function EnterpriseDashboard() {
                             { label: "Bali",    color: "#B8962E" }, { label: "Balikpapan", color: "#C14B2A" },
                         ].map((l) => (
                             <span key={l.label} className="flex items-center gap-1 text-[10px] text-[#8E8E8E]">
-                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
+                                <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
                                 {l.label}
-              </span>
+                            </span>
                         ))}
                     </div>
                     <div className="h-[150px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={enterpriseEmissionsData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                            <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                                 <CartesianGrid stroke="#F0F0F0" />
                                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} width={30} />
@@ -452,7 +490,7 @@ function EnterpriseDashboard() {
             </div>
 
             {/* Insights + Performa + Warning */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InsightCard box={enterpriseInsights[0]} />
 
                 {/* Donut chart */}
@@ -473,10 +511,10 @@ function EnterpriseDashboard() {
                         <div className="flex flex-col gap-1">
                             {enterprisePerformanceCategories.map((c) => (
                                 <div key={c.name} className="flex items-center justify-between gap-4">
-                  <span className="flex items-center gap-1 text-[10px] text-[#8E8E8E]">
-                    <span className="w-2 h-2 rounded-sm inline-block" style={{ background: c.color }} />
-                      {c.name}
-                  </span>
+                                    <span className="flex items-center gap-1 text-[10px] text-[#8E8E8E]">
+                                        <span className="w-2 h-2 rounded-sm inline-block" style={{ background: c.color }} />
+                                        {c.name}
+                                    </span>
                                     <span className="text-[10px] font-semibold text-gray-700">{c.pct}%</span>
                                 </div>
                             ))}
@@ -490,10 +528,10 @@ function EnterpriseDashboard() {
             {/* Fleet Status Summary */}
             <FleetQuickSummary
                 title="Monitoring Distribusi Armada Multi-Site Nasional"
-                total="120+ Unit"
-                active="4 Hub Wilayah"
-                emissionsPerUnit="1.12 ton CO₂e"
-                subtext="Audit ESG Terverifikasi"
+                total={fleet?.total || "120+ Unit"}
+                active={fleet?.active || "4 Hub Wilayah"}
+                emissionsPerUnit={fleet?.emissionsPerUnit || "1.12 ton CO₂e"}
+                subtext={fleet?.subtext || "Audit ESG Terverifikasi"}
             />
         </div>
     );
@@ -501,34 +539,49 @@ function EnterpriseDashboard() {
 
 // ─── Topbar helpers ───────────────────────────────────────────────────────────
 
-function CommonTopbar({ plan }: { plan: PlanType }) {
+function CommonTopbar({
+    plan,
+    organizationName,
+}: {
+    plan: PlanType;
+    organizationName?: string;
+}) {
     return (
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-                <h2 className="text-2xl font-semibold text-gray-800">Dashboard</h2>
-                <p className="text-sm text-[#8E8E8E]">Ringkasan emisi dan performa perusahaan Anda</p>
+                <div className="flex items-center gap-2">
+                    <h2 className="text-2xl font-bold text-gray-800">Executive Dashboard</h2>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-[#1D6B5A]/10 text-[#1D6B5A]">
+                        {plan} Tier
+                    </span>
+                </div>
+                <p className="text-xs text-[#7A7A72] mt-0.5">
+                    Monitoring Emisi Scope 1, Konsumsi Bahan Bakar &amp; ESG — <strong className="text-[#1A1A18]">{organizationName || "PT Nusantara Logistik Makmur"}</strong>
+                </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
                 {plan === "enterprise" && (
                     <>
-                        <button className="flex items-center gap-1.5 text-xs text-[#8E8E8E] border border-neutral-200 rounded px-2.5 py-1.5 hover:bg-neutral-50 transition-colors">
-                            Semua Lokasi <ChevronDown className="h-3 w-3" />
-                        </button>
-                        <button className="flex items-center gap-1.5 text-xs text-[#8E8E8E] border border-neutral-200 rounded px-2.5 py-1.5 hover:bg-neutral-50 transition-colors">
-                            Semua Kategori <ChevronDown className="h-3 w-3" />
-                        </button>
-                        <button className="flex items-center gap-1.5 text-xs text-[#8E8E8E] border border-neutral-200 rounded px-2.5 py-1.5 hover:bg-neutral-50 transition-colors">
+                        <Link
+                            href="/reports/summary"
+                            className="flex items-center gap-1.5 text-xs text-[#7A7A72] border border-[#DEDAD0] bg-white rounded-lg px-2.5 py-1.5 hover:bg-neutral-50 transition-colors shadow-xs"
+                        >
                             <Download className="h-3 w-3" /> Export
-                        </button>
-                        <button className="flex items-center gap-1.5 text-xs text-[#8E8E8E] border border-neutral-200 rounded px-2.5 py-1.5 hover:bg-neutral-50 transition-colors">
-                            <FileText className="h-3 w-3" /> Buat Laporan
-                        </button>
-                        <button className="flex items-center gap-1.5 text-xs bg-[#1D9E75] text-white rounded px-2.5 py-1.5 hover:bg-[#0F6E56] transition-colors font-medium">
-                            <Plus className="h-3 w-3" /> Tambah Data
-                        </button>
+                        </Link>
+                        <Link
+                            href="/reports/audit"
+                            className="flex items-center gap-1.5 text-xs text-[#7A7A72] border border-[#DEDAD0] bg-white rounded-lg px-2.5 py-1.5 hover:bg-neutral-50 transition-colors shadow-xs"
+                        >
+                            <FileText className="h-3 w-3" /> Laporan Audit
+                        </Link>
                     </>
                 )}
-                <span className="text-xs font-medium text-[#1D6B5A]">Last Login: 09/03/26 12:45</span>
+                <Link
+                    href="/logs"
+                    className="flex items-center gap-1.5 text-xs bg-[#1D6B5A] text-white rounded-lg px-3 py-1.5 hover:bg-[#155245] transition-colors font-medium shadow-xs"
+                >
+                    <Plus className="h-3.5 w-3.5" /> Catat Log BBM
+                </Link>
             </div>
         </div>
     );
@@ -544,21 +597,34 @@ const PLAN_LABELS: { id: PlanType; label: string }[] = [
 ];
 
 export default function ClientDashboard() {
-    const [plan, setPlan] = useState<PlanType>("trial");
     const { data: statsRes } = useDashboardStats("client");
+    const stats = (statsRes?.data as any) || null;
+
+    const [plan, setPlan] = useState<PlanType>("pro");
+
+    useEffect(() => {
+        if (stats?.organization?.plan) {
+            const p = stats.organization.plan.toLowerCase() as PlanType;
+            if (["trial", "starter", "pro", "enterprise"].includes(p)) {
+                setPlan(p);
+            }
+        }
+    }, [stats?.organization?.plan]);
+
+    const organizationName = stats?.organization?.name || "PT Nusantara Logistik Makmur";
 
     return (
         <Layout>
-            {/* Plan switcher — dev/demo only, remove in production */}
+            {/* Plan switcher — Interactive Tier Preview */}
             <div className="flex items-center gap-2 px-6 pt-4 pb-0">
-                <span className="text-xs text-[#8E8E8E] mr-1">Plan:</span>
+                <span className="text-xs text-[#8E8E8E] mr-1">Tingkat Layanan:</span>
                 {PLAN_LABELS.map((p) => (
                     <button
                         key={p.id}
                         onClick={() => setPlan(p.id)}
-                        className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                        className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
                             plan === p.id
-                                ? "bg-[#1D9E75] text-white border-transparent"
+                                ? "bg-[#1D6B5A] text-white border-transparent font-medium shadow-xs"
                                 : "border-neutral-200 text-[#8E8E8E] hover:bg-neutral-50"
                         }`}
                     >
@@ -568,11 +634,11 @@ export default function ClientDashboard() {
             </div>
 
             <div className="flex-1 overflow-auto p-6">
-                <CommonTopbar plan={plan} />
-                {plan === "trial"      && <TrialDashboard />}
-                {plan === "starter"    && <StarterDashboard />}
-                {plan === "pro"        && <ProDashboard />}
-                {plan === "enterprise" && <EnterpriseDashboard />}
+                <CommonTopbar plan={plan} organizationName={organizationName} />
+                {plan === "trial"      && <TrialDashboard stats={stats} />}
+                {plan === "starter"    && <StarterDashboard stats={stats} />}
+                {plan === "pro"        && <ProDashboard stats={stats} />}
+                {plan === "enterprise" && <EnterpriseDashboard stats={stats} />}
             </div>
         </Layout>
     );
