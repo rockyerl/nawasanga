@@ -14,3 +14,5 @@ local.db*
 *.db-shm
 .DS_Store
 *.tsbuildinfo
+
+.vercel
