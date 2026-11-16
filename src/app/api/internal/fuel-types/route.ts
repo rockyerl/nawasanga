@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
           emissionFactor: f.emissionFactorKgCo2PerLiter,
           unitPriceIdr: f.unitPriceIdr,
           pricePerUnit: f.unitPriceIdr,
-          unit: "liter",
+          unit: f.category === "electricity" ? "kwh" : f.category === "gas" ? "m3" : "liter",
           isActive: f.isActive,
           source: "IPCC 2006 / ESDM",
           updatedAt: new Date().toISOString(),

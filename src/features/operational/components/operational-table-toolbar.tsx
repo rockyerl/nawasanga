@@ -1,7 +1,7 @@
 "use client";
 
 import type { Table } from "@tanstack/table-core";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DataTableViewOptions } from "@/components/ui/data-table-view-options";
 import { Input } from "@/components/ui/input";
@@ -15,24 +15,31 @@ interface OperationalTableToolbarProps<TData> {
 
 export function OperationalTableToolbar<TData>({ table, search, setSearch, onAdd }: OperationalTableToolbarProps<TData>) {
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex flex-1 items-center space-x-2">
-                <Input
-                    placeholder="Cari nama atau tipe aset..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="h-8 w-[150px] lg:w-[250px]"
-                />
+                <div className="relative w-full sm:w-[280px]">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A7A72]" />
+                    <Input
+                        placeholder="Cari plat nomor, nama armada, tipe..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="h-9 pl-8 text-xs bg-[#F7F5EF] border-[#DEDAD0] focus:border-[#1D6B5A]"
+                    />
+                </div>
                 {search && (
-                    <Button variant="ghost" onClick={() => setSearch("")} className="h-8 px-2 lg:px-3">
-                        Reset <X className="ml-2 h-4 w-4" />
+                    <Button variant="ghost" onClick={() => setSearch("")} className="h-9 px-2 text-xs text-[#7A7A72]">
+                        Reset <X className="ml-1 h-3.5 w-3.5" />
                     </Button>
                 )}
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-2.5">
                 <DataTableViewOptions table={table} />
-                <Button onClick={onAdd} className="bg-[#29A2A5] hover:bg-[#29A2A5]/90 text-white" size="sm">
-                    <Plus className="h-4 w-4 mr-1" /> Tambah Aset
+                <Button
+                    onClick={onAdd}
+                    className="h-9 text-xs font-medium text-white shadow-sm"
+                    style={{ background: "#1D6B5A" }}
+                >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" /> Tambah Aset
                 </Button>
             </div>
         </div>

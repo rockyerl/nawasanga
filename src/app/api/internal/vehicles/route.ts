@@ -41,24 +41,55 @@ export async function GET(request: NextRequest) {
     const start = (page - 1) * itemPerPage;
     const items = filtered.slice(start, start + itemPerPage);
 
+    const isStationary = (t: string) => {
+      const lower = t.toLowerCase();
+      return (
+        lower.includes("excavator") ||
+        lower.includes("genset") ||
+        lower.includes("generator") ||
+        lower.includes("forklift") ||
+        lower.includes("crane") ||
+        lower.includes("pompa") ||
+        lower.includes("compressor") ||
+        lower.includes("loader") ||
+        lower.includes("stasioner")
+      );
+    };
+
     return NextResponse.json({
       code: 200,
       status: "OK",
       message: "Data aset armada berhasil diambil",
       data: {
-        items: items.map((v) => ({
-          id: v.id,
-          name: `${v.brandModel} (${v.plateNumber})`,
-          type: v.vehicleType || "Truk Kargo",
-          fuelType: v.fuelType?.name || "Bio Solar (B35)",
-          serialNumber: v.plateNumber,
-          power: `${v.year || 2022} - Euro 4`,
-          location: v.location?.name || "Pool Utama",
-          fuelConsumption: "3.2 km/L",
-          status: v.status === "operational" ? "Aktif" : "Maintenance",
-          notes: `Driver: ${v.assignedDriver?.name || "Belum ditugaskan"}`,
-          organizationId: v.organizationId,
-        })),
+        items: items.map((v) => {
+          const stationary = isStationary(v.vehicleType);
+          const isElectric = v.fuelType?.category === "electricity";
+          const consumption = isElectric
+            ? stationary
+              ? "45 kWh/Jam"
+              : "4.8 km/kWh"
+            : stationary
+            ? "18.5 L/Jam"
+            : "3.2 km/L";
+
+          return {
+            id: v.id,
+            name: `${v.brandModel} (${v.plateNumber})`,
+            brandModel: v.brandModel,
+            plateNumber: v.plateNumber,
+            type: v.vehicleType || "Truk Kargo",
+            category: stationary ? "equipment" : "vehicle",
+            fuelType: v.fuelType?.name || "Bio Solar (B35)",
+            fuelCategory: v.fuelType?.category || "diesel",
+            serialNumber: v.plateNumber,
+            power: stationary ? `${v.year || 150} kVA/kW` : `${v.year || 2023} - Standar Emisi`,
+            location: v.location?.name || "Pool Utama",
+            fuelConsumption: consumption,
+            status: v.status === "operational" ? "Aktif" : "Maintenance",
+            notes: v.assignedDriver?.name ? `Driver: ${v.assignedDriver.name}` : stationary ? "Alat Operasional Site" : "Belum ditugaskan",
+            organizationId: v.organizationId,
+          };
+        }),
         count: filtered.length,
         page,
         itemPerPage,
@@ -85,17 +116,30 @@ export async function POST(request: NextRequest) {
       targetOrgId = defaultOrg?.id || "org_nusantara_logistik";
     }
 
+    const plateNumber = (body.plateNumber || body.serialNumber || `B ${Math.floor(1000 + Math.random() * 9000)} FC`).trim().toUpperCase();
+
+    // Check duplicate
+    const existing = await db.query.vehicles.findFirst({
+      where: eq(vehicles.plateNumber, plateNumber),
+    });
+    if (existing) {
+      return NextResponse.json(
+        { code: 400, status: "Bad Request", message: `Nomor Plat / Seri "${plateNumber}" sudah terdaftar.` },
+        { status: 400 }
+      );
+    }
+
     const newVeh = {
       id: `veh_${Date.now()}`,
       organizationId: targetOrgId,
-      plateNumber: body.serialNumber || body.plateNumber || `B ${Math.floor(1000 + Math.random() * 9000)} FC`,
-      brandModel: body.name || "Hino Ranger",
-      vehicleType: body.type || "Heavy Truck",
+      plateNumber,
+      brandModel: (body.brandModel || body.name || "Kendaraan Operasional").trim(),
+      vehicleType: (body.vehicleType || body.type || "Heavy Truck").trim(),
       fuelTypeId: body.fuelTypeId || "fuel_solar",
       assignedDriverId: body.assignedDriverId || null,
-      locationId: body.locationId || "loc_pool_cikarang",
-      year: body.year ? parseInt(body.year, 10) : 2023,
-      status: body.status || "operational",
+      locationId: body.locationId || null,
+      year: body.year ? parseInt(body.year, 10) : new Date().getFullYear(),
+      status: body.status === "Aktif" ? "operational" : body.status === "Maintenance" ? "maintenance" : (body.status || "operational"),
       createdAt: now,
       updatedAt: now,
     };
@@ -105,7 +149,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       code: 201,
       status: "Created",
-      message: "Aset armada berhasil ditambahkan",
+      message: "Aset armada & operasional berhasil ditambahkan",
       data: newVeh,
     });
   } catch (err) {

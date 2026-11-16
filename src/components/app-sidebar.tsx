@@ -46,7 +46,7 @@ const clientNavMain = [
     url: "#",
     icon: Truck,
     items: [
-      { title: "Aset Kendaraan", url: "/dashboard/assets", icon: Car },
+      { title: "Aset & Kendaraan", url: "/dashboard/assets", icon: Truck },
       { title: "Driver / Pengemudi", url: "/dashboard/drivers", icon: UserCheck },
       { title: "Pool & Lokasi", url: "/dashboard/locations", icon: MapPin },
       { title: "Pencatatan BBM", url: "/dashboard/logs", icon: Fuel },
