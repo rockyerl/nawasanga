@@ -38,6 +38,11 @@ const PLAN_CONFIG: Record<PlanType, {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function getPlanConfig(plan?: string | null) {
+    const key = (plan?.toLowerCase?.() || "starter") as PlanType;
+    return PLAN_CONFIG[key] || PLAN_CONFIG.starter;
+}
+
 function daysUntil(isoDate: string): number {
     const diff = new Date(isoDate).getTime() - Date.now();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
@@ -52,8 +57,8 @@ function formatDate(isoDate: string): string {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 /** Badge chip mirip admin side */
-function PlanBadge({ plan }: { plan: PlanType }) {
-    const cfg = PLAN_CONFIG[plan];
+function PlanBadge({ plan }: { plan?: PlanType | string }) {
+    const cfg = getPlanConfig(plan);
     return (
         <span
             className="shrink-0 text-xs font-bold px-2.5 py-0.5 rounded-full text-white tracking-wide"
@@ -66,11 +71,14 @@ function PlanBadge({ plan }: { plan: PlanType }) {
 
 /** Kartu info utama plan aktif */
 function ActivePlanCard({ billing }: { billing: BillingTypes.Service.BillingInfo }) {
-    const cfg = PLAN_CONFIG[billing.currentPlan as PlanType] || PLAN_CONFIG.trial;
-    const days = daysUntil(billing.expiresAt);
+    const cfg = getPlanConfig(billing?.currentPlan);
+    const planKey = (billing?.currentPlan?.toLowerCase?.() || "starter") as PlanType;
+    const days = daysUntil(billing?.expiresAt || new Date().toISOString());
     const isExpiringSoon = days <= 7;
-    const isTrial = billing.currentPlan === "trial";
-    const usagePercent = Math.round((billing.assetUsed / billing.assetLimit) * 100);
+    const isTrial = planKey === "trial";
+    const assetLimit = billing?.assetLimit || 30;
+    const assetUsed = billing?.assetUsed || 0;
+    const usagePercent = assetLimit > 0 ? Math.round((assetUsed / assetLimit) * 100) : 0;
 
     return (
         <div
@@ -305,17 +313,18 @@ function PlanOptionCard({
 
 /** Tabel riwayat invoice */
 function InvoiceTable({
-    invoices,
+    invoices = [],
     plan,
     onViewInvoice,
 }: {
-    invoices: any[];
-    plan: PlanType;
+    invoices?: any[];
+    plan?: PlanType | string;
     onViewInvoice: (inv: any) => void;
 }) {
-    const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG.trial;
+    const cfg = getPlanConfig(plan);
+    const planKey = (plan?.toLowerCase?.() || "starter") as PlanType;
 
-    if (plan === "trial" || invoices.length === 0) {
+    if (planKey === "trial" || !invoices || invoices.length === 0) {
         return (
             <div className="rounded-lg border border-neutral-200 bg-neutral-50 flex flex-col items-center justify-center py-10 gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white border border-neutral-200 shadow-sm">
@@ -323,7 +332,7 @@ function InvoiceTable({
                 </div>
                 <p className="text-sm font-semibold text-gray-700">Belum Ada Riwayat Tagihan</p>
                 <p className="text-xs text-[#8E8E8E]">
-                    {plan === "trial"
+                    {planKey === "trial"
                         ? "Upgrade ke plan berbayar untuk melihat riwayat tagihan."
                         : "Invoice akan muncul setelah pembayaran pertama."}
                 </p>
@@ -388,22 +397,25 @@ function InvoiceTable({
 // ─── Usage stats bar ──────────────────────────────────────────────────────────
 
 function UsageOverview({ billing }: { billing: BillingTypes.Service.BillingInfo }) {
-    const cfg = PLAN_CONFIG[billing.currentPlan as PlanType] || PLAN_CONFIG.trial;
-    const usagePercent = Math.round((billing.assetUsed / billing.assetLimit) * 100);
+    const cfg = getPlanConfig(billing?.currentPlan);
+    const planKey = (billing?.currentPlan?.toLowerCase?.() || "starter") as PlanType;
+    const assetLimit = billing?.assetLimit || 30;
+    const assetUsed = billing?.assetUsed || 0;
+    const usagePercent = assetLimit > 0 ? Math.round((assetUsed / assetLimit) * 100) : 0;
 
     // fitur usage ringkasan sesuai plan
     const featureStats = [
-        { label: "Asset Digunakan",      value: `${billing.assetUsed} / ${billing.assetLimit}`,  pct: usagePercent,  color: cfg.color },
-        { label: "Input Data / Bulan",   value: billing.currentPlan === "trial" ? "2 / 5"     : billing.currentPlan === "starter" ? "41 / 100" : billing.currentPlan === "pro" ? "156 / ∞" : "842 / ∞",   pct: billing.currentPlan === "trial" ? 40 : billing.currentPlan === "starter" ? 41 : 100, color: "#1D6B5A" },
-        { label: "Export",               value: billing.currentPlan === "trial" ? "0 / 0"     : billing.currentPlan === "starter" ? "0 / 0"   : billing.currentPlan === "pro" ? "28 / ∞"  : "128 / ∞",   pct: billing.currentPlan === "trial" ? 0 : billing.currentPlan === "starter" ? 0 : 60,   color: "#EF9F27" },
-        { label: "Insight Dilihat",      value: billing.currentPlan === "trial" ? "0 / 0"     : billing.currentPlan === "starter" ? "0 / 0"   : billing.currentPlan === "pro" ? "45 / ∞"  : "312 / ∞",   pct: billing.currentPlan === "trial" ? 0 : billing.currentPlan === "starter" ? 0 : 45,   color: "#1D9E75" },
+        { label: "Asset Digunakan",      value: `${assetUsed} / ${assetLimit}`,  pct: usagePercent,  color: cfg.color },
+        { label: "Input Data / Bulan",   value: planKey === "trial" ? "2 / 5"     : planKey === "starter" ? "41 / 100" : planKey === "pro" ? "156 / ∞" : "842 / ∞",   pct: planKey === "trial" ? 40 : planKey === "starter" ? 41 : 100, color: "#1D6B5A" },
+        { label: "Export",               value: planKey === "trial" ? "0 / 0"     : planKey === "starter" ? "0 / 0"   : planKey === "pro" ? "28 / ∞"  : "128 / ∞",   pct: planKey === "trial" ? 0 : planKey === "starter" ? 0 : 60,   color: "#EF9F27" },
+        { label: "Insight Dilihat",      value: planKey === "trial" ? "0 / 0"     : planKey === "starter" ? "0 / 0"   : planKey === "pro" ? "45 / ∞"  : "312 / ∞",   pct: planKey === "trial" ? 0 : planKey === "starter" ? 0 : 45,   color: "#1D9E75" },
     ];
 
     return (
         <div className="grid grid-cols-4 gap-3">
             {featureStats.map((stat) => {
                 const isLocked = (stat.label === "Export" || stat.label === "Insight Dilihat") &&
-                    (billing.currentPlan === "trial" || billing.currentPlan === "starter");
+                    (planKey === "trial" || planKey === "starter");
                 return (
                     <div key={stat.label} className="bg-white rounded-lg border border-neutral-200 px-4 py-3 flex flex-col gap-1">
                         <span className="text-[10px] text-[#8E8E8E]">{stat.label}</span>
@@ -448,7 +460,7 @@ export function BillingView() {
     const [selectedInvoice, setSelectedInvoice] = useState<InvoiceDetailData | null>(null);
 
     const billing = useMemo(() => {
-        if (liveBilling) return liveBilling;
+        if (liveBilling && liveBilling.currentPlan) return liveBilling;
         return {
             currentPlan: "pro",
             companyName: "PT Nusantara Logistik Makmur",
@@ -497,7 +509,7 @@ export function BillingView() {
                     <h3 className="text-sm font-semibold text-gray-700">Riwayat Faktur &amp; Pembayaran</h3>
                 </div>
                 <InvoiceTable
-                    invoices={billing.invoices}
+                    invoices={billing.invoices || []}
                     plan={billing.currentPlan}
                     onViewInvoice={handleViewInvoice}
                 />

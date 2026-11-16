@@ -16,7 +16,6 @@ import {
   Truck,
   UserCheck,
   Users2,
-  Car,
   Activity,
   Receipt,
   ArrowLeftRight,

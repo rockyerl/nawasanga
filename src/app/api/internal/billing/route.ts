@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
 import { organizations, subscriptions, billingInvoices } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { getCurrentSession } from "@/features/auth/actions";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,24 +15,49 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const itemPerPage = parseInt(searchParams.get("itemPerPage") || "10", 10);
 
+    const session = await getCurrentSession();
+
     // If client portal requests specific company billing info
-    if (type === "client" || (company && type !== "global")) {
-      const org = company
-        ? await db.query.organizations.findFirst({
-            where: eq(organizations.name, company),
-            with: {
-              subscriptions: true,
-              invoices: true,
-              vehicles: true,
-            },
-          })
-        : await db.query.organizations.findFirst({
-            with: {
-              subscriptions: true,
-              invoices: true,
-              vehicles: true,
-            },
-          });
+    if (type === "client" || (company && type !== "global") || (!type && session && session.roleCode !== "superadmin")) {
+      let org = null;
+      if (company) {
+        org = await db.query.organizations.findFirst({
+          where: eq(organizations.name, company),
+          with: {
+            subscriptions: true,
+            invoices: true,
+            vehicles: true,
+          },
+        });
+      } else if (session?.organizationId) {
+        org = await db.query.organizations.findFirst({
+          where: eq(organizations.id, session.organizationId),
+          with: {
+            subscriptions: true,
+            invoices: true,
+            vehicles: true,
+          },
+        });
+      } else if (session?.organizationName) {
+        org = await db.query.organizations.findFirst({
+          where: eq(organizations.name, session.organizationName),
+          with: {
+            subscriptions: true,
+            invoices: true,
+            vehicles: true,
+          },
+        });
+      }
+
+      if (!org) {
+        org = await db.query.organizations.findFirst({
+          with: {
+            subscriptions: true,
+            invoices: true,
+            vehicles: true,
+          },
+        });
+      }
 
       const activeSub = org?.subscriptions?.[0];
       const invoices = (org?.invoices || []).map((inv) => ({
@@ -49,8 +75,11 @@ export async function GET(request: NextRequest) {
         paidAt: inv.paidAt ? new Date(inv.paidAt).toISOString() : null,
       }));
 
+      const rawPlan = (org?.plan?.toLowerCase?.() || "starter");
+      const validPlan = ["trial", "starter", "pro", "enterprise"].includes(rawPlan) ? rawPlan : "starter";
+
       const clientBillingData = {
-        currentPlan: (org?.plan || "pro") as "trial" | "starter" | "pro" | "enterprise",
+        currentPlan: validPlan as "trial" | "starter" | "pro" | "enterprise",
         companyName: org?.name || "Organisasi Klien",
         startedAt: activeSub ? new Date(activeSub.startsAt).toISOString().split("T")[0] : "2026-01-01",
         expiresAt: activeSub ? new Date(activeSub.expiresAt).toISOString().split("T")[0] : "2026-12-31",

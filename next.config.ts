@@ -44,7 +44,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  experimental: {},
+  experimental: {
+    optimizePackageImports: ["lucide-react", "@mantine/core", "@mantine/hooks"],
+  },
 };
 
 export default nextConfig;

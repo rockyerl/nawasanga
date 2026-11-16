@@ -35,12 +35,13 @@ class BillingService {
     }
   }
 
-  // Client organization billing for Client Portal (/dashboard/billing)
+  // Client organization billing for Client Portal (/billing and /dashboard/billing)
   async getBilling(companyName?: string) {
     try {
-      const q = companyName ? `?companyName=${encodeURIComponent(companyName)}` : "";
+      const q = new URLSearchParams({ type: "client" });
+      if (companyName) q.set("companyName", companyName);
       const res = await Client.get<HttpClientTypes.Response<unknown>, unknown>(
-        `internal/billing${q}`
+        `internal/billing?${q.toString()}`
       );
 
       return res.data;
