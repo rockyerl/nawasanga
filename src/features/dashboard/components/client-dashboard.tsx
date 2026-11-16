@@ -22,7 +22,6 @@ import {
     type PlanType, type StatCard, type TopEmitter, type InsightBox,
 } from "@/features/dashboard/constants/dashboard.constants";
 import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard-queries";
-import { AuditCertificateDialog } from "@/features/report-audit/components/audit-certificate-dialog";
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
@@ -543,11 +542,9 @@ function EnterpriseDashboard({ stats }: { stats?: any }) {
 function CommonTopbar({
     plan,
     organizationName,
-    onOpenCert,
 }: {
     plan: PlanType;
     organizationName?: string;
-    onOpenCert?: () => void;
 }) {
     return (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -563,15 +560,14 @@ function CommonTopbar({
                 </p>
             </div>
             <div className="flex items-center gap-2.5">
-                <button
-                    type="button"
-                    onClick={onOpenCert}
-                    className="flex items-center gap-1.5 text-xs text-[#1D6B5A] border border-[#1D6B5A]/30 bg-[#1D6B5A]/5 hover:bg-[#1D6B5A]/10 rounded-lg px-3 py-1.5 transition-colors font-semibold shadow-xs cursor-pointer"
-                    title="Cetak Sertifikat Kesiapan Audit ISO 14064-1"
+                <Link
+                    href="/reports/audit"
+                    className="flex items-center gap-1.5 text-xs text-[#1D6B5A] border border-[#1D6B5A]/30 bg-[#1D6B5A]/5 hover:bg-[#1D6B5A]/10 rounded-lg px-3 py-1.5 transition-colors font-semibold shadow-xs"
+                    title="Buka Lembar Kesiapan Audit Emisi Scope 1 & POJK 51"
                 >
-                    <Award className="h-3.5 w-3.5 text-[#1D6B5A]" />
-                    Sertifikat ISO 14064
-                </button>
+                    <FileText className="h-3.5 w-3.5 text-[#1D6B5A]" />
+                    Kesiapan Audit Scope 1
+                </Link>
                 {plan === "enterprise" && (
                     <>
                         <Link
@@ -584,7 +580,7 @@ function CommonTopbar({
                             href="/reports/audit"
                             className="flex items-center gap-1.5 text-xs text-[#7A7A72] border border-[#DEDAD0] bg-white rounded-lg px-2.5 py-1.5 hover:bg-neutral-50 transition-colors shadow-xs"
                         >
-                            <FileText className="h-3 w-3" /> Laporan Audit
+                            <FileCheck2 className="h-3 w-3" /> Rekapitulasi
                         </Link>
                     </>
                 )}
@@ -644,7 +640,6 @@ export default function ClientDashboard() {
     const stats = (statsRes?.data as any) || null;
 
     const [plan, setPlan] = useState<PlanType>("pro");
-    const [certOpen, setCertOpen] = useState(false);
 
     useEffect(() => {
         if (stats?.organization?.plan) {
@@ -656,7 +651,6 @@ export default function ClientDashboard() {
     }, [stats?.organization?.plan]);
 
     const organizationName = stats?.organization?.name || "PT Nusantara Logistik Makmur";
-    const totalEmissions = stats?.fleetSummary?.totalEmissions ? parseFloat(stats.fleetSummary.totalEmissions) : 48.2;
 
     return (
         <Layout>
@@ -679,21 +673,13 @@ export default function ClientDashboard() {
             </div>
 
             <div className="flex-1 overflow-auto p-6">
-                <CommonTopbar plan={plan} organizationName={organizationName} onOpenCert={() => setCertOpen(true)} />
+                <CommonTopbar plan={plan} organizationName={organizationName} />
                 <SentinelSecurityBanner />
                 {plan === "trial"      && <TrialDashboard stats={stats} />}
                 {plan === "starter"    && <StarterDashboard stats={stats} />}
                 {plan === "pro"        && <ProDashboard stats={stats} />}
                 {plan === "enterprise" && <EnterpriseDashboard stats={stats} />}
             </div>
-
-            <AuditCertificateDialog
-                open={certOpen}
-                setOpen={setCertOpen}
-                organizationName={organizationName}
-                totalTonCO2e={totalEmissions}
-                periodYear="2026"
-            />
         </Layout>
     );
 }

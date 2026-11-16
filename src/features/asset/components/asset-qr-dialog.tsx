@@ -20,6 +20,7 @@ interface AssetQrDialogProps {
     fuelType?: string;
     location?: string;
     organizationId?: string;
+    organizationName?: string;
   } | null;
 }
 
@@ -87,11 +88,11 @@ export function AssetQrDialog({ open, setOpen, asset }: AssetQrDialogProps) {
                     N
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-widest font-extrabold text-[#1D6B5A] leading-tight">
-                      NAWASANGA FLEET
+                    <div className="text-[10px] uppercase tracking-widest font-extrabold text-[#1D6B5A] leading-tight truncate max-w-[180px]">
+                      {asset.organizationName || "NAWASANGA FLEET"}
                     </div>
                     <div className="text-[9px] text-[#7A7A72] font-semibold leading-none">
-                      Smart Asset Identifier
+                      Telemetri Smart Asset QR
                     </div>
                   </div>
                 </div>
@@ -115,6 +116,13 @@ export function AssetQrDialog({ open, setOpen, asset }: AssetQrDialogProps) {
 
               {/* Vehicle Specifications */}
               <div className="space-y-2 border-t border-[#EDEAE0] pt-3 text-xs">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-[#7A7A72] text-[11px] font-medium">Perusahaan:</span>
+                  <span className="font-bold text-[#1D6B5A] text-[11px] truncate max-w-[180px]">
+                    {asset.organizationName || "PT Nusantara Logistik"}
+                  </span>
+                </div>
+
                 <div className="flex justify-between items-baseline">
                   <span className="text-[#7A7A72] text-[11px] font-medium">Nomor Polisi:</span>
                   <span className="font-mono text-base font-extrabold text-gray-900">
@@ -154,20 +162,23 @@ export function AssetQrDialog({ open, setOpen, asset }: AssetQrDialogProps) {
             <div className="space-y-3">
               <div className="p-4 rounded-xl bg-[#EDEAE0]/40 border border-[#DEDAD0] space-y-2 text-xs">
                 <span className="font-bold text-gray-800 flex items-center gap-1.5">
-                  <ShieldCheck size={14} className="text-[#1D6B5A]" /> Cara Kerja Scan-to-Log
+                  <ShieldCheck size={14} className="text-[#1D6B5A]" /> Cara Kerja &amp; Otorisasi Supir
                 </span>
                 <ol className="list-decimal pl-4 space-y-1.5 text-gray-600 leading-relaxed text-[11px]">
                   <li>
                     Cetak stiker dan tempelkan pada kaca dasbor unit armada atau dekat tangki bahan bakar.
                   </li>
                   <li>
-                    Pengemudi atau operator membuka kamera smartphone dan memindai QR Code stiker.
+                    <strong>Supir Tidak Perlu Login:</strong> Pengemudi cukup memindai QR Code stiker dengan kamera smartphone.
                   </li>
                   <li>
-                    Browser smartphone akan langsung membuka <strong>Driver Mobile Log</strong> dengan data kendaraan dan jenis bahan bakar yang sudah terisi otomatis.
+                    <strong>Otomatis Terikat ke Perusahaan:</strong> Sistem mengidentifikasi kepemilikan armada (PT Anda) langsung dari kode unik fisik kendaraan pada QR.
                   </li>
                   <li>
-                    Pengemudi mengambil foto struk kasir, foto odometer, mengisi liter, lalu klik Kirim (selesai dalam 20 detik).
+                    Browser smartphone akan langsung membuka <strong>Driver Mobile Log</strong> dengan plat nomor, data PT, dan jenis bahan bakar yang terisi otomatis.
+                  </li>
+                  <li>
+                    Pengemudi mengambil foto struk kasir, foto odometer, mengisi liter, lalu klik Kirim (selesai dalam 20 detik tanpa repot username/password).
                   </li>
                 </ol>
               </div>

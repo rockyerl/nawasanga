@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
         fuelType: true,
         location: true,
         assignedDriver: true,
+        organization: true,
       },
       orderBy: [desc(vehicles.createdAt)],
     });
@@ -94,6 +95,9 @@ export async function GET(request: NextRequest) {
             type: v.vehicleType || "Truk Kargo",
             category: stationary ? "equipment" : "vehicle",
             fuelType: v.fuelType?.name || "Bio Solar (B35)",
+            fuelTypeId: v.fuelTypeId,
+            fuelEmissionFactor: v.fuelType?.emissionFactorKgCo2PerLiter || 2.68,
+            fuelUnitPrice: v.fuelType?.unitPriceIdr || 14500,
             fuelCategory: v.fuelType?.category || "diesel",
             serialNumber: v.plateNumber,
             power: stationary ? `${v.year || 150} kVA/kW` : `${v.year || 2023} - Standar Emisi`,
@@ -102,6 +106,9 @@ export async function GET(request: NextRequest) {
             status: v.status === "operational" ? "Aktif" : "Maintenance",
             notes: v.assignedDriver?.name ? `Driver: ${v.assignedDriver.name}` : stationary ? "Alat Operasional Site" : "Belum ditugaskan",
             organizationId: v.organizationId,
+            organizationName: v.organization?.name || "Perusahaan Mitra",
+            assignedDriverId: v.assignedDriverId || null,
+            assignedDriverName: v.assignedDriver?.name || "",
           };
         }),
         count: filtered.length,

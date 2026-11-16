@@ -136,6 +136,7 @@ export default function Hero() {
                   Inventarisasi Scope 1
                 </button>
                 <button
+                  type="button"
                   onClick={() => setActiveTab("certificate")}
                   className={`px-3 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
                     activeTab === "certificate" 
@@ -143,7 +144,7 @@ export default function Hero() {
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
-                  Sertifikat Audit ISO
+                  Kesiapan Audit Scope 1
                 </button>
               </div>
             </div>
@@ -289,22 +290,22 @@ export default function Hero() {
                       </div>
                       <div>
                         <div className="text-sm font-bold text-white flex items-center gap-2">
-                          Sertifikat Penjaminan Audit Emisi ISO 14064-1
+                          Dossier Kesiapan Audit Emisi (ISO 14064-1 &amp; POJK 51)
                           <span className="px-2 py-0.5 rounded-full bg-[#D4AF5A]/15 text-[#D4AF5A] text-[10px] font-mono font-semibold">
                             CRYPTOGRAPHIC HASH
                           </span>
                         </div>
                         <div className="text-xs text-neutral-400">
-                          Dokumen siap cetak dan tanda tangan digital untuk Badan Sertifikasi (SGS, TUV, Sucofindo, PwC)
+                          Kertas kerja &amp; bukti transaksi lengkap siap diserahkan ke Lembaga Verifikasi Resmi (Sucofindo, SGS, TÜV, PwC)
                         </div>
                       </div>
                     </div>
                     <Badge variant="outline" className="border-[#D4AF5A]/30 text-[#D4AF5A] bg-[#D4AF5A]/10 font-mono text-xs">
-                      Certificate No: NW-2026-GHG-0081
+                      Dossier Ref: NW-2026-AUDIT-0081
                     </Badge>
                   </div>
 
-                  {/* Certificate preview miniature */}
+                  {/* Audit Dossier preview miniature */}
                   <div className="p-6 rounded-2xl bg-white text-neutral-900 border-2 border-[#D4AF5A] space-y-4 shadow-xl">
                     <div className="flex justify-between items-start border-b border-neutral-200 pb-3">
                       <div>
@@ -312,7 +313,10 @@ export default function Hero() {
                           NAWASANGA CARBON ASSURANCE SYSTEM
                         </div>
                         <div className="text-lg font-serif font-bold text-neutral-900">
-                          Certificate of Conformity — Scope 1 Direct Emissions
+                          Audit Readiness Dossier — Scope 1 Direct Emissions
+                        </div>
+                        <div className="text-[11px] text-neutral-500">
+                          Standar Format Verifikasi Sesuai ISO 14064-1:2018 &amp; POJK No. 51/2017
                         </div>
                       </div>
                       <div className="w-12 h-12 rounded-lg bg-neutral-900 text-white flex items-center justify-center font-mono text-xs">
@@ -322,11 +326,11 @@ export default function Hero() {
 
                     <div className="grid grid-cols-3 gap-3 text-xs">
                       <div>
-                        <span className="text-neutral-500 block text-[11px]">Organisasi Pemegang:</span>
+                        <span className="text-neutral-500 block text-[11px]">Entitas Terlapor:</span>
                         <span className="font-bold">PT Nusantara Logistik Prima</span>
                       </div>
                       <div>
-                        <span className="text-neutral-500 block text-[11px]">Total Emisi Diaudit:</span>
+                        <span className="text-neutral-500 block text-[11px]">Total Emisi Terverifikasi:</span>
                         <span className="font-bold text-[#1D6B5A]">1,870.24 Ton CO₂e</span>
                       </div>
                       <div>

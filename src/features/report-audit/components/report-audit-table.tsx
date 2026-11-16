@@ -15,7 +15,6 @@ import { auditColumns } from "@/features/report-audit/components/report-audit-co
 import { ReportAuditTableToolbar } from "@/features/report-audit/components/report-audit-table-toolbar";
 import { useAuditInsights } from "@/features/report-audit/hooks/use-report-audit-queries";
 import { exportToCsv } from "@/lib/export";
-import { AuditCertificateDialog } from "@/features/report-audit/components/audit-certificate-dialog";
 import { CarbonOffsetSimulator } from "@/features/report-audit/components/carbon-offset-simulator";
 import type { PlanType, AuditTypes } from "@/types/features/report-audit.type";
 
@@ -203,7 +202,7 @@ function BenchmarkSection({ benchmarks }: { benchmarks: AuditTypes.Service.Bench
     );
 }
 
-function AuditReportSection({ report, onOpenCert }: { report: AuditTypes.Service.AuditReport; onOpenCert?: () => void }) {
+function AuditReportSection({ report }: { report: AuditTypes.Service.AuditReport }) {
     const total = report.totalEmission;
     // Donut arc calculation
     let offset = 0;
@@ -291,17 +290,19 @@ function AuditReportSection({ report, onOpenCert }: { report: AuditTypes.Service
                 </div>
             </div>
 
-            {/* Download & Certificate Actions */}
+            {/* Download & Evidence Pack Actions */}
             <div className="border-t border-neutral-100 pt-3 flex flex-col gap-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wide text-[#8E8E8E]">
-                    Dokumen &amp; Sertifikat Resmi
+                    Dokumen Kesiapan Audit Emisi (Audit Readiness Dossier)
                 </span>
-                <span className="text-[11px] text-[#8E8E8E]">Unduh data emisi audit atau cetak sertifikat verifikasi ISO 14064</span>
+                <span className="text-[11px] text-[#8E8E8E]">
+                    Unduh kertas kerja inventarisasi Scope 1 terstandarisasi IPCC 2006 &amp; POJK 51 untuk diserahkan ke Auditor Eksternal (Sucofindo, SGS, dsb).
+                </span>
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                     <button
                         type="button"
                         onClick={() => {
-                            exportToCsv("Audit_Kepatuhan_ESG", report.breakdown || [], [
+                            exportToCsv("Kertas_Kerja_Audit_Scope1", report.breakdown || [], [
                                 { key: "label", label: "Sumber Emisi / Kategori" },
                                 { key: "tonCO2e", label: "Emisi (ton CO2e)" },
                                 { key: "percent", label: "Porsi (%)" },
@@ -310,18 +311,8 @@ function AuditReportSection({ report, onOpenCert }: { report: AuditTypes.Service
                         className="flex items-center gap-1.5 text-xs font-medium text-[#1D6B5A] border border-[#1D6B5A] bg-[#1D6B5A]/5 rounded-lg px-3 py-1.5 hover:bg-[#1D6B5A]/10 transition-colors cursor-pointer"
                     >
                         <Download className="h-3.5 w-3.5" />
-                        {report.downloadLabel || "Unduh Dokumen Laporan Kepatuhan Audit ESG (.CSV)"}
+                        {report.downloadLabel || "Unduh Kertas Kerja Kesiapan Audit Scope 1 (.CSV)"}
                     </button>
-                    {onOpenCert && (
-                        <button
-                            type="button"
-                            onClick={onOpenCert}
-                            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1D6B5A] hover:bg-[#155245] rounded-lg px-3.5 py-1.5 transition-all shadow-xs cursor-pointer"
-                        >
-                            <Award className="h-3.5 w-3.5 text-amber-300" />
-                            Pratinjau &amp; Cetak Sertifikat ISO 14064
-                        </button>
-                    )}
                 </div>
             </div>
         </div>
@@ -332,7 +323,6 @@ function AuditReportSection({ report, onOpenCert }: { report: AuditTypes.Service
 
 export function ReportAuditTable() {
     const [plan, setPlan] = useState<PlanType>("pro");
-    const [certOpen, setCertOpen] = useState(false);
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
@@ -411,7 +401,7 @@ export function ReportAuditTable() {
 
                     {/* Audit report — enterprise only */}
                     {data.auditReport && (
-                        <AuditReportSection report={data.auditReport} onOpenCert={() => setCertOpen(true)} />
+                        <AuditReportSection report={data.auditReport} />
                     )}
 
                     {/* Simulator Dekarbonisasi & Kredit Karbon IDXCarbon */}
@@ -428,14 +418,6 @@ export function ReportAuditTable() {
                             setSearch={setSearch}
                             plan={plan}
                         />
-                        <button
-                            type="button"
-                            onClick={() => setCertOpen(true)}
-                            className="self-start sm:self-auto flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1D6B5A] hover:bg-[#155245] rounded-lg px-3.5 py-1.5 transition-all shadow-xs cursor-pointer shrink-0"
-                        >
-                            <Award className="h-3.5 w-3.5 text-amber-300" />
-                            Sertifikat Emisi ISO 14064
-                        </button>
                     </div>
 
                     <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
@@ -448,13 +430,6 @@ export function ReportAuditTable() {
                     </div>
                 </div>
             )}
-
-            <AuditCertificateDialog
-                open={certOpen}
-                setOpen={setCertOpen}
-                organizationName={orgName}
-                totalTonCO2e={data.auditReport?.totalEmission ? Math.round(data.auditReport.totalEmission / 1000 * 10) / 10 : 48.2}
-            />
         </>
     );
 }

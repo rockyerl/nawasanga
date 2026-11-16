@@ -98,7 +98,7 @@ const caseStudies: CaseStudy[] = [
     solution: [
       "Implementasi Driver Mobile QR Fuel Log dengan validasi foto struk kasir dan odometer wajib.",
       "Algoritma Anomaly Detection yang langsung mendeteksi pengisian melebihi kapasitas tangki atau rute anomali.",
-      "Kalkulasi emisi otomatis Tier-2 IPCC 2006 dan generate sertifikat audit digital siap tanda tangan.",
+      "Kalkulasi emisi otomatis Tier-2 IPCC 2006 dan generate berkas kesiapan audit emisi siap serah ke Auditor KAN.",
     ],
     businessImpact:
       "Penghematan kas operasional Rp 840 Juta/tahun, kepatuhan audit ESG 100% tanpa catatan defisit, serta perolehan fasilitas pembiayaan hijau (Green Financing) perbankan dengan bunga istimewa.",
@@ -277,7 +277,7 @@ const caseStudies: CaseStudy[] = [
       {
         label: "Laporan Hijau Tender BUMN",
         before: "Dokumen Manual",
-        after: "Sertifikat Digital Otomatis",
+        after: "Dossier Emisi Siap Audit",
         delta: "Menang Tender 5x",
         isPositive: true,
       },

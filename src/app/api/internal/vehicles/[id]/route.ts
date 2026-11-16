@@ -3,6 +3,59 @@ import { db } from "@/db";
 import { vehicles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const vehicle = await db.query.vehicles.findFirst({
+      where: eq(vehicles.id, id),
+      with: {
+        organization: true,
+        fuelType: true,
+        assignedDriver: true,
+        location: true,
+      },
+    });
+
+    if (!vehicle) {
+      return NextResponse.json(
+        { code: 404, status: "Not Found", message: "Kendaraan tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      code: 200,
+      status: "OK",
+      message: "Data aset kendaraan berhasil diambil",
+      data: {
+        id: vehicle.id,
+        plateNumber: vehicle.plateNumber,
+        brandModel: vehicle.brandModel,
+        vehicleType: vehicle.vehicleType,
+        year: vehicle.year,
+        fuelType: vehicle.fuelType?.name || "Bio Solar (B35)",
+        fuelTypeId: vehicle.fuelTypeId,
+        fuelEmissionFactor: vehicle.fuelType?.emissionFactorKgCo2PerLiter || 2.68,
+        fuelUnitPrice: vehicle.fuelType?.unitPriceIdr || 14500,
+        organizationId: vehicle.organizationId,
+        organizationName: vehicle.organization?.name || "Perusahaan Mitra",
+        assignedDriverId: vehicle.assignedDriverId,
+        assignedDriverName: vehicle.assignedDriver?.name || "",
+        locationName: vehicle.location?.name || "Pool Utama",
+        status: vehicle.status,
+      },
+    });
+  } catch (err) {
+    return NextResponse.json(
+      { code: 500, status: "Error", message: String(err) },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

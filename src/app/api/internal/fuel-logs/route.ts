@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { fuelLogs, fuelTypes, organizations } from "@/db/schema";
+import { fuelLogs, fuelTypes, organizations, vehicles } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
@@ -89,7 +89,20 @@ export async function POST(request: NextRequest) {
     const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
     const session = token ? await verifySessionToken(token) : null;
 
-    let targetOrgId = body.organizationId || session?.organizationId;
+    // 1. Resolve vehicle from database first
+    const targetVehicleId = body.vehicleId || body.assetId;
+    let targetVehicle = null;
+    if (targetVehicleId) {
+      targetVehicle = await db.query.vehicles.findFirst({
+        where: eq(vehicles.id, targetVehicleId),
+        with: { organization: true, fuelType: true, assignedDriver: true },
+      });
+    }
+
+    // 2. Organization attribution is strictly anchored to the vehicle's registered organization!
+    // This guarantees that unauthenticated drivers scanning a vehicle QR or selecting a fleet unit
+    // will ALWAYS record transactions strictly under the vehicle's owning organization (PT A).
+    let targetOrgId = targetVehicle?.organizationId || body.organizationId || session?.organizationId;
     if (!targetOrgId) {
       const defaultOrg = await db.query.organizations.findFirst();
       targetOrgId = defaultOrg?.id || "org_nusantara_logistik";
@@ -97,29 +110,33 @@ export async function POST(request: NextRequest) {
 
     const liters = parseFloat(body.liters) || 50;
 
-    // Look up real fuel type from DB for accurate IPCC emission factor and unit price
-    const fuel = body.fuelTypeId
-      ? await db.query.fuelTypes.findFirst({
-          where: eq(fuelTypes.id, body.fuelTypeId),
-        })
-      : null;
+    // 3. Look up fuel type (from vehicle or body) for accurate IPCC emission factor and price
+    const resolvedFuelTypeId = body.fuelTypeId || targetVehicle?.fuelTypeId || "fuel_solar";
+    const fuel = await db.query.fuelTypes.findFirst({
+      where: eq(fuelTypes.id, resolvedFuelTypeId),
+    });
 
     const emissionFactor = fuel?.emissionFactorKgCo2PerLiter ?? 2.68;
     const unitPrice = fuel?.unitPriceIdr ?? 14500;
     const emissionCo2Kg = parseFloat((liters * emissionFactor).toFixed(2));
     const costIdr = parseInt(body.costIdr, 10) || Math.round(liters * unitPrice);
 
+    // 4. Resolve driver (explicit driver, assigned vehicle driver, or null)
+    const driverId = (body.driverId && body.driverId !== "none") 
+      ? body.driverId 
+      : targetVehicle?.assignedDriverId || null;
+
     const newLog = {
       id: `log_${Date.now()}`,
       organizationId: targetOrgId,
-      vehicleId: body.vehicleId || body.assetId || "veh_demo_1",
-      driverId: body.driverId && body.driverId !== "none" ? body.driverId : null,
-      fuelTypeId: fuel?.id || body.fuelTypeId || "fuel_solar",
+      vehicleId: targetVehicleId || "veh_demo_1",
+      driverId,
+      fuelTypeId: fuel?.id || resolvedFuelTypeId,
       liters,
       costIdr,
       odometerKm: body.odometerKm ? parseInt(body.odometerKm, 10) : null,
       emissionCo2Kg,
-      fuelStationName: body.notes || body.fuelStationName || "SPBU Pertamina Cikarang",
+      fuelStation: body.fuelStation || body.fuelStationName || body.spbuName || body.notes || "SPBU Pertamina Terdekat",
       receiptImageUrl: body.receiptImageUrl || "/images/receipt-placeholder.png",
       loggedAt: body.loggedAt ? new Date(body.loggedAt) : now,
       createdAt: now,
@@ -131,7 +148,10 @@ export async function POST(request: NextRequest) {
       code: 201,
       status: "Created",
       message: "Log pengisian BBM berhasil dicatat.",
-      data: newLog,
+      data: {
+        ...newLog,
+        organizationName: targetVehicle?.organization?.name || "Perusahaan Terkait",
+      },
     });
   } catch (err) {
     return NextResponse.json({ code: 500, status: "Error", message: String(err) }, { status: 500 });

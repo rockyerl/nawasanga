@@ -48,16 +48,16 @@ const coreCapabilities = [
   {
     icon: FileCheck,
     badge: "Kepatuhan Regulasi",
-    title: "Generator Sertifikat & Laporan Kesiapan Audit 1-Klik",
+    title: "Dossier Kesiapan Audit Emisi 1-Klik (POJK 51 & ISO 14064-1)",
     description:
-      "Hentikan lembur 4 bulan tim akuntansi untuk menyusun laporan keberlanjutan. Terbitkan PDF laporan kepatuhan ISO 14064-1 dan POJK 51/2017 dalam 3 menit.",
+      "Hentikan lembur 4 bulan tim akuntansi untuk menyusun laporan keberlanjutan. Ekspor dossier kertas kerja kepatuhan ISO 14064-1 dan POJK 51/2017 dalam 3 menit untuk diserahkan ke auditor resmi.",
     highlights: [
-      "Dokumen PDF siap tanda tangan digital untuk auditor eksternal",
+      "Kertas kerja audit Scope 1 terstandarisasi untuk Auditor KAN (Sucofindo, SGS)",
       "Dilengkapi Cryptographic Hash & QR Code verification scan",
       "Export multi-kolom CSV/Excel dengan UTF-8 BOM untuk ERP korporat",
     ],
     metric: "3 Menit",
-    metricLabel: "Waktu terbit dokumen kesiapan audit ISO",
+    metricLabel: "Waktu ekspor dossier kesiapan audit emisi",
   },
   {
     icon: Smartphone,

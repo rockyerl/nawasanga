@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
   Fuel, 
@@ -17,7 +17,12 @@ import {
   Sparkles,
   DollarSign,
   CloudRain,
-  Smartphone
+  Smartphone,
+  Search,
+  QrCode,
+  Building2,
+  Check,
+  ArrowRight
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,21 +33,33 @@ import Link from "next/link";
 
 interface VehicleItem {
   id: string;
-  name: string;
+  name?: string;
   brandModel: string;
   plateNumber: string;
   fuelType?: string;
   fuelTypeId?: string;
   category?: string;
   currentOdometer?: number;
+  organizationId?: string;
+  organizationName?: string;
+  assignedDriverId?: string;
+  assignedDriverName?: string;
 }
+
+const LOCAL_STORAGE_KEY = "nawasanga_active_driver_vehicle";
 
 export function DriverMobileLogView() {
   const searchParams = useSearchParams();
   const prefilledVehicleId = searchParams.get("vehicleId") || "";
 
-  const [vehicles, setVehicles] = useState<VehicleItem[]>([]);
-  const [selectedVehicleId, setSelectedVehicleId] = useState(prefilledVehicleId);
+  // Active Vehicle & Identification State
+  const [activeVehicle, setActiveVehicle] = useState<VehicleItem | null>(null);
+  const [isSearchingVehicle, setIsSearchingVehicle] = useState(false);
+  const [searchPlateQuery, setSearchPlateQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<VehicleItem[]>([]);
+  const [isLookupLoading, setIsLookupLoading] = useState(false);
+
+  // Form fields
   const [driverName, setDriverName] = useState("");
   const [liters, setLiters] = useState("");
   const [odometer, setOdometer] = useState("");
@@ -51,46 +68,114 @@ export function DriverMobileLogView() {
   const [receiptImage, setReceiptImage] = useState<string | null>(null);
   const [odometerImage, setOdometerImage] = useState<string | null>(null);
 
+  // Geolocation & UX state
   const [locationDetecting, setLocationDetecting] = useState(false);
   const [locationCoord, setLocationCoord] = useState<{ lat: number; lng: number } | null>(null);
-  
   const [loading, setLoading] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
+
+  // Submission feedback
   const [submittedData, setSubmittedData] = useState<{
     liters: number;
     cost: number;
     emissionCo2Kg: number;
     plateNumber: string;
     fuelType: string;
+    organizationName: string;
+    driverName: string;
   } | null>(null);
-  const [showInstallGuide, setShowInstallGuide] = useState(false);
 
-  // Fetch active vehicles on load
+  // Helper to activate and persist a vehicle
+  const selectAndSaveVehicle = useCallback((v: VehicleItem) => {
+    setActiveVehicle(v);
+    setIsSearchingVehicle(false);
+    if (v.assignedDriverName && !driverName) {
+      setDriverName(v.assignedDriverName);
+    }
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(v));
+    } catch {
+      // LocalStorage might be disabled in private mode
+    }
+    toast.success(`Armada terhubung: ${v.plateNumber} (${v.organizationName || "Terdaftar"})`);
+  }, [driverName]);
+
+  // Load vehicle: Check URL params first, then fallback to LocalStorage
   useEffect(() => {
-    async function loadVehicles() {
+    async function initVehicle() {
+      // Priority 1: vehicleId in URL (from scanning QR sticker on dashboard)
+      if (prefilledVehicleId) {
+        try {
+          setIsLookupLoading(true);
+          const res = await fetch(`/api/internal/vehicles/${prefilledVehicleId}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json?.data) {
+              selectAndSaveVehicle(json.data);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error("Gagal memuat kendaraan dari QR URL:", err);
+        } finally {
+          setIsLookupLoading(false);
+        }
+      }
+
+      // Priority 2: Recall from LocalStorage (if driver previously used this phone)
       try {
-        const res = await fetch("/api/internal/vehicles?itemPerPage=100");
-        const json = await res.json();
-        if (json?.data?.items) {
-          setVehicles(json.data.items);
-          if (prefilledVehicleId) {
-            setSelectedVehicleId(prefilledVehicleId);
-          } else if (json.data.items.length > 0) {
-            setSelectedVehicleId(json.data.items[0].id);
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.id && parsed?.plateNumber) {
+            setActiveVehicle(parsed);
+            if (parsed.assignedDriverName) {
+              setDriverName(parsed.assignedDriverName);
+            }
+            return;
           }
         }
-      } catch (err) {
-        console.error("Failed to load vehicles:", err);
+      } catch {
+        // Ignore JSON error
       }
-    }
-    loadVehicles();
-  }, [prefilledVehicleId]);
 
-  const activeVehicle = vehicles.find((v) => v.id === selectedVehicleId) || vehicles[0];
+      // Priority 3: Fallback default (open unit search prompt if nothing found)
+      setIsSearchingVehicle(true);
+    }
+
+    initVehicle();
+  }, [prefilledVehicleId, selectAndSaveVehicle]);
+
+  // Search vehicles by plate number or model
+  const handleSearchVehicle = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const query = searchPlateQuery.trim();
+    if (!query) {
+      toast.error("Ketik nomor plat atau model kendaraan");
+      return;
+    }
+
+    setIsLookupLoading(true);
+    try {
+      const res = await fetch(`/api/internal/vehicles?search=${encodeURIComponent(query)}&itemPerPage=10`);
+      const json = await res.json();
+      if (json?.data?.items && json.data.items.length > 0) {
+        setSearchResults(json.data.items);
+      } else {
+        setSearchResults([]);
+        toast.info("Tidak ada kendaraan yang cocok dengan nomor plat tersebut.");
+      }
+    } catch {
+      toast.error("Gagal mencari kendaraan. Periksa koneksi internet.");
+    } finally {
+      setIsLookupLoading(false);
+    }
+  };
 
   // Geolocation trigger
   const detectLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Browser tidak mendukung geolokasi GPS");
+      toast.error("Browser ponsel tidak mendukung geolokasi GPS");
       return;
     }
 
@@ -135,11 +220,13 @@ export function DriverMobileLogView() {
     }
   };
 
+  // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedVehicleId) {
-      toast.error("Pilih armada kendaraan");
+    if (!activeVehicle) {
+      toast.error("Pilih armada kendaraan terlebih dahulu");
+      setIsSearchingVehicle(true);
       return;
     }
 
@@ -153,13 +240,13 @@ export function DriverMobileLogView() {
 
     try {
       const payload = {
-        vehicleId: selectedVehicleId,
+        vehicleId: activeVehicle.id,
         liters: numLiters,
         odometerKm: odometer ? parseInt(odometer, 10) : undefined,
         fuelStation: spbuName.trim() || "SPBU Pertamina Terdekat",
         receiptImageUrl: receiptImage || undefined,
         notes: notes ? `${notes} (Input via Mobile Driver Log)` : "Input via Mobile Driver Log PWA",
-        driverName: driverName.trim() || "Driver Lapangan",
+        driverName: driverName.trim() || activeVehicle.assignedDriverName || "Driver Lapangan",
         latitude: locationCoord?.lat,
         longitude: locationCoord?.lng,
       };
@@ -175,7 +262,6 @@ export function DriverMobileLogView() {
         throw new Error(json.message || "Gagal mencatat transaksi BBM");
       }
 
-      // Success feedback state
       const estCost = Math.round(numLiters * 14550);
       const estEmission = parseFloat((numLiters * 2.65).toFixed(2));
 
@@ -183,8 +269,10 @@ export function DriverMobileLogView() {
         liters: numLiters,
         cost: estCost,
         emissionCo2Kg: estEmission,
-        plateNumber: activeVehicle?.plateNumber || "Armada",
-        fuelType: activeVehicle?.fuelType || "Bio Solar B35",
+        plateNumber: activeVehicle.plateNumber,
+        fuelType: activeVehicle.fuelType || "Bio Solar B35",
+        organizationName: activeVehicle.organizationName || json.data?.organizationName || "Perusahaan Mitra",
+        driverName: driverName.trim() || activeVehicle.assignedDriverName || "Driver Lapangan",
       });
 
       toast.success("Log transaksi BBM berhasil dicatat!");
@@ -195,7 +283,7 @@ export function DriverMobileLogView() {
     }
   };
 
-  // ── Success State Screen ──
+  // ── SCREEN 1: SUCCESS STATE ────────────────────────────────────────────────
   if (submittedData) {
     return (
       <div className="min-h-screen bg-[#F7F5EF] flex flex-col items-center justify-center p-4">
@@ -212,8 +300,14 @@ export function DriverMobileLogView() {
               Catatan BBM Berhasil!
             </h2>
             <p className="text-xs text-[#7A7A72] mt-1">
-              Unit {submittedData.plateNumber} • {submittedData.fuelType}
+              Unit <strong className="text-gray-900">{submittedData.plateNumber}</strong> • {submittedData.fuelType}
             </p>
+            
+            {/* Visual Tenant Confirmation Badge */}
+            <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1D6B5A]/10 text-[#1D6B5A] text-xs font-semibold border border-[#1D6B5A]/20">
+              <Building2 size={13} className="text-[#1D6B5A]" />
+              <span>Tercatat di: <strong>{submittedData.organizationName}</strong></span>
+            </div>
           </div>
 
           {/* Quick Metrics */}
@@ -232,13 +326,13 @@ export function DriverMobileLogView() {
             <CloudRain className="w-6 h-6 text-[#1D6B5A] shrink-0" />
             <div>
               <span className="text-[10px] text-[#1D6B5A] font-semibold block uppercase tracking-wider">
-                Emisi Karbon Terinventarisasi
+                Emisi Karbon Scope 1 Terinventarisasi
               </span>
               <span className="text-base font-bold text-[#1D6B5A]">
                 {submittedData.emissionCo2Kg} kg CO₂e
               </span>
               <span className="text-[10px] text-gray-500 block">
-                Faktor Emisi IPCC 2006 GWP AR6
+                Pengemudi: {submittedData.driverName} (Tanpa Login)
               </span>
             </div>
           </div>
@@ -252,7 +346,7 @@ export function DriverMobileLogView() {
                 setReceiptImage(null);
                 setOdometerImage(null);
               }}
-              className="w-full h-11 bg-[#1D6B5A] hover:bg-[#175749] text-white text-xs font-bold rounded-xl"
+              className="w-full h-11 bg-[#1D6B5A] hover:bg-[#175749] text-white text-xs font-bold rounded-xl cursor-pointer"
             >
               <RotateCcw size={14} className="mr-1.5" /> Catat Transaksi Baru
             </Button>
@@ -269,6 +363,131 @@ export function DriverMobileLogView() {
     );
   }
 
+  // ── SCREEN 2: VEHICLE LOOKUP GATE (When no vehicle active or driver clicks "Ganti Armada") ──
+  if (isSearchingVehicle || !activeVehicle) {
+    return (
+      <div className="min-h-screen bg-[#F7F5EF] py-4 px-4 flex flex-col items-center justify-center">
+        <div className="w-full max-w-md bg-white rounded-3xl border border-[#1D6B5A]/20 shadow-xl overflow-hidden flex flex-col animate-fade-in">
+          {/* Header */}
+          <div className="bg-[#1D6B5A] text-white p-5 space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center font-bold text-xs text-[#D4AF5A]">
+                N
+              </div>
+              <span className="text-xs font-bold tracking-widest uppercase text-white/90">
+                IDENTIFIKASI ARMADA
+              </span>
+            </div>
+            <h1 className="font-display text-xl font-bold pt-1">
+              Pilih Kendaraan Anda
+            </h1>
+            <p className="text-[11px] text-white/85 leading-tight">
+              Supir tidak perlu login. Cukup ketik nomor polisi mobil Anda atau scan stiker dasbor.
+            </p>
+          </div>
+
+          <div className="p-5 space-y-4">
+            {/* Search Input Box */}
+            <form onSubmit={handleSearchVehicle} className="space-y-2">
+              <Label className="text-xs font-semibold text-gray-700">
+                Nomor Polisi / Plat Kendaraan
+              </Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type="text"
+                    placeholder="cth: B 9102 UX"
+                    value={searchPlateQuery}
+                    onChange={(e) => setSearchPlateQuery(e.target.value.toUpperCase())}
+                    className="h-11 text-sm font-mono uppercase bg-[#F7F5EF] border-[#DEDAD0] rounded-xl pr-8"
+                  />
+                  {searchPlateQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchPlateQuery("")}
+                      className="absolute right-2.5 top-3 text-xs text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isLookupLoading}
+                  className="h-11 px-4 bg-[#1D6B5A] hover:bg-[#175749] text-white rounded-xl text-xs font-bold"
+                >
+                  <Search size={14} className="mr-1" />
+                  {isLookupLoading ? "Mencari..." : "Cari"}
+                </Button>
+              </div>
+            </form>
+
+            {/* Matching Results List */}
+            {searchResults.length > 0 && (
+              <div className="space-y-2 pt-1 animate-fade-in">
+                <span className="text-[11px] font-bold text-gray-600 block">
+                  Pilih Kendaraan Anda ({searchResults.length} ditemukan):
+                </span>
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {searchResults.map((v) => (
+                    <div
+                      key={v.id}
+                      onClick={() => selectAndSaveVehicle(v)}
+                      className="p-3.5 rounded-2xl border border-[#EDEAE0] bg-[#FAF8F5] hover:bg-[#1D6B5A]/5 hover:border-[#1D6B5A]/30 cursor-pointer transition-all flex items-center justify-between"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-base font-extrabold text-gray-900">
+                            {v.plateNumber}
+                          </span>
+                          <Badge variant="outline" className="border-[#1D6B5A]/30 text-[#1D6B5A] text-[9px] font-bold">
+                            {v.fuelType || "Bio Solar"}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {v.brandModel}
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] font-semibold text-[#1D6B5A]">
+                          <Building2 size={11} />
+                          <span>{v.organizationName || "PT Nusantara Logistik"}</span>
+                        </div>
+                      </div>
+                      <ChevronRight size={18} className="text-[#1D6B5A] shrink-0" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Windshield QR Sticker Instructions */}
+            <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2 text-xs">
+              <div className="flex items-center gap-2 font-bold text-amber-900">
+                <QrCode size={16} className="text-amber-800" />
+                <span>Punya Stiker QR di Dasbor Mobil?</span>
+              </div>
+              <p className="text-[11px] text-amber-800/90 leading-relaxed">
+                Arahkan kamera smartphone Anda ke <strong>Stiker QR Dasbor</strong> di kaca depan truk Anda. Form pencatatan akan langsung terhubung ke mobil &amp; PT Anda tanpa perlu mencari plat secara manual!
+              </p>
+            </div>
+
+            {/* Cancel / Back to active if one was already set */}
+            {activeVehicle && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsSearchingVehicle(false)}
+                className="w-full h-10 text-xs border-[#DEDAD0] text-gray-700 rounded-xl cursor-pointer"
+              >
+                Kembali ke Unit Sebelumnya ({activeVehicle.plateNumber})
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── SCREEN 3: FAST FUEL LOGGING FORM ───────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#F7F5EF] py-4 px-4 flex flex-col items-center justify-center">
       {/* Smartphone Viewport Frame */}
@@ -335,53 +554,57 @@ export function DriverMobileLogView() {
           </div>
         )}
 
-        {/* Active Vehicle Banner */}
+        {/* Active Vehicle & Verified Tenant Banner */}
         <div className="p-4 bg-[#EDEAE0]/40 border-b border-[#DEDAD0] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-white border border-[#DEDAD0] text-[#1D6B5A]">
+            <div className="p-2.5 rounded-xl bg-white border border-[#DEDAD0] text-[#1D6B5A] shadow-xs">
               <Truck size={20} />
             </div>
             <div>
-              <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold block">
-                Armada Terpilih
-              </span>
-              <span className="text-base font-extrabold text-gray-900 font-mono">
-                {activeVehicle?.plateNumber || "Pilih Armada"}
+              {/* Organization Identification */}
+              <div className="flex items-center gap-1 text-[11px] font-bold text-[#1D6B5A]">
+                <Building2 size={12} />
+                <span>{activeVehicle.organizationName || "PT Nusantara Logistik"}</span>
+              </div>
+              <span className="text-base font-extrabold text-gray-900 font-mono block">
+                {activeVehicle.plateNumber}
               </span>
               <span className="text-xs text-gray-600 block">
-                {activeVehicle?.brandModel || activeVehicle?.name}
+                {activeVehicle.brandModel}
               </span>
             </div>
           </div>
 
-          <Badge variant="outline" className="border-[#1D6B5A]/30 text-[#1D6B5A] bg-white text-[10px] font-bold">
-            {activeVehicle?.fuelType || "Bio Solar"}
-          </Badge>
+          <div className="flex flex-col items-end gap-1.5">
+            <Badge variant="outline" className="border-[#1D6B5A]/30 text-[#1D6B5A] bg-white text-[10px] font-bold">
+              {activeVehicle.fuelType || "Bio Solar"}
+            </Badge>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchResults([]);
+                setSearchPlateQuery("");
+                setIsSearchingVehicle(true);
+              }}
+              className="text-[10px] font-bold text-[#1D6B5A] hover:underline cursor-pointer"
+            >
+              Ganti Armada →
+            </button>
+          </div>
         </div>
 
         {/* Form Inputs */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Switch Vehicle if not preset */}
-          {!prefilledVehicleId && vehicles.length > 1 && (
-            <div className="space-y-1">
-              <Label className="text-xs font-semibold text-gray-700">Pilih Kendaraan Lain</Label>
-              <select
-                value={selectedVehicleId}
-                onChange={(e) => setSelectedVehicleId(e.target.value)}
-                className="w-full h-10 px-3 text-xs bg-[#F7F5EF] border border-[#DEDAD0] rounded-xl focus:outline-[#1D6B5A]"
-              >
-                {vehicles.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.plateNumber} — {v.brandModel}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
           {/* Pengemudi */}
           <div className="space-y-1">
-            <Label className="text-xs font-semibold text-gray-700">Nama Pengemudi / Operator</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-gray-700">Nama Pengemudi / Operator</Label>
+              {activeVehicle.assignedDriverName && (
+                <span className="text-[10px] text-[#1D6B5A] font-semibold">
+                  Driver Tetap: {activeVehicle.assignedDriverName}
+                </span>
+              )}
+            </div>
             <Input
               type="text"
               placeholder="cth: Agus Santoso"
@@ -496,18 +719,30 @@ export function DriverMobileLogView() {
             />
           </div>
 
+          {/* Catatan / Keterangan */}
+          <div className="space-y-1">
+            <Label className="text-xs font-semibold text-gray-700">Catatan Tambahan (Opsional)</Label>
+            <Input
+              type="text"
+              placeholder="cth: Perjalanan rute Surabaya - Jakarta muatan penuh"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="h-10 text-xs bg-[#F7F5EF] border-[#DEDAD0] rounded-xl"
+            />
+          </div>
+
           {/* Submit Button */}
           <div className="pt-2">
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-[#1D6B5A] hover:bg-[#175749] text-white text-sm font-bold rounded-xl shadow-md flex items-center justify-center gap-2"
+              className="w-full h-12 bg-[#1D6B5A] hover:bg-[#175749] text-white text-sm font-bold rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               {loading ? (
-                <span>Menyimpan &amp; Memverifikasi...</span>
+                <span>Menyimpan ke Sistem {activeVehicle.organizationName || "PT"}...</span>
               ) : (
                 <>
-                  <ShieldCheck size={16} /> Kirim Log Transaksi BBM
+                  <ShieldCheck size={16} /> Simpan Log Transaksi BBM
                 </>
               )}
             </Button>
