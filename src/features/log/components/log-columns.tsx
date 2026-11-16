@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/table-core";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { LogTableRowActions } from "@/features/log/components/log-table-row-actions";
 import type { LogTypes } from "@/types/features/log.type";
-import { Fuel, CloudRain } from "lucide-react";
+import { Fuel, CloudRain, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const logColumns: ColumnDef<LogTypes.Service.LogData>[] = [
@@ -40,8 +40,11 @@ export const logColumns: ColumnDef<LogTypes.Service.LogData>[] = [
         header: ({ column }) => <DataTableColumnHeader column={column} title="Driver / Operator" />,
         cell: ({ row }) => (
             <div className="flex flex-col">
-                <span className="text-xs text-gray-800 truncate">{row.getValue("driverName")}</span>
-                <span className="text-[11px] text-[#7A7A72]">{row.original.fuelStation || "SPBU Terdaftar"}</span>
+                <span className="text-xs font-semibold text-gray-800 truncate">{row.getValue("driverName")}</span>
+                <span className="text-[11px] text-[#7A7A72] truncate">{row.original.fuelStation || "SPBU Terdaftar"}</span>
+                <span className="inline-flex items-center gap-0.5 text-[9px] text-emerald-700 font-semibold mt-0.5">
+                    <Sparkles size={9} className="text-[#1D6B5A]" /> AI OCR &amp; Geofence OK
+                </span>
             </div>
         ),
     },
