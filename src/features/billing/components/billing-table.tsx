@@ -17,6 +17,7 @@ import {
     AlertTriangle,
 } from "lucide-react";
 import { PLAN_OPTIONS } from "@/features/billing/constants/billing.constants";
+import { InvoiceViewerDialog, type InvoiceDetailData } from "@/features/billing/components/invoice-viewer-dialog";
 import { useBillingList } from "@/features/billing/hooks/use-billing-queries";
 import type { BillingTypes } from "@/types/features/billing.type";
 import type { PlanType } from "@/types/features/report-tren.type";
@@ -34,15 +35,6 @@ const PLAN_CONFIG: Record<PlanType, {
     pro:        { badge: "PRO",        color: "#1D9E75", lightBg: "#F0FBF7", border: "#6EE4C0" },
     enterprise: { badge: "ENTERPRISE", color: "#EF9F27", lightBg: "#FFFBF0", border: "#FDD9A0" },
 };
-
-// ─── Demo company switcher list ───────────────────────────────────────────────
-
-const DEMO_COMPANIES = [
-    "CV Langit Biru",
-    "PT Solusi Energi",
-    "PT Global Energi",
-    "PT Pertamina Energi",
-];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -313,8 +305,16 @@ function PlanOptionCard({
 }
 
 /** Tabel riwayat invoice */
-function InvoiceTable({ invoices, plan }: { invoices: BillingTypes.Service.Invoice[]; plan: PlanType }) {
-    const cfg = PLAN_CONFIG[plan];
+function InvoiceTable({
+    invoices,
+    plan,
+    onViewInvoice,
+}: {
+    invoices: any[];
+    plan: PlanType;
+    onViewInvoice: (inv: any) => void;
+}) {
+    const cfg = PLAN_CONFIG[plan] || PLAN_CONFIG.trial;
 
     if (plan === "trial" || invoices.length === 0) {
         return (
@@ -350,7 +350,7 @@ function InvoiceTable({ invoices, plan }: { invoices: BillingTypes.Service.Invoi
                         key={inv.id}
                         className={`border-b border-neutral-50 hover:bg-neutral-50 transition-colors ${i === invoices.length - 1 ? "border-0" : ""}`}
                     >
-                        <td className="px-4 py-3 font-mono text-gray-700">{inv.id}</td>
+                        <td className="px-4 py-3 font-mono font-semibold text-gray-800">{inv.id}</td>
                         <td className="px-4 py-3 text-[#8E8E8E]">{inv.date}</td>
                         <td className="px-4 py-3 font-semibold text-gray-800">{inv.amount}</td>
                         <td className="px-4 py-3">
@@ -369,11 +369,13 @@ function InvoiceTable({ invoices, plan }: { invoices: BillingTypes.Service.Invoi
                         </td>
                         <td className="px-4 py-3 text-right">
                             <button
-                                className="inline-flex items-center gap-1 text-[11px] font-medium hover:opacity-80 transition-opacity"
+                                type="button"
+                                onClick={() => onViewInvoice(inv)}
+                                className="inline-flex items-center gap-1 text-[11px] font-medium hover:underline cursor-pointer"
                                 style={{ color: cfg.color }}
                             >
                                 <Download className="h-3 w-3" />
-                                Download
+                                Faktur Resmi
                             </button>
                         </td>
                     </tr>
@@ -438,35 +440,14 @@ function UsageOverview({ billing }: { billing: BillingTypes.Service.BillingInfo 
     );
 }
 
-// ─── Demo switcher (dev only) ─────────────────────────────────────────────────
-
-function DemoSwitcher({ company, setCompany }: { company: string; setCompany: (c: string) => void }) {
-    return (
-        <div className="flex items-center gap-2 -mt-2 -mx-6 px-6 pb-0">
-            <span className="text-xs text-[#8E8E8E] mr-1">Demo Perusahaan:</span>
-            {DEMO_COMPANIES.map((c) => (
-                <button
-                    key={c}
-                    onClick={() => setCompany(c)}
-                    className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-                        company === c
-                            ? "bg-[#1D9E75] text-white border-transparent"
-                            : "border-neutral-200 text-[#8E8E8E] hover:bg-neutral-50"
-                    }`}
-                >
-                    {c}
-                </button>
-            ))}
-        </div>
-    );
-}
-
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main client billing component ───────────────────────────────────────────
 
 export function BillingView() {
-    const [company, setCompany] = useState("PT Nusantara Logistik Makmur");
     const { data: billingRes } = useBillingList();
     const liveBilling = billingRes?.data as any;
+
+    const [viewerOpen, setViewerOpen] = useState(false);
+    const [selectedInvoice, setSelectedInvoice] = useState<InvoiceDetailData | null>(null);
 
     const billing = useMemo(() => {
         if (liveBilling) return liveBilling;
@@ -481,11 +462,24 @@ export function BillingView() {
         };
     }, [liveBilling]);
 
-    return (
-        <>
-            {/* Demo switcher — remove in production */}
-            <DemoSwitcher company={company} setCompany={setCompany} />
+    const handleViewInvoice = (inv: any) => {
+        const rawAmount = inv.rawAmount || parseInt(String(inv.amount).replace(/[^0-9]/g, ""), 10) || 4500000;
+        setSelectedInvoice({
+            id: inv.invoiceId || inv.id,
+            invoiceNumber: inv.id,
+            companyName: billing.companyName,
+            plan: billing.currentPlan,
+            amountIdr: rawAmount,
+            amountFormatted: inv.amount,
+            status: inv.status,
+            paymentMethod: inv.paymentMethod || "Bank Transfer BCA",
+            createdAt: new Date().toISOString(),
+        });
+        setViewerOpen(true);
+    };
 
+    return (
+        <div className="space-y-6">
             {/* Active plan card */}
             <ActivePlanCard billing={billing} />
 
@@ -493,20 +487,30 @@ export function BillingView() {
             <div>
                 <div className="flex items-center gap-2 mb-3">
                     <BarChart3 className="h-4 w-4 text-[#8E8E8E]" />
-                    <h3 className="text-sm font-semibold text-gray-700">Penggunaan (Rata-rata)</h3>
+                    <h3 className="text-sm font-semibold text-gray-700">Penggunaan Kuota Armada</h3>
                 </div>
                 <UsageOverview billing={billing} />
             </div>
-
 
             {/* Invoice history */}
             <div>
                 <div className="flex items-center gap-2 mb-3">
                     <CreditCard className="h-4 w-4 text-[#8E8E8E]" />
-                    <h3 className="text-sm font-semibold text-gray-700">Riwayat Tagihan</h3>
+                    <h3 className="text-sm font-semibold text-gray-700">Riwayat Faktur &amp; Pembayaran</h3>
                 </div>
-                <InvoiceTable invoices={billing.invoices} plan={billing.currentPlan} />
+                <InvoiceTable
+                    invoices={billing.invoices}
+                    plan={billing.currentPlan}
+                    onViewInvoice={handleViewInvoice}
+                />
             </div>
-        </>
+
+            {/* Invoice Official Viewer Dialog */}
+            <InvoiceViewerDialog
+                open={viewerOpen}
+                setOpen={setViewerOpen}
+                invoice={selectedInvoice}
+            />
+        </div>
     );
 }
