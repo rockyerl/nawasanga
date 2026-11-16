@@ -62,11 +62,28 @@ function NawasangaLogoSmall() {
 }
 
 export function Footer() {
-  const links = {
-    Produk: ["Fitur", "Pricing", "Changelog"],
-    Regulasi: ["IPCC 2006", "Perpres 98/2021", "KLHK SIGN-SMART", "GHG Protocol"],
-    Perusahaan: ["Tentang Kami", "Blog", "Karir", "Press Kit"],
-    Dukungan: ["Dokumentasi", "Status", "Kontak"],
+  const links: Record<string, Array<{ label: string; href: string }>> = {
+    Produk: [
+      { label: "Fitur", href: "#fitur" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Artikel & Wawasan", href: "#artikel" },
+    ],
+    Regulasi: [
+      { label: "IPCC 2006", href: "#regulasi" },
+      { label: "Perpres 98/2021", href: "#regulasi" },
+      { label: "KLHK SIGN-SMART", href: "#regulasi" },
+      { label: "GHG Protocol", href: "#regulasi" },
+    ],
+    Perusahaan: [
+      { label: "Artikel & Panduan", href: "#artikel" },
+      { label: "Tentang Kami", href: "#" },
+      { label: "Karir", href: "#" },
+    ],
+    Dukungan: [
+      { label: "Bantuan & FAQ", href: "#faq" },
+      { label: "Simulasi Emisi", href: "#kalkulator" },
+      { label: "Masuk Portal", href: "/login" },
+    ],
   };
 
   return (
@@ -86,7 +103,7 @@ export function Footer() {
               Platform ESG & Carbon Monitoring untuk industri Indonesia.
             </p>
             <p className="font-ui text-xs text-abu/40 mt-2 italic">
-              "Dari semua penjuru, satu pandangan."
+              &quot;Dari semua penjuru, satu pandangan.&quot;
             </p>
           </div>
 
@@ -95,9 +112,9 @@ export function Footer() {
               <div className="font-ui text-xs text-abu/50 tracking-widest uppercase mb-4">{cat}</div>
               <ul className="space-y-3">
                 {items.map((item) => (
-                  <li key={item}>
-                    <a href="#" className="font-ui text-xs text-abu/60 hover:text-arang/80 transition-colors">
-                      {item}
+                  <li key={item.label}>
+                    <a href={item.href} className="font-ui text-xs text-abu/60 hover:text-arang/80 transition-colors">
+                      {item.label}
                     </a>
                   </li>
                 ))}

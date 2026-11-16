@@ -8,9 +8,11 @@ export namespace VehicleTypeTypes {
             | 'motorcycle'
             | 'car'
             | 'light_truck'
+            | 'medium_truck'
             | 'heavy_truck'
             | 'bus'
-            | 'heavy_equipment';
+            | 'heavy_equipment'
+            | 'operational';
 
         export interface VehicleTypeData {
             id: string;

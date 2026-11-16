@@ -28,10 +28,12 @@ export const articleColumns: ColumnDef<ArticleTypes.Service.ArticleData>[] = [
         accessorKey: "publishedAt",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Tgl Terbit" />,
         cell: ({ row }) => {
-            const date = new Date(row.getValue("publishedAt") as string);
+            const raw = row.getValue("publishedAt") as string;
+            const date = raw ? new Date(raw) : new Date();
+            const isValid = !isNaN(date.getTime());
             return (
                 <span className="text-sm text-[#7A7A72]">
-                    {date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+                    {isValid ? date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
                 </span>
             );
         },

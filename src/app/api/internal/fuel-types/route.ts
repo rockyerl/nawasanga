@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
       data: {
         items: filtered.map((f) => ({
           id: f.id,
+          code: f.id.replace("ft_", "").toUpperCase(),
           name: f.name,
           category: f.category,
           emissionFactor: f.emissionFactorKgCo2PerLiter,
@@ -27,6 +28,8 @@ export async function GET(request: NextRequest) {
           pricePerUnit: f.unitPriceIdr,
           unit: "liter",
           isActive: f.isActive,
+          source: "IPCC 2006 / ESDM",
+          updatedAt: new Date().toISOString(),
         })),
         count: filtered.length,
         page: 1,

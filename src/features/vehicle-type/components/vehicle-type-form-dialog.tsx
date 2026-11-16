@@ -15,9 +15,11 @@ const CATEGORIES: VehicleTypeTypes.Service.Category[] = [
     "motorcycle",
     "car",
     "light_truck",
+    "medium_truck",
     "heavy_truck",
     "bus",
     "heavy_equipment",
+    "operational",
 ];
 
 interface Props {
@@ -124,7 +126,7 @@ export function VehicleTypeFormDialog({ open, setOpen, initialData }: Props) {
                             </SelectTrigger>
                             <SelectContent>
                                 {CATEGORIES.map((c) => (
-                                    <SelectItem key={c} value={c}>{CATEGORY_LABEL[c]}</SelectItem>
+                                    <SelectItem key={c} value={c}>{CATEGORY_LABEL[c] || c}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>

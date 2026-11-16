@@ -45,7 +45,7 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const links = ["Fitur", "Pricing", "Regulasi"];
+  const links = ["Fitur", "Pricing", "Regulasi", "Artikel"];
 
   return (
     <nav
