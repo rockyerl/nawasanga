@@ -10,9 +10,10 @@ interface ReportTableToolbarProps<TData> {
     search: string;
     setSearch: (value: string) => void;
     plan: PlanType;
+    onExport?: () => void;
 }
 
-export function ReportTableToolbar<TData>({ table, search, setSearch, plan }: ReportTableToolbarProps<TData>) {
+export function ReportTableToolbar<TData>({ table, search, setSearch, plan, onExport }: ReportTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0;
 
     return (
@@ -36,25 +37,33 @@ export function ReportTableToolbar<TData>({ table, search, setSearch, plan }: Re
             </div>
 
             <div className="flex items-center gap-2">
-                {/* Export PDF */}
+                {/* Export CSV / PDF */}
                 {plan === "trial" ? (
                     <button
                         disabled
                         title="Tersedia di Starter ke atas"
                         className="flex items-center gap-1.5 h-8 text-xs text-neutral-300 border border-neutral-200 rounded px-2.5 cursor-not-allowed"
                     >
-                        <Lock className="h-3 w-3" /> Export PDF
+                        <Lock className="h-3 w-3" /> Export Laporan
                     </button>
                 ) : (
-                    <button className="flex items-center gap-1.5 h-8 text-xs text-[#8E8E8E] border border-neutral-200 rounded px-2.5 hover:bg-neutral-50 transition-colors">
-                        <Download className="h-3 w-3" /> Export PDF
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        className="flex items-center gap-1.5 h-8 text-xs text-[#1D6B5A] border border-[#1D6B5A]/30 bg-[#1D6B5A]/5 rounded px-2.5 hover:bg-[#1D6B5A]/10 transition-colors font-medium cursor-pointer"
+                    >
+                        <Download className="h-3 w-3" /> Unduh CSV
                     </button>
                 )}
 
-                {/* Export Excel - pro & enterprise saja */}
+                {/* Export Excel / ESG - pro & enterprise saja */}
                 {(plan === "pro" || plan === "enterprise") && (
-                    <button className="flex items-center gap-1.5 h-8 text-xs text-[#8E8E8E] border border-neutral-200 rounded px-2.5 hover:bg-neutral-50 transition-colors">
-                        <FileText className="h-3 w-3" /> Export Excel
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        className="flex items-center gap-1.5 h-8 text-xs text-white bg-[#1D6B5A] hover:bg-[#155245] rounded px-2.5 transition-colors font-medium shadow-xs cursor-pointer"
+                    >
+                        <FileText className="h-3 w-3" /> Export Rekap ESG
                     </button>
                 )}
 

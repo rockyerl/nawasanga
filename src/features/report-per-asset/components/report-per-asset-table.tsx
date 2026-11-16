@@ -8,12 +8,13 @@ import {
     type PaginationState,
     type SortingState,
 } from "@tanstack/table-core";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Lock, TrendingUp, TrendingDown, Download, FileDown } from "lucide-react";
 import { DataGrid } from "@/components/data-grid";
 import { assetColumns } from "@/features/report-per-asset/components/report-per-asset-columns";
 import { PerAssetTableToolbar } from "@/features/report-per-asset/components/report-per-asset-table-toolbar";
 import { useAssets } from "@/features/report-per-asset/hooks/report-per-asset-user-queries";
+import { exportToCsv } from "@/lib/export";
 import { QueryDirection } from "@/types/lib/query.type";
 import type { AssetData, PlanType } from "@/types/features/report-per-asset.type";
 
@@ -491,7 +492,7 @@ function LaporanPerAsset({ plan }: { plan: PlanType }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function PerAssetTable() {
-    const [plan, setPlan] = useState<PlanType>("trial");
+    const [plan, setPlan] = useState<PlanType>("pro");
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
@@ -516,6 +517,31 @@ export function PerAssetTable() {
         return res?.data?.count ?? 0;
     }, [data]);
 
+    useEffect(() => {
+        const orgPlan = (data as any)?.data?.organization?.plan;
+        if (orgPlan) {
+            const p = String(orgPlan).toLowerCase() as PlanType;
+            if (["trial", "starter", "pro", "enterprise"].includes(p)) {
+                setPlan(p);
+            }
+        }
+    }, [data]);
+
+    const handleExport = () => {
+        exportToCsv("Laporan_Emisi_Per_Aset", items, [
+            { key: "rank", label: "Peringkat" },
+            { key: "name", label: "Identitas Aset" },
+            { key: "plateNumber", label: "Plat Nomor" },
+            { key: "kategori", label: "Kategori" },
+            { key: "location", label: "Pool / Lokasi" },
+            { key: "fuelConsumption", label: "Konsumsi BBM" },
+            { key: "emissions", label: "Emisi (ton CO2e)" },
+            { key: "percentage", label: "Kontribusi (%)" },
+            { key: "efficiency", label: "Efisiensi (km/L)" },
+            { key: "status", label: "Status Operasional" },
+        ]);
+    };
+
     const table = useReactTable({
         data: items,
         columns: assetColumns[plan],
@@ -532,16 +558,16 @@ export function PerAssetTable() {
 
     return (
         <>
-            {/* Plan switcher — dev/demo only, remove in production */}
+            {/* Plan switcher — Interactive Tier Preview */}
             <div className="flex items-center gap-2 -mt-2 -mx-6 px-6 pb-0">
-                <span className="text-xs text-[#8E8E8E] mr-1">Plan:</span>
+                <span className="text-xs text-[#8E8E8E] mr-1">Tingkat Layanan:</span>
                 {PLAN_LABELS.map((p) => (
                     <button
                         key={p.id}
                         onClick={() => setPlan(p.id)}
-                        className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                        className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
                             plan === p.id
-                                ? "bg-[#1D9E75] text-white border-transparent"
+                                ? "bg-[#1D6B5A] text-white border-transparent font-medium shadow-xs"
                                 : "border-neutral-200 text-[#8E8E8E] hover:bg-neutral-50"
                         }`}
                     >
@@ -564,8 +590,14 @@ export function PerAssetTable() {
 
             {/* Table */}
             <div key={plan} className="space-y-4">
-                <PerAssetTableToolbar table={table} search={search} setSearch={setSearch} plan={plan} />
-                <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
+                <PerAssetTableToolbar
+                    table={table}
+                    search={search}
+                    setSearch={setSearch}
+                    plan={plan}
+                    onExport={handleExport}
+                />
+                <div className="rounded-xl border border-[#DEDAD0] bg-white overflow-hidden shadow-xs">
                     <DataGrid
                         table={table}
                         columnsLength={assetColumns[plan].length}

@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { fuelLogs, vehicles, locations } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { fuelLogs, vehicles, locations, organizations } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,8 +13,31 @@ export async function GET(request: NextRequest) {
     const itemPerPage = parseInt(searchParams.get("itemPerPage") || "10", 10);
     const sortBy = searchParams.get("sortBy") || "rank";
     const direction = searchParams.get("direction") || "asc";
+    const requestedOrg = searchParams.get("organizationId");
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    let orgFilter: string | null = null;
+    if (session && session.roleCode !== "SUPERADMIN") {
+      orgFilter = session.organizationId || null;
+    } else if (requestedOrg && requestedOrg !== "all") {
+      orgFilter = requestedOrg;
+    }
+
+    const userOrg = orgFilter
+      ? await db.query.organizations.findFirst({
+          where: eq(organizations.id, orgFilter),
+        })
+      : await db.query.organizations.findFirst();
+
+    if (!orgFilter && session?.roleCode !== "SUPERADMIN" && userOrg) {
+      orgFilter = userOrg.id;
+    }
 
     const allVehicles = await db.query.vehicles.findMany({
+      where: orgFilter ? eq(vehicles.organizationId, orgFilter) : undefined,
       with: {
         location: true,
         fuelType: true,
@@ -20,6 +45,7 @@ export async function GET(request: NextRequest) {
     });
 
     const allLogs = await db.query.fuelLogs.findMany({
+      where: orgFilter ? eq(fuelLogs.organizationId, orgFilter) : undefined,
       orderBy: [desc(fuelLogs.loggedAt)],
     });
 
@@ -106,6 +132,11 @@ export async function GET(request: NextRequest) {
       status: "OK",
       message: "Data emisi per aset armada berhasil diambil dari database",
       data: {
+        organization: {
+          id: userOrg?.id || "",
+          name: userOrg?.name || "Organisasi Klien",
+          plan: userOrg?.plan?.toLowerCase() || "pro",
+        },
         items,
         count: filtered.length,
         page,

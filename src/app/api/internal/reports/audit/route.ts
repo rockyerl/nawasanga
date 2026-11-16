@@ -1,11 +1,38 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/db";
-import { fuelLogs, fuelTypes, locations, vehicles } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { fuelLogs, fuelTypes, locations, vehicles, organizations } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const requestedOrg = searchParams.get("organizationId");
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    const session = token ? await verifySessionToken(token) : null;
+
+    let orgFilter: string | null = null;
+    if (session && session.roleCode !== "SUPERADMIN") {
+      orgFilter = session.organizationId || null;
+    } else if (requestedOrg && requestedOrg !== "all") {
+      orgFilter = requestedOrg;
+    }
+
+    const userOrg = orgFilter
+      ? await db.query.organizations.findFirst({
+          where: eq(organizations.id, orgFilter),
+        })
+      : await db.query.organizations.findFirst();
+
+    if (!orgFilter && session?.roleCode !== "SUPERADMIN" && userOrg) {
+      orgFilter = userOrg.id;
+    }
+
     const allLogs = await db.query.fuelLogs.findMany({
+      where: orgFilter ? eq(fuelLogs.organizationId, orgFilter) : undefined,
       with: {
         fuelType: true,
         vehicle: {
@@ -74,6 +101,11 @@ export async function GET(request: NextRequest) {
     }));
 
     const auditData = {
+      organization: {
+        id: userOrg?.id || "",
+        name: userOrg?.name || "Organisasi Klien",
+        plan: userOrg?.plan?.toLowerCase() || "pro",
+      },
       insights: [
         {
           type: "recommendation" as const,

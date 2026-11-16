@@ -8,12 +8,13 @@ import {
     type PaginationState,
     type SortingState,
 } from "@tanstack/table-core";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Lock, Download, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import { DataGrid } from "@/components/data-grid";
 import { reportColumns } from "@/features/report-summary/components/report-summary-columns";
 import { ReportTableToolbar } from "@/features/report-summary/components/report-summary-table-toolbar";
 import { useReports } from "@/features/report-summary/hooks/use-report-summary-queries";
+import { exportToCsv } from "@/lib/export";
 import type { PlanType, ReportData } from "@/types/features/report-summary.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
@@ -661,7 +662,7 @@ function LaporanRingkasan({ plan }: { plan: PlanType }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function ReportSummaryTable() {
-    const [plan, setPlan] = useState<PlanType>("trial");
+    const [plan, setPlan] = useState<PlanType>("pro");
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
@@ -672,8 +673,30 @@ export function ReportSummaryTable() {
         search,
     });
 
-    const responseData = data?.data as { items?: ReportData[]; count?: number } | undefined;
+    const responseData = data?.data as { items?: ReportData[]; count?: number; organization?: { plan?: string; name?: string } } | undefined;
     const items = useMemo(() => (responseData?.items || []) as any[], [responseData?.items]);
+
+    useEffect(() => {
+        if (responseData?.organization?.plan) {
+            const p = responseData.organization.plan.toLowerCase() as PlanType;
+            if (["trial", "starter", "pro", "enterprise"].includes(p)) {
+                setPlan(p);
+            }
+        }
+    }, [responseData?.organization?.plan]);
+
+    const handleExport = () => {
+        exportToCsv("Laporan_Ringkasan_Emisi", items, [
+            { key: "id", label: "ID Laporan" },
+            { key: "period", label: "Periode" },
+            { key: "totalFuel", label: "Total BBM (Liter)" },
+            { key: "totalEmissions", label: "Emisi (ton CO2e)" },
+            { key: "totalVehicles", label: "Jumlah Armada" },
+            { key: "totalDrivers", label: "Jumlah Driver" },
+            { key: "avgEmissions", label: "Rata-rata Emisi" },
+            { key: "status", label: "Status" },
+        ]);
+    };
 
     const table = useReactTable({
         data: items,
@@ -688,16 +711,16 @@ export function ReportSummaryTable() {
 
     return (
         <>
-            {/* Plan switcher — dev/demo only, remove in production */}
+            {/* Plan switcher — Interactive Tier Preview */}
             <div className="flex items-center gap-2 -mt-2 -mx-6 px-6 pb-0">
-                <span className="text-xs text-[#8E8E8E] mr-1">Plan:</span>
+                <span className="text-xs text-[#8E8E8E] mr-1">Tingkat Layanan:</span>
                 {PLAN_LABELS.map((p) => (
                     <button
                         key={p.id}
                         onClick={() => setPlan(p.id)}
-                        className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                        className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
                             plan === p.id
-                                ? "bg-[#1D9E75] text-white border-transparent"
+                                ? "bg-[#1D6B5A] text-white border-transparent font-medium shadow-xs"
                                 : "border-neutral-200 text-[#8E8E8E] hover:bg-neutral-50"
                         }`}
                     >
@@ -720,8 +743,14 @@ export function ReportSummaryTable() {
 
             {/* Table */}
             <div key={plan} className="space-y-4">
-                <ReportTableToolbar table={table} search={search} setSearch={setSearch} plan={plan} />
-                <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
+                <ReportTableToolbar
+                    table={table}
+                    search={search}
+                    setSearch={setSearch}
+                    plan={plan}
+                    onExport={handleExport}
+                />
+                <div className="rounded-xl border border-[#DEDAD0] bg-white overflow-hidden shadow-xs">
                     <DataGrid
                         table={table}
                         columnsLength={reportColumns[plan].length}

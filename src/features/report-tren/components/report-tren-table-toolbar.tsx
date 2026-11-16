@@ -12,6 +12,7 @@ interface ReportTrenTableToolbarProps<TData> {
     search: string;
     setSearch: (value: string) => void;
     plan: PlanType;
+    onExport?: () => void;
 }
 
 export function ReportTrenTableToolbar<TData>({
@@ -19,6 +20,7 @@ export function ReportTrenTableToolbar<TData>({
                                                   search,
                                                   setSearch,
                                                   plan,
+                                                  onExport,
                                               }: ReportTrenTableToolbarProps<TData>) {
     const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -53,8 +55,12 @@ export function ReportTrenTableToolbar<TData>({
                         <Lock className="h-3 w-3" /> Export
                     </button>
                 ) : (
-                    <button className="flex items-center gap-1.5 h-8 text-xs text-[#8E8E8E] border border-neutral-200 rounded px-2.5 hover:bg-neutral-50 transition-colors">
-                        Export
+                    <button
+                        type="button"
+                        onClick={onExport}
+                        className="flex items-center gap-1.5 h-8 text-xs text-[#1D6B5A] border border-[#1D6B5A]/30 bg-[#1D6B5A]/5 rounded px-2.5 hover:bg-[#1D6B5A]/10 transition-colors font-medium cursor-pointer"
+                    >
+                        Export CSV
                     </button>
                 )}
                 <DataTableViewOptions table={table} />

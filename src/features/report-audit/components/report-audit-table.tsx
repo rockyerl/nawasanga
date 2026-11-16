@@ -8,12 +8,13 @@ import {
     type PaginationState,
     type SortingState,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Lock, AlertTriangle, Zap, Lightbulb, Download } from "lucide-react";
 import { DataGrid } from "@/components/data-grid";
 import { auditColumns } from "@/features/report-audit/components/report-audit-columns";
 import { ReportAuditTableToolbar } from "@/features/report-audit/components/report-audit-table-toolbar";
 import { useAuditInsights } from "@/features/report-audit/hooks/use-report-audit-queries";
+import { exportToCsv } from "@/lib/export";
 import type { PlanType, AuditTypes } from "@/types/features/report-audit.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
@@ -294,9 +295,19 @@ function AuditReportSection({ report }: { report: AuditTypes.Service.AuditReport
                     Lampiran Data Lengkap
                 </span>
                 <span className="text-[11px] text-[#8E8E8E]">Unduh data emisi seluruh perusahaan</span>
-                <button className="mt-1 self-start flex items-center gap-1.5 text-xs font-medium text-[#1D9E75] border border-[#1D9E75] rounded px-2.5 py-1 hover:bg-[#F0FBF7] transition-colors">
+                <button
+                    type="button"
+                    onClick={() => {
+                        exportToCsv("Audit_Kepatuhan_ESG", report.breakdown || [], [
+                            { key: "label", label: "Sumber Emisi / Kategori" },
+                            { key: "tonCO2e", label: "Emisi (ton CO2e)" },
+                            { key: "percent", label: "Porsi (%)" },
+                        ]);
+                    }}
+                    className="mt-1 self-start flex items-center gap-1.5 text-xs font-medium text-[#1D6B5A] border border-[#1D6B5A] bg-[#1D6B5A]/5 rounded-lg px-3 py-1.5 hover:bg-[#1D6B5A]/10 transition-colors cursor-pointer"
+                >
                     <Download className="h-3 w-3" />
-                    {report.downloadLabel}
+                    {report.downloadLabel || "Unduh Dokumen Laporan Kepatuhan Audit ESG (.CSV)"}
                 </button>
             </div>
         </div>
@@ -306,13 +317,23 @@ function AuditReportSection({ report }: { report: AuditTypes.Service.AuditReport
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function ReportAuditTable() {
-    const [plan, setPlan] = useState<PlanType>("trial");
+    const [plan, setPlan] = useState<PlanType>("pro");
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
 
     const { data: auditRes, isLoading } = useAuditInsights(plan);
     const data = auditRes?.data || { insights: [] };
+
+    useEffect(() => {
+        const orgPlan = (auditRes as any)?.data?.organization?.plan;
+        if (orgPlan) {
+            const p = String(orgPlan).toLowerCase() as PlanType;
+            if (["trial", "starter", "pro", "enterprise"].includes(p)) {
+                setPlan(p);
+            }
+        }
+    }, [auditRes]);
 
     const filtered = useMemo(() => {
         const insights = data.insights ?? [];

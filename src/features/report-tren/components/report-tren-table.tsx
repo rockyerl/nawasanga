@@ -8,7 +8,7 @@ import {
     type PaginationState,
     type SortingState,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Lock, TrendingUp, TrendingDown } from "lucide-react";
 import {
     LineChart,
@@ -26,6 +26,7 @@ import { DataGrid } from "@/components/data-grid";
 import { trendColumns } from "@/features/report-tren/components/report-tren-columns";
 import { ReportTrenTableToolbar } from "@/features/report-tren/components/report-tren-table-toolbar";
 import { useTrends } from "@/features/report-tren/hooks/report-tren-user-queries";
+import { exportToCsv } from "@/lib/export";
 import type { PlanType } from "@/types/features/report-tren.type";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
@@ -480,13 +481,23 @@ function EnterpriseCharts() {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function ReportTrenTable() {
-    const [plan, setPlan] = useState<PlanType>("trial");
+    const [plan, setPlan] = useState<PlanType>("pro");
     const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
     const [sorting, setSorting] = useState<SortingState>([]);
     const [search, setSearch] = useState("");
 
     const { data: trendRes, isLoading } = useTrends(plan);
     const trendData = trendRes?.data;
+
+    useEffect(() => {
+        const orgPlan = (trendData as any)?.organization?.plan;
+        if (orgPlan) {
+            const p = String(orgPlan).toLowerCase() as PlanType;
+            if (["trial", "starter", "pro", "enterprise"].includes(p)) {
+                setPlan(p);
+            }
+        }
+    }, [trendData]);
 
     const filtered = useMemo(() => {
         const series = (trendData?.emissionSeries ?? []) as any[];
@@ -495,6 +506,15 @@ export function ReportTrenTable() {
             s.label.toLowerCase().includes(search.toLowerCase())
         );
     }, [trendData, search]);
+
+    const handleExport = () => {
+        const rows = (trendData?.emissionSeries ?? []) as any[];
+        exportToCsv("Laporan_Tren_Emisi", rows, [
+            { key: "label", label: "Periode / Bulan" },
+            { key: "value", label: "Emisi (ton CO2e)" },
+            { key: "fuelLiters", label: "Konsumsi BBM (Liter)" },
+        ]);
+    };
 
     const table = useReactTable({
         data: filtered,
@@ -511,16 +531,16 @@ export function ReportTrenTable() {
 
     return (
         <>
-            {/* Plan switcher — dev/demo only, remove in production */}
+            {/* Plan switcher — Interactive Tier Preview */}
             <div className="flex items-center gap-2 -mt-2 -mx-6 px-6 pb-0">
-                <span className="text-xs text-[#8E8E8E] mr-1">Plan:</span>
+                <span className="text-xs text-[#8E8E8E] mr-1">Tingkat Layanan:</span>
                 {PLAN_LABELS.map((p) => (
                     <button
                         key={p.id}
                         onClick={() => setPlan(p.id)}
-                        className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                        className={`text-xs px-3 py-1 rounded-full border transition-colors cursor-pointer ${
                             plan === p.id
-                                ? "bg-[#1D9E75] text-white border-transparent"
+                                ? "bg-[#1D6B5A] text-white border-transparent font-medium shadow-xs"
                                 : "border-neutral-200 text-[#8E8E8E] hover:bg-neutral-50"
                         }`}
                     >
@@ -556,7 +576,8 @@ export function ReportTrenTable() {
                         </p>
                     </div>
                     <button
-                        className="text-xs font-medium text-white rounded px-4 py-2 hover:opacity-90 transition-opacity bg-[#1D6B5A]"
+                        onClick={() => setPlan(plan === "trial" ? "starter" : "pro")}
+                        className="text-xs font-medium text-white rounded px-4 py-2 hover:opacity-90 transition-opacity bg-[#1D6B5A] cursor-pointer"
                     >
                         {plan === "trial" ? "Upgrade ke Starter" : "Upgrade ke Pro"}
                     </button>
@@ -568,8 +589,9 @@ export function ReportTrenTable() {
                         search={search}
                         setSearch={setSearch}
                         plan={plan}
+                        onExport={handleExport}
                     />
-                    <div className="rounded-md border border-neutral-200 bg-white overflow-hidden">
+                    <div className="rounded-xl border border-[#DEDAD0] bg-white overflow-hidden shadow-xs">
                         <DataGrid
                             table={table}
                             columnsLength={trendColumns[plan].length}
