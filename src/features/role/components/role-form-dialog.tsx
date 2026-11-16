@@ -112,7 +112,7 @@ export function RoleFormDialog({ open, setOpen, initialData }: RoleFormDialogPro
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto" style={{ background: "#FDFCFA" }}>
+            <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] max-h-[90vh] overflow-y-auto p-6" style={{ background: "#FDFCFA" }}>
                 <DialogHeader>
                     <DialogTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                         <Shield className="w-5 h-5 text-[#1D6B5A]" />

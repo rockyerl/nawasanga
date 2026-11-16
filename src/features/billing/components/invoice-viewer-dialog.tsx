@@ -47,7 +47,7 @@ export function InvoiceViewerDialog({ open, setOpen, invoice }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-2xl max-h-[92vh] overflow-y-auto p-6 bg-white border border-[#EDEAE0]">
+            <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] max-h-[92vh] overflow-y-auto p-6 bg-white border border-[#EDEAE0]">
                 <DialogHeader className="pb-3 border-b border-[#EDEAE0] flex flex-row items-center justify-between">
                     <div>
                         <DialogTitle className="text-base font-semibold text-[#1A1A18] flex items-center gap-2">

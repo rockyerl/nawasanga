@@ -103,7 +103,7 @@ export function UserFormDialog({ open, setOpen, initialData }: UserFormDialogPro
 
     return (
         <Dialog open={open} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-2xl bg-[#FDFCFA]">
+            <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] max-h-[90vh] overflow-y-auto p-6 bg-[#FDFCFA]">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-semibold text-gray-800">
                         {isEdit ? "Edit Pengguna" : "Tambah Pengguna Baru"}

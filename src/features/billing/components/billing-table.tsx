@@ -30,10 +30,10 @@ const PLAN_CONFIG: Record<PlanType, {
     lightBg: string;
     border: string;
 }> = {
-    trial:      { badge: "TRIAL",      color: "#6B7280", lightBg: "#F9FAFB", border: "#E5E7EB" },
-    starter:    { badge: "STARTER",    color: "#29A2A5", lightBg: "#F0FAFA", border: "#A7E4E5" },
-    pro:        { badge: "PRO",        color: "#1D9E75", lightBg: "#F0FBF7", border: "#6EE4C0" },
-    enterprise: { badge: "ENTERPRISE", color: "#EF9F27", lightBg: "#FFFBF0", border: "#FDD9A0" },
+    trial:      { badge: "TRIAL",      color: "#7A7A72", lightBg: "#F7F5EF", border: "#EDEAE0" },
+    starter:    { badge: "STARTER",    color: "#3B82F6", lightBg: "#EFF6FF", border: "#BFDBFE" },
+    pro:        { badge: "PRO",        color: "#1D6B5A", lightBg: "#EEF5F3", border: "#A2CFC5" },
+    enterprise: { badge: "ENTERPRISE", color: "#B8962E", lightBg: "#FEF9EC", border: "#E8DEC0" },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -172,10 +172,9 @@ function ActivePlanCard({ billing }: { billing: BillingTypes.Service.BillingInfo
                         </span>
                     </div>
                     <button
-                        className="shrink-0 text-xs font-semibold text-white rounded px-3 py-1.5 hover:opacity-90 transition-opacity"
-                        style={{ backgroundColor: billing.currentPlan === "trial" ? "#29A2A5" : "#1D9E75" }}
+                        className="shrink-0 text-xs font-semibold text-white rounded px-3 py-1.5 hover:opacity-90 transition-opacity bg-[#1D6B5A]"
                     >
-                        {billing.currentPlan === "trial" ? "Upgrade Plan" : "Upgrade Plan"}
+                        Upgrade Plan
                     </button>
                 </div>
             )}
@@ -395,7 +394,7 @@ function UsageOverview({ billing }: { billing: BillingTypes.Service.BillingInfo 
     // fitur usage ringkasan sesuai plan
     const featureStats = [
         { label: "Asset Digunakan",      value: `${billing.assetUsed} / ${billing.assetLimit}`,  pct: usagePercent,  color: cfg.color },
-        { label: "Input Data / Bulan",   value: billing.currentPlan === "trial" ? "2 / 5"     : billing.currentPlan === "starter" ? "41 / 100" : billing.currentPlan === "pro" ? "156 / ∞" : "842 / ∞",   pct: billing.currentPlan === "trial" ? 40 : billing.currentPlan === "starter" ? 41 : 100, color: "#29A2A5" },
+        { label: "Input Data / Bulan",   value: billing.currentPlan === "trial" ? "2 / 5"     : billing.currentPlan === "starter" ? "41 / 100" : billing.currentPlan === "pro" ? "156 / ∞" : "842 / ∞",   pct: billing.currentPlan === "trial" ? 40 : billing.currentPlan === "starter" ? 41 : 100, color: "#1D6B5A" },
         { label: "Export",               value: billing.currentPlan === "trial" ? "0 / 0"     : billing.currentPlan === "starter" ? "0 / 0"   : billing.currentPlan === "pro" ? "28 / ∞"  : "128 / ∞",   pct: billing.currentPlan === "trial" ? 0 : billing.currentPlan === "starter" ? 0 : 60,   color: "#EF9F27" },
         { label: "Insight Dilihat",      value: billing.currentPlan === "trial" ? "0 / 0"     : billing.currentPlan === "starter" ? "0 / 0"   : billing.currentPlan === "pro" ? "45 / ∞"  : "312 / ∞",   pct: billing.currentPlan === "trial" ? 0 : billing.currentPlan === "starter" ? 0 : 45,   color: "#1D9E75" },
     ];

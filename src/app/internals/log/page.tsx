@@ -9,7 +9,7 @@ export default function LogPage() {
             <section className="flex flex-1 flex-col gap-4 overflow-hidden p-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-semibold text-gray-800">Log</h2>
-                    <span className="text-sm text-[#29A2A5]">Last Login: 09/03/26 12:45</span>
+                    <span className="text-xs font-medium text-[#1D6B5A]">Last Login: 09/03/26 12:45</span>
                 </div>
                 <LogTable />
             </section>

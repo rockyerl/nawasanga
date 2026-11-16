@@ -26,11 +26,7 @@ export function MonitoringTableToolbar({ search, setSearch, onSync, isSyncing }:
             <Button
                 onClick={onSync}
                 disabled={isSyncing}
-                className="shrink-0 text-sm font-medium transition-all"
-                style={{
-                    background: isSyncing ? "#DEDAD0" : "#1D6B5A",
-                    color: "#F7F5EF"
-                }}
+                className="shrink-0 text-sm font-medium transition-all bg-[#1D6B5A] hover:bg-[#155245] text-white disabled:bg-[#DEDAD0] disabled:text-[#7A7A72]"
             >
                 <RefreshCw size={16} className={`mr-1.5 ${isSyncing ? "animate-spin" : ""}`} />
                 {isSyncing ? "Syncing..." : "Sync Data Database"}

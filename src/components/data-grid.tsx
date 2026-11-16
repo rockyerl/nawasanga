@@ -25,7 +25,7 @@ export function DataGrid<TData>({
                                 }: DataGridProps<TData>) {
     return (
         <>
-            <div className="rounded-md border border-border">
+            <div className="rounded-xl border border-[#DEDAD0] bg-white overflow-hidden shadow-xs">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (

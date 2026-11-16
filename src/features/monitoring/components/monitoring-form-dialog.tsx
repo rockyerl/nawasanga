@@ -85,7 +85,7 @@ export function MonitoringFormDialog({ open, setOpen, initialData }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-lg" style={{ background: "#FDFCFA" }}>
+            <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] max-h-[90vh] overflow-y-auto p-6" style={{ background: "#FDFCFA" }}>
                 <DialogHeader>
                     <DialogTitle className="text-base font-semibold" style={{ color: "#1A1A18" }}>
                         {isEdit ? "Edit Akun" : "Tambah Akun"}

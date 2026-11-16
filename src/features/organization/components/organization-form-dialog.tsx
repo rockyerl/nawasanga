@@ -260,7 +260,7 @@ export function OrganizationFormDialog({ open, setOpen, initialData }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-4xl max-h-[92vh] flex flex-col p-6" style={{ background: "#FDFCFA" }}>
+            <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] max-h-[92vh] flex flex-col p-6" style={{ background: "#FDFCFA" }}>
                 <DialogHeader className="pb-3 border-b border-[#EDEAE0]">
                     <div className="flex items-center justify-between">
                         <div>

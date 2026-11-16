@@ -24,10 +24,10 @@ export interface PerformanceCategory {
 
 // Baseline data per tier
 export const trialStatCards: StatCard[] = [
-  { label: "Total Emisi", value: "1.25", unit: "ton CO₂e", trend: "↑ 12%", trendUp: true, comparison: "vs baseline", barColor: "#1D9E75", barWidth: "42%" },
-  { label: "Konsumsi BBM", value: "426", unit: "Liter", trend: "↑ 8%", trendUp: true, comparison: "vs baseline", barColor: "#29A2A5", barWidth: "55%" },
-  { label: "Asset", value: "3/3", unit: "Maksimal", trend: "", trendUp: false, comparison: "", barColor: "#E24B4A", barWidth: "100%" },
-  { label: "Efisiensi", value: "7.8", unit: "km/l", trend: "↓ 5%", trendUp: false, comparison: "vs baseline", barColor: "#EF9F27", barWidth: "65%" },
+  { label: "Total Emisi", value: "1.25", unit: "ton CO₂e", trend: "↑ 12%", trendUp: true, comparison: "vs baseline", barColor: "#1D6B5A", barWidth: "42%" },
+  { label: "Konsumsi BBM", value: "426", unit: "Liter", trend: "↑ 8%", trendUp: true, comparison: "vs baseline", barColor: "#2A9478", barWidth: "55%" },
+  { label: "Asset", value: "3/3", unit: "Maksimal", trend: "", trendUp: false, comparison: "", barColor: "#C14B2A", barWidth: "100%" },
+  { label: "Efisiensi", value: "7.8", unit: "km/l", trend: "↓ 5%", trendUp: false, comparison: "vs baseline", barColor: "#B8962E", barWidth: "65%" },
 ];
 
 export const trialEmissionsData = [
@@ -50,10 +50,10 @@ export const trialAssets: AssetRow[] = [
 ];
 
 export const starterStatCards: StatCard[] = [
-  { label: "Total Emisi", value: "3.45", unit: "ton CO₂e", trend: "↑ 19%", trendUp: true, comparison: "vs baseline", barColor: "#1D9E75", barWidth: "58%" },
-  { label: "Konsumsi BBM", value: "1.245", unit: "Liter", trend: "↑ 15%", trendUp: true, comparison: "vs baseline", barColor: "#29A2A5", barWidth: "62%" },
-  { label: "Asset", value: "8/10", unit: "Digunakan", trend: "", trendUp: false, comparison: "", barColor: "#29A2A5", barWidth: "80%" },
-  { label: "Efisiensi", value: "8.2", unit: "km/l", trend: "↓ 3%", trendUp: false, comparison: "vs baseline", barColor: "#EF9F27", barWidth: "68%" },
+  { label: "Total Emisi", value: "3.45", unit: "ton CO₂e", trend: "↑ 19%", trendUp: true, comparison: "vs baseline", barColor: "#1D6B5A", barWidth: "58%" },
+  { label: "Konsumsi BBM", value: "1.245", unit: "Liter", trend: "↑ 15%", trendUp: true, comparison: "vs baseline", barColor: "#2A9478", barWidth: "62%" },
+  { label: "Asset", value: "8/10", unit: "Digunakan", trend: "", trendUp: false, comparison: "", barColor: "#1D6B5A", barWidth: "80%" },
+  { label: "Efisiensi", value: "8.2", unit: "km/l", trend: "↓ 3%", trendUp: false, comparison: "vs baseline", barColor: "#B8962E", barWidth: "68%" },
 ];
 
 export const starterEmissionsData = [
@@ -81,10 +81,10 @@ export const starterAssets: AssetRow[] = [
 export const starterAssetUsage = { used: 6, total: 10 };
 
 export const proStatCards: StatCard[] = [
-  { label: "Total Emisi", value: "8.62", unit: "ton CO₂e", trend: "↓ 22%", trendUp: false, comparison: "vs baseline", barColor: "#1D9E75", barWidth: "72%" },
-  { label: "Konsumsi BBM", value: "3.150", unit: "Liter", trend: "↑ 18%", trendUp: true, comparison: "vs baseline", barColor: "#29A2A5", barWidth: "78%" },
-  { label: "Asset", value: "6/30", unit: "Digunakan", trend: "", trendUp: false, comparison: "", barColor: "#29A2A5", barWidth: "20%" },
-  { label: "Efisiensi", value: "9.3", unit: "km/l", trend: "↓ 6%", trendUp: false, comparison: "vs baseline", barColor: "#EF9F27", barWidth: "77%" },
+  { label: "Total Emisi", value: "8.62", unit: "ton CO₂e", trend: "↓ 22%", trendUp: false, comparison: "vs baseline", barColor: "#1D6B5A", barWidth: "72%" },
+  { label: "Konsumsi BBM", value: "3.150", unit: "Liter", trend: "↑ 18%", trendUp: true, comparison: "vs baseline", barColor: "#2A9478", barWidth: "78%" },
+  { label: "Asset", value: "6/30", unit: "Digunakan", trend: "", trendUp: false, comparison: "", barColor: "#1D6B5A", barWidth: "20%" },
+  { label: "Efisiensi", value: "9.3", unit: "km/l", trend: "↓ 6%", trendUp: false, comparison: "vs baseline", barColor: "#B8962E", barWidth: "77%" },
 ];
 
 export const proEmissionsData = [
@@ -116,11 +116,11 @@ export const proAssets: AssetRow[] = [
 ];
 
 export const enterpriseStatCards: StatCard[] = [
-  { label: "Total Emisi", value: "24.75", unit: "ton CO₂e", trend: "↑ 18%", trendUp: true, comparison: "vs baseline", barColor: "#1D9E75", barWidth: "82%" },
-  { label: "Konsumsi BBM", value: "8.920", unit: "Liter", trend: "↑ 17%", trendUp: true, comparison: "vs baseline", barColor: "#29A2A5", barWidth: "78%" },
-  { label: "Asset Terdaftar", value: "6", unit: "Unit Armada", trend: "", trendUp: false, comparison: "", barColor: "#29A2A5", barWidth: "100%" },
-  { label: "Efisiensi Global", value: "10.2", unit: "km/l", trend: "↓ 4%", trendUp: false, comparison: "vs baseline", barColor: "#EF9F27", barWidth: "85%" },
-  { label: "Lokasi Aktif", value: "3", unit: "Pool/Hub", trend: "+1", trendUp: true, comparison: "aktif", barColor: "#6366f1", barWidth: "60%" },
+  { label: "Total Emisi", value: "24.75", unit: "ton CO₂e", trend: "↑ 18%", trendUp: true, comparison: "vs baseline", barColor: "#1D6B5A", barWidth: "82%" },
+  { label: "Konsumsi BBM", value: "8.920", unit: "Liter", trend: "↑ 17%", trendUp: true, comparison: "vs baseline", barColor: "#2A9478", barWidth: "78%" },
+  { label: "Asset Terdaftar", value: "6", unit: "Unit Armada", trend: "", trendUp: false, comparison: "", barColor: "#1D6B5A", barWidth: "100%" },
+  { label: "Efisiensi Global", value: "10.2", unit: "km/l", trend: "↓ 4%", trendUp: false, comparison: "vs baseline", barColor: "#B8962E", barWidth: "85%" },
+  { label: "Lokasi Aktif", value: "3", unit: "Pool/Hub", trend: "+1", trendUp: true, comparison: "aktif", barColor: "#2A9478", barWidth: "60%" },
 ];
 
 export const enterpriseEmissionsData = [
@@ -138,10 +138,10 @@ export const enterpriseLocationBars: LocationBar[] = [
 ];
 
 export const enterprisePerformanceCategories: PerformanceCategory[] = [
-  { name: "Heavy Truck", pct: 60, color: "#1D9E75" },
-  { name: "Medium Truck", pct: 25, color: "#29A2A5" },
-  { name: "Light Vehicle", pct: 10, color: "#EF9F27" },
-  { name: "Genset", pct: 5, color: "#888780" },
+  { name: "Heavy Truck", pct: 60, color: "#1D6B5A" },
+  { name: "Medium Truck", pct: 25, color: "#2A9478" },
+  { name: "Light Vehicle", pct: 10, color: "#B8962E" },
+  { name: "Genset", pct: 5, color: "#7A7A72" },
 ];
 
 export const enterpriseInsights: InsightBox[] = [

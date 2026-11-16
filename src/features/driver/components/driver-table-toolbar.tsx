@@ -35,7 +35,7 @@ export function DriverTableToolbar<TData>({ table, search, setSearch, onAdd }: D
             </div>
             <div className="flex gap-3">
                 <DataTableViewOptions table={table} />
-                <Button onClick={onAdd} className="bg-[#29A2A5] hover:bg-[#29A2A5]/90 text-white" size="sm">
+                <Button onClick={onAdd} className="bg-[#1D6B5A] hover:bg-[#155245] text-white" size="sm">
                     <Plus className="h-4 w-4 mr-1" /> Tambah Driver
                 </Button>
             </div>

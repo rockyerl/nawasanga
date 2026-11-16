@@ -24,8 +24,7 @@ export function ArticleTableToolbar({ search, setSearch, onAdd }: Props) {
             </div>
             <Button
                 onClick={onAdd}
-                className="shrink-0 text-sm font-medium"
-                style={{ background: "#1D6B5A", color: "#F7F5EF" }}
+                className="shrink-0 text-sm font-medium bg-[#1D6B5A] hover:bg-[#155245] text-white shadow-xs"
             >
                 <Plus size={16} className="mr-1.5" />
                 Tulis Artikel

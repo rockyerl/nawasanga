@@ -182,8 +182,7 @@ export function LogTableToolbar<TData>({
         {onAdd && (
           <Button
             onClick={onAdd}
-            className="h-8 text-xs font-medium text-white shadow-sm"
-            style={{ background: "#1D6B5A" }}
+            className="h-8 text-xs font-medium text-white shadow-sm bg-[#1D6B5A] hover:bg-[#155245]"
           >
             <Plus className="h-3.5 w-3.5 mr-1" /> Catat BBM
           </Button>

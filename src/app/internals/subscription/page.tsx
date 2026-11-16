@@ -17,7 +17,7 @@ export default function SubscriptionPage(): JSX.Element {
                             Kelola paket langganan, batas aset kendaraan, dan skema harga platform.
                         </p>
                     </div>
-                    <span className="text-sm" style={{ color: "#29A2A5" }}>
+                    <span className="text-xs font-medium" style={{ color: "#1D6B5A" }}>
                         Last Login: 09/03/26 12:45
                     </span>
                 </div>

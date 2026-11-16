@@ -246,7 +246,7 @@ function StarterDashboard() {
                                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} width={30} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Line type="monotone" dataKey="value" stroke="#29A2A5" strokeWidth={2} dot={{ r: 3, fill: "#29A2A5", stroke: "#fff", strokeWidth: 1.5 }} />
+                                <Line type="monotone" dataKey="value" stroke="#1D6B5A" strokeWidth={2} dot={{ r: 3, fill: "#1D6B5A", stroke: "#fff", strokeWidth: 1.5 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -267,7 +267,7 @@ function StarterDashboard() {
                         <span className="text-xs text-[#8E8E8E]">/ {starterAssetUsage.total}</span>
                     </div>
                     <div className="mt-2 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
-                        <div className="h-full rounded-full bg-[#29A2A5]" style={{ width: `${(starterAssetUsage.used / starterAssetUsage.total) * 100}%` }} />
+                        <div className="h-full rounded-full bg-[#1D6B5A]" style={{ width: `${(starterAssetUsage.used / starterAssetUsage.total) * 100}%` }} />
                     </div>
                     <p className="text-[10px] text-[#8E8E8E] mt-2">Upgrade ke Pro untuk lebih banyak asset</p>
                 </div>
@@ -332,9 +332,9 @@ function ProDashboard() {
                     {/* Legend */}
                     <div className="flex items-center gap-4 mb-2">
                         {[
-                            { label: "Kendaraan", color: "#1D9E75" },
-                            { label: "Genset",    color: "#29A2A5" },
-                            { label: "Alat Berat",color: "#EF9F27" },
+                            { label: "Kendaraan", color: "#1D6B5A" },
+                            { label: "Genset",    color: "#2A9478" },
+                            { label: "Alat Berat",color: "#B8962E" },
                         ].map((l) => (
                             <span key={l.label} className="flex items-center gap-1 text-[10px] text-[#8E8E8E]">
                 <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
@@ -349,9 +349,9 @@ function ProDashboard() {
                                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} width={30} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Line type="monotone" dataKey="value"     name="Kendaraan" stroke="#1D9E75" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="genset"    name="Genset"    stroke="#29A2A5" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="alatBerat" name="Alat Berat"stroke="#EF9F27" strokeWidth={1.5} dot={false} />
+                                <Line type="monotone" dataKey="value"     name="Kendaraan" stroke="#1D6B5A" strokeWidth={1.5} dot={false} />
+                                <Line type="monotone" dataKey="genset"    name="Genset"    stroke="#2A9478" strokeWidth={1.5} dot={false} />
+                                <Line type="monotone" dataKey="alatBerat" name="Alat Berat"stroke="#B8962E" strokeWidth={1.5} dot={false} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -404,8 +404,8 @@ function EnterpriseDashboard() {
                     </div>
                     <div className="flex items-center gap-4 mb-2">
                         {[
-                            { label: "Jakarta", color: "#1D9E75" }, { label: "Surabaya", color: "#29A2A5" },
-                            { label: "Bali",    color: "#EF9F27" }, { label: "Balikpapan", color: "#E24B4A" },
+                            { label: "Jakarta", color: "#1D6B5A" }, { label: "Surabaya", color: "#2A9478" },
+                            { label: "Bali",    color: "#B8962E" }, { label: "Balikpapan", color: "#C14B2A" },
                         ].map((l) => (
                             <span key={l.label} className="flex items-center gap-1 text-[10px] text-[#8E8E8E]">
                 <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: l.color }} />
@@ -420,10 +420,10 @@ function EnterpriseDashboard() {
                                 <XAxis dataKey="day" tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fontSize: 9, fill: "#8E8E8E" }} axisLine={false} tickLine={false} width={30} />
                                 <Tooltip content={<CustomTooltip />} />
-                                <Line type="monotone" dataKey="value"      name="Jakarta"    stroke="#1D9E75" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="surabaya"   name="Surabaya"   stroke="#29A2A5" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="bali"       name="Bali"       stroke="#EF9F27" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="balikpapan" name="Balikpapan" stroke="#E24B4A" strokeWidth={1.5} dot={false} />
+                                <Line type="monotone" dataKey="value"      name="Jakarta"    stroke="#1D6B5A" strokeWidth={1.5} dot={false} />
+                                <Line type="monotone" dataKey="surabaya"   name="Surabaya"   stroke="#2A9478" strokeWidth={1.5} dot={false} />
+                                <Line type="monotone" dataKey="bali"       name="Bali"       stroke="#B8962E" strokeWidth={1.5} dot={false} />
+                                <Line type="monotone" dataKey="balikpapan" name="Balikpapan" stroke="#C14B2A" strokeWidth={1.5} dot={false} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -528,7 +528,7 @@ function CommonTopbar({ plan }: { plan: PlanType }) {
                         </button>
                     </>
                 )}
-                <span className="text-sm text-[#29A2A5]">Last Login: 09/03/26 12:45</span>
+                <span className="text-xs font-medium text-[#1D6B5A]">Last Login: 09/03/26 12:45</span>
             </div>
         </div>
     );

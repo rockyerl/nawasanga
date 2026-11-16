@@ -39,25 +39,25 @@ const PLAN_CONFIG: Record<PlanType, {
         badge: "STARTER PLAN",
         assetLabel: "10 Asset",
         description: "Ranking emisi dan tabel detail per kendaraan.",
-        color: "#29A2A5",
-        lightBg: "#F0FAFA",
-        border: "#A7E4E5",
+        color: "#3B82F6",
+        lightBg: "#EFF6FF",
+        border: "#BFDBFE",
     },
     pro: {
         badge: "PRO PLAN",
         assetLabel: "30 Asset",
         description: "Efisiensi, status, dan analisis mendalam per asset.",
-        color: "#1D9E75",
-        lightBg: "#F0FBF7",
-        border: "#6EE4C0",
+        color: "#1D6B5A",
+        lightBg: "#EEF5F3",
+        border: "#A2CFC5",
     },
     enterprise: {
         badge: "ENTERPRISE PLAN",
         assetLabel: "100+ Asset",
         description: "Ranking global, multi-lokasi & Export Excel.",
-        color: "#EF9F27",
-        lightBg: "#FFFBF0",
-        border: "#FDD9A0",
+        color: "#B8962E",
+        lightBg: "#FEF9EC",
+        border: "#E8DEC0",
     },
 };
 
@@ -76,43 +76,43 @@ interface StatCard {
 
 const PLAN_STAT_CARDS: Record<PlanType, StatCard[]> = {
     trial: [
-        { label: "Top Asset",       value: "2",      unit: "ditampilkan", barWidth: "20%",  barColor: "#6B7280" },
-        { label: "Total Emisi",     value: "1,2",    unit: "ton CO₂e",   barWidth: "40%",  barColor: "#1D9E75" },
-        { label: "Total BBM",       value: "800",    unit: "L",          barWidth: "30%",  barColor: "#29A2A5" },
-        { label: "Asset Aktif",     value: "3 / 3",  barWidth: "100%",   barColor: "#EF9F27" },
+        { label: "Top Asset",       value: "2",      unit: "ditampilkan", barWidth: "20%",  barColor: "#7A7A72" },
+        { label: "Total Emisi",     value: "1,2",    unit: "ton CO₂e",   barWidth: "40%",  barColor: "#1D6B5A" },
+        { label: "Total BBM",       value: "800",    unit: "L",          barWidth: "30%",  barColor: "#2A9478" },
+        { label: "Asset Aktif",     value: "3 / 3",  barWidth: "100%",   barColor: "#B8962E" },
     ],
     starter: [
-        { label: "Total Asset",     value: "8",       unit: "ditampilkan", barWidth: "50%",  barColor: "#29A2A5" },
-        { label: "Total Emisi",     value: "1,5",     unit: "ton CO₂e",   trend: "▲ 12%", trendUp: false, comparison: "vs bulan lalu", barWidth: "55%", barColor: "#1D9E75" },
-        { label: "Total BBM",       value: "1.200",   unit: "L",          trend: "▲ 8%",  trendUp: false, comparison: "vs bulan lalu", barWidth: "60%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",     value: "8 / 10",  barWidth: "80%",    barColor: "#EF9F27" },
+        { label: "Total Asset",     value: "8",       unit: "ditampilkan", barWidth: "50%",  barColor: "#1D6B5A" },
+        { label: "Total Emisi",     value: "1,5",     unit: "ton CO₂e",   trend: "▲ 12%", trendUp: false, comparison: "vs bulan lalu", barWidth: "55%", barColor: "#1D6B5A" },
+        { label: "Total BBM",       value: "1.200",   unit: "L",          trend: "▲ 8%",  trendUp: false, comparison: "vs bulan lalu", barWidth: "60%", barColor: "#2A9478" },
+        { label: "Asset Aktif",     value: "8 / 10",  barWidth: "80%",    barColor: "#B8962E" },
     ],
     pro: [
-        { label: "Total Asset",     value: "10",      unit: "ditampilkan", barWidth: "33%",  barColor: "#1D9E75" },
-        { label: "Total Emisi",     value: "1,5",     unit: "ton CO₂e",   trend: "▼ 5%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "65%", barColor: "#1D9E75" },
-        { label: "Total BBM",       value: "1.200",   unit: "L",          trend: "▼ 3%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "70%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",     value: "28 / 30", barWidth: "93%",    barColor: "#EF9F27" },
-        { label: "Avg Efisiensi",   value: "8,2",     unit: "km/L",       trend: "▼ 2%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "50%", barColor: "#1D9E75" },
+        { label: "Total Asset",     value: "10",      unit: "ditampilkan", barWidth: "33%",  barColor: "#1D6B5A" },
+        { label: "Total Emisi",     value: "1,5",     unit: "ton CO₂e",   trend: "▼ 5%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "65%", barColor: "#1D6B5A" },
+        { label: "Total BBM",       value: "1.200",   unit: "L",          trend: "▼ 3%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "70%", barColor: "#2A9478" },
+        { label: "Asset Aktif",     value: "28 / 30", barWidth: "93%",    barColor: "#B8962E" },
+        { label: "Avg Efisiensi",   value: "8,2",     unit: "km/L",       trend: "▼ 2%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "50%", barColor: "#1D6B5A" },
     ],
     enterprise: [
-        { label: "Total Asset",     value: "20",        unit: "ditampilkan", barWidth: "13%",  barColor: "#EF9F27" },
-        { label: "Total Emisi",     value: "12,5",      unit: "ton CO₂e",   trend: "▼ 15%", trendUp: true, comparison: "vs Des 2024", barWidth: "72%", barColor: "#1D9E75" },
-        { label: "Total BBM",       value: "9.800",     unit: "L",          trend: "▼ 10%", trendUp: true, comparison: "vs Des 2024", barWidth: "78%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",     value: "120 / 150+",barWidth: "80%",    barColor: "#EF9F27" },
-        { label: "Avg Efisiensi",   value: "9,1",       unit: "km/L",       trend: "▼ 8%",  trendUp: true, comparison: "vs Des 2024", barWidth: "55%", barColor: "#1D9E75" },
+        { label: "Total Asset",     value: "20",        unit: "ditampilkan", barWidth: "13%",  barColor: "#B8962E" },
+        { label: "Total Emisi",     value: "12,5",      unit: "ton CO₂e",   trend: "▼ 15%", trendUp: true, comparison: "vs Des 2024", barWidth: "72%", barColor: "#1D6B5A" },
+        { label: "Total BBM",       value: "9.800",     unit: "L",          trend: "▼ 10%", trendUp: true, comparison: "vs Des 2024", barWidth: "78%", barColor: "#2A9478" },
+        { label: "Asset Aktif",     value: "120 / 150+",barWidth: "80%",    barColor: "#B8962E" },
+        { label: "Avg Efisiensi",   value: "9,1",       unit: "km/L",       trend: "▼ 8%",  trendUp: true, comparison: "vs Des 2024", barWidth: "55%", barColor: "#1D6B5A" },
     ],
 };
 
 // ─── Chart / preview data ─────────────────────────────────────────────────────
 
 const RANKING_TRIAL = [
-    { label: "Kendaraan A", emisi: 0.7, pct: 58, color: "#1D9E75" },
-    { label: "Kendaraan B", emisi: 0.5, pct: 42, color: "#29A2A5" },
+    { label: "Kendaraan A", emisi: 0.7, pct: 58, color: "#1D6B5A" },
+    { label: "Kendaraan B", emisi: 0.5, pct: 42, color: "#2A9478" },
 ];
 
 const RANKING_STARTER = [
-    { label: "Kendaraan A", emisi: 0.60, bbm: 480, pct: 100, color: "#1D9E75" },
-    { label: "Kendaraan B", emisi: 0.45, bbm: 360, pct: 75,  color: "#29A2A5" },
+    { label: "Kendaraan A", emisi: 0.60, bbm: 480, pct: 100, color: "#1D6B5A" },
+    { label: "Kendaraan B", emisi: 0.45, bbm: 360, pct: 75,  color: "#2A9478" },
     { label: "Kendaraan C", emisi: 0.23, bbm: 185, pct: 38,  color: "#EF9F27" },
     { label: "Kendaraan D", emisi: 0.15, bbm: 120, pct: 25,  color: "#6B7280" },
     { label: "Kendaraan E", emisi: 0.14, bbm: 100, pct: 23,  color: "#D1D5DB" },
@@ -258,7 +258,7 @@ function LaporanPerAssetTrial() {
                 <div className="mt-1 flex items-center gap-2 rounded-lg bg-neutral-50 border border-neutral-200 px-3 py-2.5">
                     <Lock className="h-3.5 w-3.5 text-[#8E8E8E] shrink-0" />
                     <span className="text-[11px] text-[#8E8E8E] flex-1">Upgrade untuk melihat detail seluruh asset</span>
-                    <button className="shrink-0 text-[11px] font-medium text-white bg-[#29A2A5] rounded px-2.5 py-1 hover:opacity-90 transition-opacity">
+                    <button className="shrink-0 text-[11px] font-medium text-white bg-[#1D6B5A] rounded px-2.5 py-1 hover:opacity-90 transition-opacity">
                         Upgrade ke Starter
                     </button>
                 </div>

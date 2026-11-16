@@ -42,25 +42,25 @@ const PLAN_CONFIG: Record<PlanType, {
         badge: "TRIAL PLAN",
         assetLabel: "3 Asset",
         description: "Fitur terbatas. Upgrade untuk melihat laporan tren lengkap.",
-        color: "#6B7280",
-        lightBg: "#F9FAFB",
-        border: "#E5E7EB",
+        color: "#7A7A72",
+        lightBg: "#F7F5EF",
+        border: "#EDEAE0",
     },
     starter: {
         badge: "STARTER PLAN",
         assetLabel: "10 Asset",
         description: "Tren emisi & konsumsi BBM untuk pantau performa perusahaan.",
-        color: "#29A2A5",
-        lightBg: "#F0FAFA",
-        border: "#A7E4E5",
+        color: "#3B82F6",
+        lightBg: "#EFF6FF",
+        border: "#BFDBFE",
     },
     pro: {
         badge: "PRO PLAN",
         assetLabel: "30 Asset",
         description: "Perbandingan periode & insight otomatis untuk optimasi emisi.",
-        color: "#1D9E75",
-        lightBg: "#F0FBF7",
-        border: "#6EE4C0",
+        color: "#1D6B5A",
+        lightBg: "#EEF5F3",
+        border: "#A2CFC5",
     },
     enterprise: {
         badge: "ENTERPRISE PLAN",
@@ -87,25 +87,25 @@ interface StatCard {
 
 const PLAN_STAT_CARDS: Record<PlanType, StatCard[]> = {
     trial: [
-        { label: "Total Emisi",         value: "1,2",  unit: "ton CO₂e", barWidth: "40%",  barColor: "#1D9E75" },
-        { label: "Total BBM",           value: "800",  unit: "L",        barWidth: "30%",  barColor: "#29A2A5" },
-        { label: "Asset Aktif",         value: "3 / 3",                  barWidth: "100%", barColor: "#EF9F27" },
+        { label: "Total Emisi",         value: "1,2",  unit: "ton CO₂e", barWidth: "40%",  barColor: "#1D6B5A" },
+        { label: "Total BBM",           value: "800",  unit: "L",        barWidth: "30%",  barColor: "#2A9478" },
+        { label: "Asset Aktif",         value: "3 / 3",                  barWidth: "100%", barColor: "#B8962E" },
     ],
     starter: [
-        { label: "Total Emisi",         value: "1,5",   unit: "ton CO₂e", trend: "▲ 12%", trendUp: false, comparison: "vs Des 2024", barWidth: "55%", barColor: "#1D9E75" },
-        { label: "Total BBM",           value: "1.200", unit: "L",        trend: "▲ 8%",  trendUp: false, comparison: "vs Des 2024", barWidth: "60%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",         value: "8 / 10",                  barWidth: "80%", barColor: "#EF9F27" },
+        { label: "Total Emisi",         value: "1,5",   unit: "ton CO₂e", trend: "▲ 12%", trendUp: false, comparison: "vs Des 2024", barWidth: "55%", barColor: "#1D6B5A" },
+        { label: "Total BBM",           value: "1.200", unit: "L",        trend: "▲ 8%",  trendUp: false, comparison: "vs Des 2024", barWidth: "60%", barColor: "#2A9478" },
+        { label: "Asset Aktif",         value: "8 / 10",                  barWidth: "80%", barColor: "#B8962E" },
     ],
     pro: [
-        { label: "Total Emisi",         value: "1,5",   unit: "ton CO₂e", trend: "▲ 20%", trendUp: false, comparison: "vs Des 2024", barWidth: "65%", barColor: "#1D9E75" },
-        { label: "Total BBM",           value: "1.200", unit: "L",        trend: "▲ 12%", trendUp: false, comparison: "vs Des 2024", barWidth: "70%", barColor: "#29A2A5" },
-        { label: "Efisiensi Rata-rata", value: "8,2",   unit: "km/L",     trend: "▼ 10%", trendUp: true,  comparison: "vs Des 2024", barWidth: "50%", barColor: "#1D9E75" },
-        { label: "Asset Aktif",         value: "28 / 30",                 barWidth: "93%", barColor: "#EF9F27" },
+        { label: "Total Emisi",         value: "1,5",   unit: "ton CO₂e", trend: "▲ 20%", trendUp: false, comparison: "vs Des 2024", barWidth: "65%", barColor: "#1D6B5A" },
+        { label: "Total BBM",           value: "1.200", unit: "L",        trend: "▲ 12%", trendUp: false, comparison: "vs Des 2024", barWidth: "70%", barColor: "#2A9478" },
+        { label: "Efisiensi Rata-rata", value: "8,2",   unit: "km/L",     trend: "▼ 10%", trendUp: true,  comparison: "vs Des 2024", barWidth: "50%", barColor: "#1D6B5A" },
+        { label: "Asset Aktif",         value: "28 / 30",                 barWidth: "93%", barColor: "#B8962E" },
     ],
     enterprise: [
-        { label: "Total Emisi",         value: "12,5",  unit: "ton CO₂e", trend: "▲ 15%", trendUp: false, comparison: "vs Des 2024", barWidth: "72%", barColor: "#1D9E75" },
-        { label: "Total BBM",           value: "9.800", unit: "L",        trend: "▲ 10%", trendUp: false, comparison: "vs Des 2024", barWidth: "78%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",         value: "120 / 150+",              barWidth: "80%", barColor: "#EF9F27" },
+        { label: "Total Emisi",         value: "12,5",  unit: "ton CO₂e", trend: "▲ 15%", trendUp: false, comparison: "vs Des 2024", barWidth: "72%", barColor: "#1D6B5A" },
+        { label: "Total BBM",           value: "9.800", unit: "L",        trend: "▲ 10%", trendUp: false, comparison: "vs Des 2024", barWidth: "78%", barColor: "#2A9478" },
+        { label: "Asset Aktif",         value: "120 / 150+",              barWidth: "80%", barColor: "#B8962E" },
     ],
 };
 
@@ -267,7 +267,7 @@ function TrialCharts({ trendData }: { trendData?: any }) {
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
-                <LockedChartOverlay upgradeLabel="Upgrade ke Starter" upgradeColor="#29A2A5" />
+                <LockedChartOverlay upgradeLabel="Upgrade ke Starter" upgradeColor="#1D6B5A" />
             </div>
 
             {/* Tren Konsumsi BBM — blurred */}
@@ -278,18 +278,18 @@ function TrialCharts({ trendData }: { trendData?: any }) {
                         <AreaChart data={fuelData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                             <defs>
                                 <linearGradient id="bbmGradientTrial" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#29A2A5" stopOpacity={0.15} />
-                                    <stop offset="95%" stopColor="#29A2A5" stopOpacity={0} />
+                                    <stop offset="5%" stopColor="#2A9478" stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor="#2A9478" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                             <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
                             <YAxis tick={{ fontSize: 10, fill: "#8E8E8E" }} tickLine={false} axisLine={false} />
-                            <Area type="monotone" dataKey="bbm" stroke="#29A2A5" strokeWidth={2} fill="url(#bbmGradientTrial)" dot={{ r: 3 }} />
+                            <Area type="monotone" dataKey="bbm" stroke="#2A9478" strokeWidth={2} fill="url(#bbmGradientTrial)" dot={{ r: 3 }} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
-                <LockedChartOverlay upgradeLabel="Upgrade ke Starter" upgradeColor="#29A2A5" />
+                <LockedChartOverlay upgradeLabel="Upgrade ke Starter" upgradeColor="#1D6B5A" />
             </div>
         </div>
     );
@@ -332,8 +332,8 @@ function StarterCharts({ trendData }: { trendData?: any }) {
                     <AreaChart data={fuelData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                         <defs>
                             <linearGradient id="bbmGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#29A2A5" stopOpacity={0.15} />
-                                <stop offset="95%" stopColor="#29A2A5" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#2A9478" stopOpacity={0.15} />
+                                <stop offset="95%" stopColor="#2A9478" stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
@@ -346,10 +346,10 @@ function StarterCharts({ trendData }: { trendData?: any }) {
                         <Area
                             type="monotone"
                             dataKey="bbm"
-                            stroke="#29A2A5"
+                            stroke="#2A9478"
                             strokeWidth={2}
                             fill="url(#bbmGradient)"
-                            dot={{ r: 3, fill: "#29A2A5" }}
+                            dot={{ r: 3, fill: "#2A9478" }}
                         />
                     </AreaChart>
                 </ResponsiveContainer>
@@ -431,10 +431,10 @@ function ProCharts({ trendData }: { trendData?: any }) {
 // ─── Chart section: Enterprise ────────────────────────────────────────────────
 
 const LOCATION_COLORS: Record<string, string> = {
-    jakarta:  "#1D9E75",
-    surabaya: "#29A2A5",
-    bali:     "#EF9F27",
-    medan:    "#8B5CF6",
+    jakarta:  "#1D6B5A",
+    surabaya: "#2A9478",
+    bali:     "#B8962E",
+    medan:    "#6366F1",
 };
 
 function EnterpriseCharts() {
@@ -556,8 +556,7 @@ export function ReportTrenTable() {
                         </p>
                     </div>
                     <button
-                        className="text-xs font-medium text-white rounded px-4 py-2 hover:opacity-90 transition-opacity"
-                        style={{ backgroundColor: plan === "trial" ? "#29A2A5" : "#1D9E75" }}
+                        className="text-xs font-medium text-white rounded px-4 py-2 hover:opacity-90 transition-opacity bg-[#1D6B5A]"
                     >
                         {plan === "trial" ? "Upgrade ke Starter" : "Upgrade ke Pro"}
                     </button>

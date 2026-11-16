@@ -16,7 +16,7 @@ export default function FuelTypePage() {
                             Kelola jenis bahan bakar, faktor emisi, dan harga referensi.
                         </p>
                     </div>
-                    <span className="text-sm" style={{ color: "#29A2A5" }}>
+                    <span className="text-xs font-medium" style={{ color: "#1D6B5A" }}>
                         Last Login: 09/03/26 12:45
                     </span>
                 </div>

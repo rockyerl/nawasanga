@@ -25,7 +25,7 @@ export const roleColumns: ColumnDef<RoleData>[] = [
                         permissions.map((p) => (
                             <span
                                 key={p}
-                                className="inline-flex items-center rounded-md bg-[#29A2A5]/10 px-2 py-0.5 text-xs font-medium text-[#29A2A5]"
+                                className="inline-flex items-center rounded-md bg-[#1D6B5A]/10 px-2 py-0.5 text-xs font-medium text-[#1D6B5A]"
                             >
                                 {p}
                             </span>

@@ -101,8 +101,7 @@ export function SubscriptionFormDialog({ open, setOpen, initialData }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            {/* Diperlebar: dari sm:max-w-2xl → sm:max-w-4xl */}
-            <DialogContent className="sm:max-w-4xl flex flex-col overflow-hidden" style={{ background: "#FDFCFA", maxHeight: "90vh" }}>
+            <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] flex flex-col overflow-hidden max-h-[90vh] p-6" style={{ background: "#FDFCFA" }}>
                 <DialogHeader>
                     <div className="flex items-center gap-2">
                         <span

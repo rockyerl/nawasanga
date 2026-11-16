@@ -38,17 +38,17 @@ const PLAN_CONFIG: Record<PlanType, {
         badge: "STARTER PLAN",
         assetLabel: "10 Asset",
         description: "Laporan dasar untuk memantau emisi perusahaan Anda.",
-        color: "#29A2A5",
-        lightBg: "#F0FAFA",
-        border: "#A7E4E5",
+        color: "#3B82F6",
+        lightBg: "#EFF6FF",
+        border: "#BFDBFE",
     },
     pro: {
         badge: "PRO PLAN",
         assetLabel: "30 Asset",
         description: "Analisis mendalam dan insight untuk optimasi emisi.",
-        color: "#1D9E75",
-        lightBg: "#F0FBF7",
-        border: "#6EE4C0",
+        color: "#1D6B5A",
+        lightBg: "#EEF5F3",
+        border: "#A2CFC5",
     },
     enterprise: {
         badge: "ENTERPRISE PLAN",
@@ -75,31 +75,31 @@ interface StatCard {
 
 const PLAN_STAT_CARDS: Record<PlanType, StatCard[]> = {
     trial: [
-        { label: "Total Laporan",  value: "3",      barWidth: "30%",  barColor: "#6B7280" },
-        { label: "Total Emisi",    value: "1,680",  unit: "kg CO₂",   barWidth: "40%",  barColor: "#1D9E75" },
-        { label: "Total BBM",      value: "2,400",  unit: "L",        barWidth: "30%",  barColor: "#29A2A5" },
-        { label: "Asset Aktif",    value: "3 / 3",  barWidth: "100%", barColor: "#EF9F27" },
+        { label: "Total Laporan",  value: "3",      barWidth: "30%",  barColor: "#7A7A72" },
+        { label: "Total Emisi",    value: "1,680",  unit: "kg CO₂",   barWidth: "40%",  barColor: "#1D6B5A" },
+        { label: "Total BBM",      value: "2,400",  unit: "L",        barWidth: "30%",  barColor: "#2A9478" },
+        { label: "Asset Aktif",    value: "3 / 3",  barWidth: "100%", barColor: "#B8962E" },
     ],
     starter: [
-        { label: "Total Laporan",  value: "6",      barWidth: "50%",  barColor: "#29A2A5" },
-        { label: "Total Emisi",    value: "5,490",  unit: "kg CO₂",   trend: "▲ 12%", trendUp: false, comparison: "vs bulan lalu", barWidth: "55%", barColor: "#1D9E75" },
-        { label: "Total BBM",      value: "7,860",  unit: "L",        trend: "▲ 8%",  trendUp: false, comparison: "vs bulan lalu", barWidth: "60%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",    value: "8 / 10", barWidth: "80%",  barColor: "#EF9F27" },
-        { label: "Avg Emisi",      value: "14.8",   unit: "kg CO₂/L", barWidth: "45%", barColor: "#1D9E75" },
+        { label: "Total Laporan",  value: "6",      barWidth: "50%",  barColor: "#1D6B5A" },
+        { label: "Total Emisi",    value: "5,490",  unit: "kg CO₂",   trend: "▲ 12%", trendUp: false, comparison: "vs bulan lalu", barWidth: "55%", barColor: "#1D6B5A" },
+        { label: "Total BBM",      value: "7,860",  unit: "L",        trend: "▲ 8%",  trendUp: false, comparison: "vs bulan lalu", barWidth: "60%", barColor: "#2A9478" },
+        { label: "Asset Aktif",    value: "8 / 10", barWidth: "80%",  barColor: "#B8962E" },
+        { label: "Avg Emisi",      value: "14.8",   unit: "kg CO₂/L", barWidth: "45%", barColor: "#1D6B5A" },
     ],
     pro: [
-        { label: "Total Laporan",  value: "9",       barWidth: "75%",  barColor: "#1D9E75" },
-        { label: "Total Emisi",    value: "18,900",  unit: "kg CO₂",   trend: "▼ 5%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "65%", barColor: "#1D9E75" },
-        { label: "Total BBM",      value: "27,000",  unit: "L",        trend: "▼ 3%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "70%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",    value: "28 / 30", barWidth: "93%",  barColor: "#EF9F27" },
-        { label: "Avg Emisi",      value: "15.2",    unit: "kg CO₂/L", trend: "▼ 2%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "50%", barColor: "#1D9E75" },
+        { label: "Total Laporan",  value: "9",       barWidth: "75%",  barColor: "#1D6B5A" },
+        { label: "Total Emisi",    value: "18,900",  unit: "kg CO₂",   trend: "▼ 5%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "65%", barColor: "#1D6B5A" },
+        { label: "Total BBM",      value: "27,000",  unit: "L",        trend: "▼ 3%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "70%", barColor: "#2A9478" },
+        { label: "Asset Aktif",    value: "28 / 30", barWidth: "93%",  barColor: "#B8962E" },
+        { label: "Avg Emisi",      value: "15.2",    unit: "kg CO₂/L", trend: "▼ 2%",  trendUp: true, comparison: "vs bulan lalu", barWidth: "50%", barColor: "#1D6B5A" },
     ],
     enterprise: [
-        { label: "Total Laporan",  value: "10",        barWidth: "90%",  barColor: "#EF9F27" },
-        { label: "Total Emisi",    value: "68,600",    unit: "kg CO₂",   trend: "▼ 15%", trendUp: true, comparison: "vs Des 2024", barWidth: "72%", barColor: "#1D9E75" },
-        { label: "Total BBM",      value: "98,000",    unit: "L",        trend: "▼ 10%", trendUp: true, comparison: "vs Des 2024", barWidth: "78%", barColor: "#29A2A5" },
-        { label: "Asset Aktif",    value: "115 / 120+",barWidth: "96%",  barColor: "#EF9F27" },
-        { label: "Avg Emisi",      value: "15.5",      unit: "kg CO₂/L", trend: "▼ 8%",  trendUp: true, comparison: "vs Des 2024", barWidth: "55%", barColor: "#1D9E75" },
+        { label: "Total Laporan",  value: "10",        barWidth: "90%",  barColor: "#B8962E" },
+        { label: "Total Emisi",    value: "68,600",    unit: "kg CO₂",   trend: "▼ 15%", trendUp: true, comparison: "vs Des 2024", barWidth: "72%", barColor: "#1D6B5A" },
+        { label: "Total BBM",      value: "98,000",    unit: "L",        trend: "▼ 10%", trendUp: true, comparison: "vs Des 2024", barWidth: "78%", barColor: "#2A9478" },
+        { label: "Asset Aktif",    value: "115 / 120+",barWidth: "96%",  barColor: "#B8962E" },
+        { label: "Avg Emisi",      value: "15.5",      unit: "kg CO₂/L", trend: "▼ 8%",  trendUp: true, comparison: "vs Des 2024", barWidth: "55%", barColor: "#1D6B5A" },
     ],
 };
 
@@ -122,26 +122,26 @@ const CHART_DATA = {
         medan:    [0.8, 0.85, 0.9, 0.88, 0.95],
     },
     topBBM: [
-        { label: "Kendaraan A", percent: 40, color: "#1D9E75" },
-        { label: "Kendaraan B", percent: 25, color: "#29A2A5" },
-        { label: "Kendaraan C", percent: 20, color: "#EF9F27" },
-        { label: "Kendaraan D", percent: 10, color: "#6B7280" },
+        { label: "Kendaraan A", percent: 40, color: "#1D6B5A" },
+        { label: "Kendaraan B", percent: 25, color: "#2A9478" },
+        { label: "Kendaraan C", percent: 20, color: "#B8962E" },
+        { label: "Kendaraan D", percent: 10, color: "#7A7A72" },
         { label: "Kendaraan E", percent: 5,  color: "#D1D5DB" },
     ],
     topEmisiTrial: [
-        { label: "Kendaraan A", value: "0,7 ton (40%)", percent: 40, color: "#1D9E75" },
-        { label: "Kendaraan B", value: "0,5 ton (40%)", percent: 30, color: "#29A2A5" },
+        { label: "Kendaraan A", value: "0,7 ton (40%)", percent: 40, color: "#1D6B5A" },
+        { label: "Kendaraan B", value: "0,5 ton (40%)", percent: 30, color: "#2A9478" },
     ],
     donut: {
-        starter:    [{ label: "Kendaraan", color: "#1D9E75", pct: 75 }, { label: "Genset", color: "#29A2A5", pct: 20 }, { label: "Lainnya", color: "#EF9F27", pct: 5 }],
-        pro:        [{ label: "Kendaraan", color: "#1D9E75", pct: 70 }, { label: "Genset", color: "#29A2A5", pct: 22 }, { label: "Lainnya", color: "#EF9F27", pct: 8 }],
-        enterprise: [{ label: "Kendaraan", color: "#1D9E75", pct: 75 }, { label: "Genset", color: "#29A2A5", pct: 15 }, { label: "Lainnya", color: "#EF9F27", pct: 10 }],
+        starter:    [{ label: "Kendaraan", color: "#1D6B5A", pct: 75 }, { label: "Genset", color: "#2A9478", pct: 20 }, { label: "Lainnya", color: "#B8962E", pct: 5 }],
+        pro:        [{ label: "Kendaraan", color: "#1D6B5A", pct: 70 }, { label: "Genset", color: "#2A9478", pct: 22 }, { label: "Lainnya", color: "#B8962E", pct: 8 }],
+        enterprise: [{ label: "Kendaraan", color: "#1D6B5A", pct: 75 }, { label: "Genset", color: "#2A9478", pct: 15 }, { label: "Lainnya", color: "#B8962E", pct: 10 }],
     },
     enterpriseBreakdown: [
-        { location: "Jakarta",  values: [5.2, "(47%)"], color: "#1D9E75" },
-        { location: "Surabaya", values: [3.1, "(28%)"], color: "#29A2A5" },
-        { location: "Bali",     values: [2.6, "(24%)"], color: "#EF9F27" },
-        { location: "Medan",    values: [1.4, "(13%)"], color: "#6B7280" },
+        { location: "Jakarta",  values: [5.2, "(47%)"], color: "#1D6B5A" },
+        { location: "Surabaya", values: [3.1, "(28%)"], color: "#2A9478" },
+        { location: "Bali",     values: [2.6, "(24%)"], color: "#B8962E" },
+        { location: "Medan",    values: [1.4, "(13%)"], color: "#7A7A72" },
     ],
     insightSingkatPro: [
         "Emisi naik 20% dari bulan lalu.",
@@ -466,13 +466,13 @@ function LaporanRingkasanPro() {
                     {/* Legend */}
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1"><span className="h-2 w-5 rounded-full inline-block" style={{ backgroundColor: "#1D9E75" }} /><span className="text-[10px] text-[#8E8E8E]">Jan 2025</span></div>
-                        <div className="flex items-center gap-1"><span className="h-2 w-5 rounded-full inline-block" style={{ backgroundColor: "#29A2A5" }} /><span className="text-[10px] text-[#8E8E8E]">Des 2024</span></div>
+                        <div className="flex items-center gap-1"><span className="h-2 w-5 rounded-full inline-block" style={{ backgroundColor: "#2A9478" }} /><span className="text-[10px] text-[#8E8E8E]">Des 2024</span></div>
                     </div>
                     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H}>
                         {[0.25, 0.5, 0.75].map((t) => (
                             <line key={t} x1="0" y1={H * t} x2={W} y2={H * t} stroke="#F3F4F6" strokeWidth="1" />
                         ))}
-                        <polyline points={polylinePoints(des, W, H, min, max)} fill="none" stroke="#29A2A5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 2" />
+                        <polyline points={polylinePoints(des, W, H, min, max)} fill="none" stroke="#2A9478" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 2" />
                         <polyline points={polylinePoints(jan, W, H, min, max)} fill="none" stroke="#1D9E75" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         {jan.map((v, i) => {
                             const x = (i / (jan.length - 1)) * W;
@@ -533,7 +533,7 @@ function LaporanRingkasanEnterprise() {
     const max = Math.max(...allVals) + 0.2;
     const seriesList = [
         { key: "jakarta",  color: "#1D9E75", label: "Jakarta",  data: series.jakarta },
-        { key: "surabaya", color: "#29A2A5", label: "Surabaya", data: series.surabaya },
+        { key: "surabaya", color: "#2A9478", label: "Surabaya", data: series.surabaya },
         { key: "bali",     color: "#EF9F27", label: "Bali",     data: series.bali },
         { key: "medan",    color: "#6B7280", label: "Medan",    data: series.medan },
     ];

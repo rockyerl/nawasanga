@@ -152,7 +152,7 @@ export function AccountFormDialog({ open, setOpen, initialData }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="sm:max-w-xl p-6" style={{ background: "#FDFCFA" }}>
+            <DialogContent className="w-[95vw] sm:w-[70vw] sm:max-w-[70vw] max-h-[90vh] overflow-y-auto p-6" style={{ background: "#FDFCFA" }}>
                 <DialogHeader className="pb-3 border-b border-[#EDEAE0]">
                     <DialogTitle className="text-base font-semibold text-[#1A1A18] flex items-center gap-2">
                         <UserCheck className="w-5 h-5 text-[#1D6B5A]" />
