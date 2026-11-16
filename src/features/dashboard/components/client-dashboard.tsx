@@ -11,7 +11,7 @@ import {
 import {
     ChevronDown, Lock, Lightbulb, AlertTriangle,
     Sparkles, Download, FileText, Plus, TrendingUp, TrendingDown, Minus,
-    ArrowRight, Truck,
+    ArrowRight, Truck, FileCheck2, ShieldCheck, Award,
 } from "lucide-react";
 import {
     trialStatCards, trialEmissionsData, trialTopEmitters,
@@ -22,6 +22,7 @@ import {
     type PlanType, type StatCard, type TopEmitter, type InsightBox,
 } from "@/features/dashboard/constants/dashboard.constants";
 import { useDashboardStats } from "@/features/dashboard/hooks/use-dashboard-queries";
+import { AuditCertificateDialog } from "@/features/report-audit/components/audit-certificate-dialog";
 
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
@@ -542,9 +543,11 @@ function EnterpriseDashboard({ stats }: { stats?: any }) {
 function CommonTopbar({
     plan,
     organizationName,
+    onOpenCert,
 }: {
     plan: PlanType;
     organizationName?: string;
+    onOpenCert?: () => void;
 }) {
     return (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -560,6 +563,15 @@ function CommonTopbar({
                 </p>
             </div>
             <div className="flex items-center gap-2.5">
+                <button
+                    type="button"
+                    onClick={onOpenCert}
+                    className="flex items-center gap-1.5 text-xs text-[#1D6B5A] border border-[#1D6B5A]/30 bg-[#1D6B5A]/5 hover:bg-[#1D6B5A]/10 rounded-lg px-3 py-1.5 transition-colors font-semibold shadow-xs cursor-pointer"
+                    title="Cetak Sertifikat Kesiapan Audit ISO 14064-1"
+                >
+                    <Award className="h-3.5 w-3.5 text-[#1D6B5A]" />
+                    Sertifikat ISO 14064
+                </button>
                 {plan === "enterprise" && (
                     <>
                         <Link
@@ -587,6 +599,37 @@ function CommonTopbar({
     );
 }
 
+function SentinelSecurityBanner() {
+    return (
+        <div className="mb-4 rounded-xl border border-[#1D6B5A]/20 bg-gradient-to-r from-[#1D6B5A]/5 via-white to-[#1D6B5A]/5 p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-[#1D6B5A] text-white">
+                    <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-900">
+                            SENTINEL FUEL SENTINEL: 100% OPERASIONAL NORMAL
+                        </span>
+                        <span className="flex h-2 w-2 relative">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                    </div>
+                    <p className="text-[11px] text-[#7A7A72]">
+                        0 Anomali Kebocoran Terdeteksi • Perlindungan Geofencing SPBU, Batas Fisik Tangki &amp; Deviasi Odometer Aktif.
+                    </p>
+                </div>
+            </div>
+            <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    ZERO LEAKAGE AUDIT PASS
+                </span>
+            </div>
+        </div>
+    );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 const PLAN_LABELS: { id: PlanType; label: string }[] = [
@@ -601,6 +644,7 @@ export default function ClientDashboard() {
     const stats = (statsRes?.data as any) || null;
 
     const [plan, setPlan] = useState<PlanType>("pro");
+    const [certOpen, setCertOpen] = useState(false);
 
     useEffect(() => {
         if (stats?.organization?.plan) {
@@ -612,6 +656,7 @@ export default function ClientDashboard() {
     }, [stats?.organization?.plan]);
 
     const organizationName = stats?.organization?.name || "PT Nusantara Logistik Makmur";
+    const totalEmissions = stats?.fleetSummary?.totalEmissions ? parseFloat(stats.fleetSummary.totalEmissions) : 48.2;
 
     return (
         <Layout>
@@ -634,12 +679,21 @@ export default function ClientDashboard() {
             </div>
 
             <div className="flex-1 overflow-auto p-6">
-                <CommonTopbar plan={plan} organizationName={organizationName} />
+                <CommonTopbar plan={plan} organizationName={organizationName} onOpenCert={() => setCertOpen(true)} />
+                <SentinelSecurityBanner />
                 {plan === "trial"      && <TrialDashboard stats={stats} />}
                 {plan === "starter"    && <StarterDashboard stats={stats} />}
                 {plan === "pro"        && <ProDashboard stats={stats} />}
                 {plan === "enterprise" && <EnterpriseDashboard stats={stats} />}
             </div>
+
+            <AuditCertificateDialog
+                open={certOpen}
+                setOpen={setCertOpen}
+                organizationName={organizationName}
+                totalTonCO2e={totalEmissions}
+                periodYear="2026"
+            />
         </Layout>
     );
 }

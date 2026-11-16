@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
     CalendarDays,
     CheckCircle2,
@@ -70,7 +71,13 @@ function PlanBadge({ plan }: { plan?: PlanType | string }) {
 }
 
 /** Kartu info utama plan aktif */
-function ActivePlanCard({ billing }: { billing: BillingTypes.Service.BillingInfo }) {
+function ActivePlanCard({ 
+    billing, 
+    onUpgrade 
+}: { 
+    billing: BillingTypes.Service.BillingInfo;
+    onUpgrade?: () => void;
+}) {
     const cfg = getPlanConfig(billing?.currentPlan);
     const planKey = (billing?.currentPlan?.toLowerCase?.() || "starter") as PlanType;
     const days = daysUntil(billing?.expiresAt || new Date().toISOString());
@@ -175,14 +182,15 @@ function ActivePlanCard({ billing }: { billing: BillingTypes.Service.BillingInfo
                         <Zap className="h-3.5 w-3.5" style={{ color: cfg.color }} />
                         <span className="text-xs text-gray-700">
                             {billing.currentPlan === "trial"
-                                ? "Upgrade plan untuk fitur Lebih lengkap"
-                                : "Upgrade plan untuk fitur Lebih lengkap"}
+                                ? "Tingkatkan ke paket Pro untuk kuota 30 armada dan laporan audit ESG lengkap."
+                                : "Upgrade ke paket Pro untuk kuota 30 armada dan ekspor laporan audit."}
                         </span>
                     </div>
                     <button
-                        className="shrink-0 text-xs font-semibold text-white rounded px-3 py-1.5 hover:opacity-90 transition-opacity bg-[#1D6B5A]"
+                        onClick={onUpgrade}
+                        className="shrink-0 text-xs font-semibold text-white rounded px-3.5 py-1.5 hover:opacity-90 transition-opacity bg-[#1D6B5A] cursor-pointer"
                     >
-                        Upgrade Plan
+                        Upgrade Plan →
                     </button>
                 </div>
             )}
@@ -256,21 +264,26 @@ function PlanOptionCard({
 
             {/* Feature list */}
             <div className="flex flex-col gap-1.5">
-                {option.features.map((f: any) => (
-                    <div key={f.label} className="flex items-center gap-2">
-                        {f.available ? (
-                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: option.color }} />
-                        ) : (
-                            <XCircle className="h-3.5 w-3.5 shrink-0 text-neutral-300" />
-                        )}
-                        <span className={`text-xs ${f.available ? "text-gray-700" : "text-neutral-400"}`}>
-                            {f.label}
-                            {f.locked && (
-                                <Lock className="inline h-2.5 w-2.5 ml-1 text-neutral-300" />
+                {(option.features || []).map((f: any, idx: number) => {
+                    const label = typeof f === "string" ? f : f.label;
+                    const available = typeof f === "string" ? true : f.available !== false;
+                    const locked = typeof f === "string" ? false : f.locked;
+                    return (
+                        <div key={idx} className="flex items-center gap-2">
+                            {available ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: option.color || "#1D6B5A" }} />
+                            ) : (
+                                <XCircle className="h-3.5 w-3.5 shrink-0 text-neutral-300" />
                             )}
-                        </span>
-                    </div>
-                ))}
+                            <span className={`text-xs ${available ? "text-gray-700" : "text-neutral-400"}`}>
+                                {label}
+                                {locked && (
+                                    <Lock className="inline h-2.5 w-2.5 ml-1 text-neutral-300" />
+                                )}
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* CTA */}
@@ -453,6 +466,7 @@ function UsageOverview({ billing }: { billing: BillingTypes.Service.BillingInfo 
 // ─── Main client billing component ───────────────────────────────────────────
 
 export function BillingView() {
+    const router = useRouter();
     const { data: billingRes } = useBillingList();
     const liveBilling = billingRes?.data as any;
 
@@ -488,10 +502,17 @@ export function BillingView() {
         setViewerOpen(true);
     };
 
+    const handleSelectPlan = (planId: PlanType) => {
+        router.push(`/payment?plan=${planId}&org=${encodeURIComponent(billing.companyName)}`);
+    };
+
     return (
         <div className="space-y-6">
             {/* Active plan card */}
-            <ActivePlanCard billing={billing} />
+            <ActivePlanCard 
+                billing={billing} 
+                onUpgrade={() => handleSelectPlan("pro")} 
+            />
 
             {/* Usage overview */}
             <div>
@@ -500,6 +521,24 @@ export function BillingView() {
                     <h3 className="text-sm font-semibold text-gray-700">Penggunaan Kuota Armada</h3>
                 </div>
                 <UsageOverview billing={billing} />
+            </div>
+
+            {/* Plan Upgrade & Options Grid */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <Zap className="h-4 w-4 text-[#1D6B5A]" />
+                    <h3 className="text-sm font-semibold text-gray-700">Pilihan Paket &amp; Upgrade Layanan</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {PLAN_OPTIONS.map((opt) => (
+                        <PlanOptionCard
+                            key={opt.id}
+                            option={opt as any}
+                            currentPlan={billing.currentPlan}
+                            onSelect={handleSelectPlan}
+                        />
+                    ))}
+                </div>
             </div>
 
             {/* Invoice history */}
